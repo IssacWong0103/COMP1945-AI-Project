@@ -1,0 +1,17 @@
+# Downloaded images (use download scripts to fetch them)
+Fashion_DB/Zara/Athletic_Sport/*.jpg
+Fashion_DB/Zara/Bottoms/*.jpg
+Fashion_DB/Zara/Business_Smart/*.jpg
+Fashion_DB/Zara/Casual/*.jpg
+Fashion_DB/Zara/Formal_Dress/*.jpg
+Fashion_DB/Zara/Loungewear/*.jpg
+Fashion_DB/Zara/Outerwear/*.jpg
+Fashion_DB/Zara/Streetwear/*.jpg
+
+# macOS
+.DS_Store
+*/.DS_Store
+
+# Python
+__pycache__/
+*.pyc
