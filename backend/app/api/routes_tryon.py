@@ -47,6 +47,7 @@ async def create_try_on(payload: TryOnRequest, db: Session = Depends(get_db)) ->
             gender=profile.gender if profile else None,
             skin_tone=profile.skin_tone if profile else None,
             height_cm=profile.height_cm if profile else None,
+            weight_kg=profile.weight_kg if profile else None,
             existing_task_id=outfit.kie_task_id,
         )
     except Exception as exc:  # noqa: BLE001

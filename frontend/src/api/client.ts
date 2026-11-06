@@ -144,15 +144,17 @@ export async function updateProfile(input: {
 }): Promise<Profile> {
   const body = new FormData()
   if (input.file) body.append('file', input.file)
-  if (input.heightCm != null && !Number.isNaN(input.heightCm)) {
-    body.append('heightCm', String(input.heightCm))
-  }
-  if (input.weightKg != null && !Number.isNaN(input.weightKg)) {
-    body.append('weightKg', String(input.weightKg))
-  }
-  if (input.gender) body.append('gender', input.gender)
-  if (input.skinTone) body.append('skinTone', input.skinTone)
-  if (input.preferredStyle) body.append('preferredStyle', input.preferredStyle)
+  body.append(
+    'heightCm',
+    input.heightCm != null && !Number.isNaN(input.heightCm) ? String(input.heightCm) : '',
+  )
+  body.append(
+    'weightKg',
+    input.weightKg != null && !Number.isNaN(input.weightKg) ? String(input.weightKg) : '',
+  )
+  body.append('gender', input.gender ?? '')
+  body.append('skinTone', input.skinTone ?? '')
+  body.append('preferredStyle', input.preferredStyle ?? '')
 
   const res = await fetch('/api/profile', { method: 'PUT', body })
   return parseJson<Profile>(res)

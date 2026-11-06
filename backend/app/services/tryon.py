@@ -31,6 +31,7 @@ def build_tryon_prompt(
     gender: str | None = None,
     skin_tone: str | None = None,
     height_cm: float | None = None,
+    weight_kg: float | None = None,
 ) -> str:
     lines = []
     for item in garments:
@@ -46,6 +47,8 @@ def build_tryon_prompt(
         profile_bits.append(f"skin tone: {skin_tone}")
     if height_cm:
         profile_bits.append(f"height about {int(height_cm)} cm")
+    if weight_kg:
+        profile_bits.append(f"weight about {int(round(weight_kg))} kg")
     profile_line = "; ".join(profile_bits)
     extra = f" Respect these attributes: {profile_line}." if profile_line else ""
     return (
@@ -290,6 +293,7 @@ async def generate_tryon(
     gender: str | None = None,
     skin_tone: str | None = None,
     height_cm: float | None = None,
+    weight_kg: float | None = None,
     existing_task_id: str | None = None,
 ) -> tuple[str, str | None, str | None]:
     """
@@ -303,6 +307,7 @@ async def generate_tryon(
         gender=gender,
         skin_tone=skin_tone,
         height_cm=height_cm,
+        weight_kg=weight_kg,
     )
 
     can_call_kie = bool(settings.kie_api_key.strip()) and settings.public_uploads_reachable()

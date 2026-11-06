@@ -13,7 +13,7 @@ from pathlib import Path
 
 from app.config import settings
 from app.models import WardrobeItem
-from app.schemas import OutfitItemRef, OutfitOut
+from app.schemas import PREFERRED_STYLES, OutfitItemRef, OutfitOut
 
 logger = logging.getLogger(__name__)
 
@@ -227,6 +227,24 @@ def generate_cores(items: Sequence[WardrobeItem], rng: random.Random) -> list[li
     return cores
 
 
+def _style_tokens(value: str) -> set[str]:
+    spaced = re.sub(r"([A-Z])", r" \1", value)
+    parts = re.split(r"[^a-zA-Z0-9]+", spaced.lower())
+    return {part for part in parts if len(part) >= 3}
+
+
+def _item_matches_preferred(item: WardrobeItem, preferred_style: str) -> bool:
+    if item.style == preferred_style:
+        return True
+    if preferred_style in PREFERRED_STYLES:
+        return False
+    tokens = _style_tokens(preferred_style)
+    if not tokens:
+        return False
+    blob = _blob(item)
+    return any(token in blob for token in tokens)
+
+
 def _style_score(style: str, venue: str) -> float:
     table = VENUE_STYLE_SCORES.get(venue, {})
     if style in table:
@@ -271,7 +289,7 @@ def venue_fit_score(
         score -= 0.06
 
     if preferred_style:
-        pref_hits = sum(1 for item in items if item.style == preferred_style)
+        pref_hits = sum(1 for item in items if _item_matches_preferred(item, preferred_style))
         score += 0.06 * (pref_hits / len(items))
 
     complete = ("top" in categories and "bottom" in categories) or ("dress" in categories)
@@ -311,8 +329,13 @@ def cohesion_score(items: Sequence[WardrobeItem], preferred_style: str | None) -
     majority = max(set(styles), key=styles.count)
     agreement = styles.count(majority) / len(styles)
     score += 0.18 * agreement
-    if preferred_style and majority == preferred_style:
-        score += 0.05
+    if preferred_style:
+        if majority == preferred_style:
+            score += 0.05
+        elif preferred_style not in PREFERRED_STYLES:
+            custom_hits = sum(1 for item in items if _item_matches_preferred(item, preferred_style))
+            if custom_hits / len(items) >= 0.5:
+                score += 0.05
 
     genders = {item.item_gender for item in items if item.item_gender != "unisex"}
     if len(genders) > 1:

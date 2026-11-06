@@ -66,6 +66,8 @@ export function Wardrobe() {
   const [uploading, setUploading] = useState(false)
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>('all')
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<WardrobeItem | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     document.title = 'Wardrobe — USTyle'
@@ -130,6 +132,21 @@ export function Wardrobe() {
   function onDeleted(id: string) {
     setItems((prev) => prev.filter((entry) => entry.id !== id))
     if (selectedId === id) setSelectedId(null)
+  }
+
+  async function confirmDelete() {
+    if (!pendingDelete) return
+    setDeleting(true)
+    setError(null)
+    try {
+      await deleteWardrobeItem(pendingDelete.id)
+      onDeleted(pendingDelete.id)
+      setPendingDelete(null)
+    } catch (err) {
+      setError(friendlyError(err))
+    } finally {
+      setDeleting(false)
+    }
   }
 
   return (
@@ -262,8 +279,7 @@ export function Wardrobe() {
                   key={item.id}
                   item={item}
                   onOpen={() => setSelectedId(item.id)}
-                  onDeleted={onDeleted}
-                  onError={setError}
+                  onRequestDelete={() => setPendingDelete(item)}
                 />
               ))}
             </div>
@@ -281,8 +297,19 @@ export function Wardrobe() {
             setItems((prev) => prev.map((entry) => (entry.id === next.id ? next : entry)))
             setError(null)
           }}
-          onDeleted={onDeleted}
+          onRequestDelete={() => setPendingDelete(selected)}
           onError={setError}
+        />
+      ) : null}
+
+      {pendingDelete ? (
+        <ConfirmDeleteDialog
+          item={pendingDelete}
+          busy={deleting}
+          onCancel={() => {
+            if (!deleting) setPendingDelete(null)
+          }}
+          onConfirm={() => void confirmDelete()}
         />
       ) : null}
     </div>
@@ -292,30 +319,13 @@ export function Wardrobe() {
 function WardrobeCard({
   item,
   onOpen,
-  onDeleted,
-  onError,
+  onRequestDelete,
 }: {
   item: WardrobeItem
   onOpen: () => void
-  onDeleted: (id: string) => void
-  onError: (message: string) => void
+  onRequestDelete: () => void
 }) {
-  const [confirming, setConfirming] = useState(false)
-  const [busy, setBusy] = useState(false)
   const title = itemTitle(item)
-
-  async function remove() {
-    setBusy(true)
-    try {
-      await deleteWardrobeItem(item.id)
-      onDeleted(item.id)
-    } catch (err) {
-      onError(friendlyError(err))
-      setConfirming(false)
-    } finally {
-      setBusy(false)
-    }
-  }
 
   function onKeyDown(event: KeyboardEvent<HTMLElement>) {
     if (event.key === 'Enter' || event.key === ' ') {
@@ -386,28 +396,17 @@ function WardrobeCard({
               {humanize(item.itemGender) || 'Unisex'}
             </span>
           </p>
-          {confirming ? (
-            <div className="flex items-center gap-1.5" onClick={(event) => event.stopPropagation()}>
-              <Button variant="danger" disabled={busy} onClick={() => void remove()}>
-                {busy ? 'Removing…' : 'Delete'}
-              </Button>
-              <Button variant="ghost" disabled={busy} onClick={() => setConfirming(false)}>
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="rounded-lg border border-red-300 px-3 py-1 text-[13px] font-semibold text-danger hover:bg-red-50"
-              aria-label={`Delete ${title}`}
-              onClick={(event) => {
-                event.stopPropagation()
-                setConfirming(true)
-              }}
-            >
-              Delete
-            </button>
-          )}
+          <button
+            type="button"
+            className="rounded-lg border border-red-300 px-3 py-1 text-[13px] font-semibold text-danger hover:bg-red-50"
+            aria-label={`Delete ${title}`}
+            onClick={(event) => {
+              event.stopPropagation()
+              onRequestDelete()
+            }}
+          >
+            Delete
+          </button>
         </div>
       </div>
     </article>
@@ -418,13 +417,13 @@ function ItemDrawer({
   item,
   onClose,
   onSaved,
-  onDeleted,
+  onRequestDelete,
   onError,
 }: {
   item: WardrobeItem
   onClose: () => void
   onSaved: (item: WardrobeItem) => void
-  onDeleted: (id: string) => void
+  onRequestDelete: () => void
   onError: (message: string) => void
 }) {
   const navigate = useNavigate()
@@ -435,8 +434,6 @@ function ItemDrawer({
   const [itemGender, setItemGender] = useState(item.itemGender || 'unisex')
   const [description, setDescription] = useState(item.description)
   const [saving, setSaving] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [confirming, setConfirming] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -447,7 +444,6 @@ function ItemDrawer({
     setItemGender(item.itemGender || 'unisex')
     setDescription(item.description)
     setFormError(null)
-    setConfirming(false)
   }, [item])
 
   useEffect(() => {
@@ -493,21 +489,6 @@ function ItemDrawer({
       onError(message)
     } finally {
       setSaving(false)
-    }
-  }
-
-  async function remove() {
-    setDeleting(true)
-    try {
-      await deleteWardrobeItem(item.id)
-      onDeleted(item.id)
-    } catch (err) {
-      const message = friendlyError(err)
-      setFormError(message)
-      onError(message)
-      setConfirming(false)
-    } finally {
-      setDeleting(false)
     }
   }
 
@@ -637,33 +618,17 @@ function ItemDrawer({
           ) : null}
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
-            <Button type="submit" disabled={saving || deleting}>
+            <Button type="submit" disabled={saving}>
               {saving ? 'Saving…' : 'Save changes'}
             </Button>
-            {confirming ? (
-              <>
-                <Button
-                  type="button"
-                  variant="danger"
-                  disabled={deleting || saving}
-                  onClick={() => void remove()}
-                >
-                  {deleting ? 'Deleting…' : 'Confirm delete'}
-                </Button>
-                <Button type="button" variant="ghost" disabled={deleting} onClick={() => setConfirming(false)}>
-                  Cancel
-                </Button>
-              </>
-            ) : (
-              <button
-                type="button"
-                disabled={saving || deleting}
-                className="rounded-lg border border-red-300 px-3.5 py-2 text-sm font-semibold text-danger hover:bg-red-50 disabled:opacity-50"
-                onClick={() => setConfirming(true)}
-              >
-                Delete item
-              </button>
-            )}
+            <button
+              type="button"
+              disabled={saving}
+              className="rounded-lg border border-red-300 px-3.5 py-2 text-sm font-semibold text-danger hover:bg-red-50 disabled:opacity-50"
+              onClick={onRequestDelete}
+            >
+              Delete item
+            </button>
           </div>
 
           <button
@@ -675,6 +640,81 @@ function ItemDrawer({
           </button>
         </form>
       </aside>
+    </div>
+  )
+}
+
+function ConfirmDeleteDialog({
+  item,
+  busy,
+  onCancel,
+  onConfirm,
+}: {
+  item: WardrobeItem
+  busy: boolean
+  onCancel: () => void
+  onConfirm: () => void
+}) {
+  const title = itemTitle(item)
+
+  useEffect(() => {
+    function onKey(event: globalThis.KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      if (!busy) onCancel()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [busy, onCancel])
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0 bg-ink/45"
+        aria-label="Cancel delete"
+        disabled={busy}
+        onClick={onCancel}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-body"
+        className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-5 shadow-2xl"
+      >
+        <h2 id="delete-dialog-title" className="text-lg font-semibold tracking-tight text-ink">
+          Delete this item?
+        </h2>
+        <div className="mt-4 flex gap-3">
+          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-canvas">
+            {item.imageUrl ? (
+              <img
+                src={apiUrl(item.imageUrl)}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center text-[10px] font-medium text-muted">
+                {humanize(item.category)}
+              </div>
+            )}
+          </div>
+          <p id="delete-dialog-body" className="text-sm leading-relaxed text-muted">
+            <span className="font-semibold text-ink">{title}</span> will be removed from your wardrobe.
+            This cannot be undone.
+          </p>
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="button" variant="danger" disabled={busy} onClick={onConfirm}>
+            {busy ? 'Deleting…' : 'Delete item'}
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }

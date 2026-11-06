@@ -14,7 +14,7 @@ export function Home() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    document.title = 'Dashboard — USTyle'
+    document.title = 'Home — USTyle'
   }, [])
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export function Home() {
         detail: 'Used only for virtual try-on, never shared.',
         done: hasPhoto,
         to: '/you',
-        action: 'Open Profile',
+        action: 'Open Me',
       },
       {
         id: 'profile',
@@ -69,7 +69,7 @@ export function Home() {
         detail: 'Improves venue fit and sizing.',
         done: hasAttrs,
         to: '/you',
-        action: 'Open Profile',
+        action: 'Open Me',
       },
     ],
     [hasWardrobe, hasPhoto, hasAttrs],
@@ -82,7 +82,7 @@ export function Home() {
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="text-[26px] font-semibold tracking-tight text-ink">Dashboard</h2>
+          <h2 className="text-[26px] font-semibold tracking-tight text-ink">Home</h2>
           <p className="mt-1 max-w-xl text-sm text-muted">
             Finish three quick steps and USTyle can style you from your own closet.
           </p>
@@ -132,7 +132,7 @@ export function Home() {
               badge={hasPhoto ? { text: 'Added', tone: 'ok' } : { text: 'Not added', tone: 'warn' }}
             />
             <StatCard
-              label="Profile attributes"
+              label="About you"
               value={hasAttrs ? 'Complete' : 'Incomplete'}
               hint="Height + preferred style"
               muted={!hasAttrs}
@@ -141,7 +141,7 @@ export function Home() {
             <StatCard
               label="Preferred style"
               value={styleLabel || 'Not set'}
-              hint="Choose one in Profile"
+              hint="Choose one in Me"
               muted={!styleLabel}
             />
           </section>
@@ -213,7 +213,7 @@ export function Home() {
                 />
                 <QuickAction
                   to="/you"
-                  title="Edit profile"
+                  title="Edit Me"
                   subtitle="Body photo, height, style"
                   icon={<PersonIcon />}
                 />

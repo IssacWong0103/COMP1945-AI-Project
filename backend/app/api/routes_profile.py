@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Profile
-from app.schemas import GENDERS, PREFERRED_STYLES, SKIN_TONES, ProfileOut
+from app.schemas import GENDERS, ProfileOut
 from app.services.storage import save_upload
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -30,16 +30,33 @@ def _to_out(profile: Profile | None) -> ProfileOut:
     return ProfileOut.model_validate(profile)
 
 
-def _parse_number(raw: str | None, field: str) -> float | None:
+def _parse_number(
+    raw: str | None,
+    field: str,
+    *,
+    minimum: float,
+    maximum: float,
+) -> float | None:
     if raw is None or str(raw).strip() == "":
         return None
     try:
         value = float(raw)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=f"{field} must be a number.") from exc
-    if value <= 0 or value > 500:
+    if value < minimum or value > maximum:
         raise HTTPException(status_code=400, detail=f"{field} is out of range.")
     return value
+
+
+def _parse_note(raw: str | None, field: str, *, max_len: int = 80) -> str | None:
+    if raw is None:
+        return None
+    text = " ".join(str(raw).split()).strip()
+    if not text:
+        return ""
+    if len(text) > max_len:
+        raise HTTPException(status_code=400, detail=f"{field} is too long.")
+    return text
 
 
 @router.get("", response_model=ProfileOut)
@@ -64,25 +81,26 @@ async def update_profile(
         _, image_url = await save_upload(file, "profile")
         profile.body_photo_url = image_url
 
-    height = _parse_number(heightCm, "heightCm")
-    if height is not None:
-        profile.height_cm = height
-    weight = _parse_number(weightKg, "weightKg")
-    if weight is not None:
-        profile.weight_kg = weight
+    if heightCm is not None:
+        profile.height_cm = _parse_number(heightCm, "heightCm", minimum=100, maximum=250)
+    if weightKg is not None:
+        profile.weight_kg = _parse_number(weightKg, "weightKg", minimum=30, maximum=200)
 
-    if gender:
-        if gender not in GENDERS:
+    if gender is not None:
+        cleaned = gender.strip()
+        if cleaned == "":
+            profile.gender = None
+        elif cleaned not in GENDERS:
             raise HTTPException(status_code=400, detail="Invalid gender.")
-        profile.gender = gender
-    if skinTone:
-        if skinTone not in SKIN_TONES:
-            raise HTTPException(status_code=400, detail="Invalid skinTone.")
-        profile.skin_tone = skinTone
-    if preferredStyle:
-        if preferredStyle not in PREFERRED_STYLES:
-            raise HTTPException(status_code=400, detail="Invalid preferredStyle.")
-        profile.preferred_style = preferredStyle
+        else:
+            profile.gender = cleaned
+
+    if skinTone is not None:
+        note = _parse_note(skinTone, "skinTone")
+        profile.skin_tone = note or None
+    if preferredStyle is not None:
+        note = _parse_note(preferredStyle, "preferredStyle")
+        profile.preferred_style = note or None
 
     db.commit()
     db.refresh(profile)

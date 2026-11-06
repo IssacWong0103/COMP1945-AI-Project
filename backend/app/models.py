@@ -32,8 +32,8 @@ class Profile(Base):
     height_cm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     weight_kg: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     gender: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    skin_tone: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
-    preferred_style: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)
+    skin_tone: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
+    preferred_style: Mapped[Optional[str]] = mapped_column(String(80), nullable=True)
 
 
 class Outfit(Base):

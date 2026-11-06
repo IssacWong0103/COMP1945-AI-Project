@@ -6,6 +6,7 @@ import { ErrorNote } from '../components/ErrorNote'
 import { OutfitCard } from '../components/OutfitCard'
 import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
+import { SuggestSelect } from '../components/SuggestSelect'
 import { FALLBACK_VENUES, STYLE_OPTIONS } from '../constants'
 import type { Outfit, VenueInfo } from '../types'
 
@@ -108,7 +109,7 @@ export function Recommend() {
         <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           No body photo yet.{' '}
           <Link to="/you" className="font-semibold underline">
-            Add one in Profile
+            Add one in Me
           </Link>{' '}
           to enable virtual try-on. Matching still works without it.
         </p>
@@ -151,20 +152,19 @@ export function Recommend() {
             <label htmlFor="styleOverride" className="text-xs font-medium text-muted">
               Style override
             </label>
-            <select
-              id="styleOverride"
-              name="preferredStyle"
-              value={styleOverride}
-              onChange={(event) => setStyleOverride(event.target.value)}
-              className="mt-1.5 w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm outline-none focus:border-navy"
-            >
-              <option value="">Use profile default</option>
-              {STYLE_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <div className="mt-1.5">
+              <SuggestSelect
+                id="styleOverride"
+                name="preferredStyle"
+                value={styleOverride}
+                options={STYLE_OPTIONS}
+                placeholder="Use profile default"
+                customPlaceholder="e.g. dark academia, preppy, Y2K"
+                customHint="Leave on default to use Me. Custom words are a soft hint."
+                onChange={setStyleOverride}
+                disabled={busy}
+              />
+            </div>
           </div>
 
           <div className="mt-6">

@@ -4,17 +4,17 @@ import { getHealth } from '../api/client'
 import { ConnectionBanner } from './ConnectionBanner'
 
 const LINKS = [
-  { to: '/', label: 'Dashboard', end: true, icon: DashboardIcon },
-  { to: '/wardrobe', label: 'Wardrobe', end: false, icon: WardrobeIcon },
-  { to: '/dress-me', label: 'Generate', end: false, icon: GenerateIcon },
-  { to: '/you', label: 'Profile', end: false, icon: ProfileIcon },
+  { to: '/', label: 'Home', end: true, icon: DashboardIcon },
+  { to: '/wardrobe', label: 'Closet', end: false, icon: ClosetIcon },
+  { to: '/dress-me', label: 'Studio', end: false, icon: GenerateIcon },
+  { to: '/you', label: 'Me', end: false, icon: ProfileIcon },
 ] as const
 
 const TITLES: Record<string, string> = {
-  '/': 'Dashboard',
-  '/wardrobe': 'Wardrobe',
-  '/dress-me': 'Generate outfits',
-  '/you': 'Profile',
+  '/': 'Home',
+  '/wardrobe': 'Closet',
+  '/dress-me': 'Studio',
+  '/you': 'Me',
 }
 
 export function Layout() {
@@ -22,7 +22,7 @@ export function Layout() {
   const [backendUp, setBackendUp] = useState<boolean | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const isHome = location.pathname === '/'
-  const flushHeader = isHome || location.pathname === '/wardrobe'
+  const flushHeader = isHome || location.pathname === '/wardrobe' || location.pathname === '/you'
 
   useEffect(() => {
     setMenuOpen(false)
@@ -116,7 +116,11 @@ export function Layout() {
               {backendUp ? 'API connected' : backendUp === false ? 'API offline' : 'Checking API…'}
             </p>
             <p className="mt-0.5 pl-4 text-[12px] text-white/50">
-              {backendUp ? 'Backend responding' : backendUp === false ? 'Cannot reach backend' : 'Waiting for backend'}
+              {backendUp
+                ? 'Your workspace is connected'
+                : backendUp === false
+                  ? 'Your workspace is offline'
+                  : 'Checking workspace…'}
             </p>
           </div>
           <p className="px-1 pt-3 text-[11px] text-white/40">Group 18 · COMP1945</p>
@@ -192,15 +196,16 @@ function DashboardIcon() {
   )
 }
 
-function WardrobeIcon() {
+function ClosetIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
       <path
-        d="M7.1 4.6 10 7.2 12.9 4.6 16.4 7.2l-1.8 1.6v7.4H5.4V8.8L3.6 7.2 7.1 4.6Z"
+        d="M7.2 4.8 10 7.2 12.8 4.8 16 7.1v8.7H4V7.1L7.2 4.8Z"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinejoin="round"
       />
+      <path d="M10 7.2v8.6" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   )
 }

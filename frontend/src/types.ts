@@ -9,7 +9,7 @@ export type Gender = 'male' | 'female' | 'nonBinary' | 'preferNot'
 
 export type ItemGender = 'male' | 'female' | 'unisex'
 
-export type SkinTone = 'fair' | 'light' | 'medium' | 'tan' | 'deep'
+export type SkinTone = 'fair' | 'light' | 'medium' | 'tan' | 'deep' | (string & {})
 
 export type PreferredStyle =
   | 'casual'
@@ -18,6 +18,7 @@ export type PreferredStyle =
   | 'sporty'
   | 'minimal'
   | 'formal'
+  | (string & {})
 
 export type Category =
   | 'top'

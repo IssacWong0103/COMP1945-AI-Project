@@ -135,7 +135,7 @@ class VenueListResponse(CamelModel):
 
 class RecommendRequest(CamelModel):
     venue: Venue
-    preferred_style: PreferredStyle | None = None
+    preferred_style: str | None = Field(default=None, max_length=80)
 
 
 class OutfitItemRef(CamelModel):
