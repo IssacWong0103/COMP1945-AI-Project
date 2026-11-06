@@ -1,0 +1,1 @@
+"""USTyle FastAPI application package."""

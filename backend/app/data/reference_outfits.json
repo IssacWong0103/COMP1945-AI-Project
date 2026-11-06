@@ -1,0 +1,368 @@
+[
+  {
+    "id": "ref-lecture-01",
+    "venues": ["lecture"],
+    "fashionDbCategory": "Casual",
+    "style": "casual",
+    "tokens": "white tee navy jeans casual lecture campus comfortable cotton denim",
+    "items": [
+      {"category": "top", "color": "white", "style": "casual", "tokens": "white t-shirt tee cotton casual"},
+      {"category": "bottom", "color": "navy", "style": "casual", "tokens": "navy jeans denim straight"}
+    ]
+  },
+  {
+    "id": "ref-lecture-02",
+    "venues": ["lecture"],
+    "fashionDbCategory": "Casual",
+    "style": "casual",
+    "tokens": "grey hoodie black joggers lecture hall comfortable",
+    "items": [
+      {"category": "top", "color": "gray", "style": "casual", "tokens": "grey hoodie sweatshirt"},
+      {"category": "bottom", "color": "black", "style": "casual", "tokens": "black joggers sweatpants"}
+    ]
+  },
+  {
+    "id": "ref-lecture-03",
+    "venues": ["lecture"],
+    "fashionDbCategory": "Casual",
+    "style": "smartCasual",
+    "tokens": "navy knit khaki chinos lecture smart casual neat",
+    "items": [
+      {"category": "top", "color": "navy", "style": "smartCasual", "tokens": "navy knit sweater"},
+      {"category": "bottom", "color": "khaki", "style": "smartCasual", "tokens": "khaki chinos trousers"}
+    ]
+  },
+  {
+    "id": "ref-lecture-04",
+    "venues": ["lecture"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "minimal",
+    "tokens": "white oxford navy trousers minimal lecture clean",
+    "items": [
+      {"category": "top", "color": "white", "style": "minimal", "tokens": "white oxford shirt"},
+      {"category": "bottom", "color": "navy", "style": "minimal", "tokens": "navy trousers"}
+    ]
+  },
+  {
+    "id": "ref-lecture-05",
+    "venues": ["lecture", "casualDate"],
+    "fashionDbCategory": "Casual",
+    "style": "casual",
+    "tokens": "cream sweater blue jeans sneakers lecture date relaxed",
+    "items": [
+      {"category": "top", "color": "cream", "style": "casual", "tokens": "cream sweater knit"},
+      {"category": "bottom", "color": "blue", "style": "casual", "tokens": "blue jeans denim"},
+      {"category": "shoes", "color": "white", "style": "casual", "tokens": "white sneakers"}
+    ]
+  },
+  {
+    "id": "ref-lecture-06",
+    "venues": ["lecture"],
+    "fashionDbCategory": "Outerwear",
+    "style": "casual",
+    "tokens": "olive overshirt black tee jeans lecture layering",
+    "items": [
+      {"category": "top", "color": "black", "style": "casual", "tokens": "black t-shirt"},
+      {"category": "bottom", "color": "blue", "style": "casual", "tokens": "blue jeans"},
+      {"category": "outerwear", "color": "olive", "style": "casual", "tokens": "olive overshirt jacket"}
+    ]
+  },
+  {
+    "id": "ref-career-01",
+    "venues": ["careerFair"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "smartCasual",
+    "tokens": "light blue shirt navy chinos career fair smart casual interview",
+    "items": [
+      {"category": "top", "color": "blue", "style": "smartCasual", "tokens": "light blue business shirt"},
+      {"category": "bottom", "color": "navy", "style": "smartCasual", "tokens": "navy chinos trousers"}
+    ]
+  },
+  {
+    "id": "ref-career-02",
+    "venues": ["careerFair"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "smartCasual",
+    "tokens": "white shirt grey trousers navy blazer career fair",
+    "items": [
+      {"category": "top", "color": "white", "style": "smartCasual", "tokens": "white dress shirt"},
+      {"category": "bottom", "color": "gray", "style": "smartCasual", "tokens": "grey trousers"},
+      {"category": "outerwear", "color": "navy", "style": "smartCasual", "tokens": "navy blazer jacket"}
+    ]
+  },
+  {
+    "id": "ref-career-03",
+    "venues": ["careerFair", "formal"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "formal",
+    "tokens": "white shirt black trousers black blazer career formal",
+    "items": [
+      {"category": "top", "color": "white", "style": "formal", "tokens": "white shirt"},
+      {"category": "bottom", "color": "black", "style": "formal", "tokens": "black trousers"},
+      {"category": "outerwear", "color": "black", "style": "formal", "tokens": "black blazer"}
+    ]
+  },
+  {
+    "id": "ref-career-04",
+    "venues": ["careerFair"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "smartCasual",
+    "tokens": "beige blouse black trousers loafers career fair women",
+    "items": [
+      {"category": "top", "color": "beige", "style": "smartCasual", "tokens": "beige blouse shirt"},
+      {"category": "bottom", "color": "black", "style": "smartCasual", "tokens": "black tailored trousers"},
+      {"category": "shoes", "color": "black", "style": "smartCasual", "tokens": "black loafers"}
+    ]
+  },
+  {
+    "id": "ref-career-05",
+    "venues": ["careerFair"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "minimal",
+    "tokens": "navy polo charcoal chinos minimal career neat",
+    "items": [
+      {"category": "top", "color": "navy", "style": "minimal", "tokens": "navy polo shirt"},
+      {"category": "bottom", "color": "charcoal", "style": "minimal", "tokens": "charcoal chinos"}
+    ]
+  },
+  {
+    "id": "ref-career-06",
+    "venues": ["careerFair", "lecture"],
+    "fashionDbCategory": "Casual",
+    "style": "smartCasual",
+    "tokens": "striped shirt khaki chinos smart casual campus",
+    "items": [
+      {"category": "top", "color": "white", "style": "smartCasual", "tokens": "striped oxford shirt"},
+      {"category": "bottom", "color": "khaki", "style": "smartCasual", "tokens": "khaki chinos"}
+    ]
+  },
+  {
+    "id": "ref-date-01",
+    "venues": ["casualDate"],
+    "fashionDbCategory": "Casual",
+    "style": "casual",
+    "tokens": "black tee dark jeans white sneakers casual date",
+    "items": [
+      {"category": "top", "color": "black", "style": "casual", "tokens": "black t-shirt"},
+      {"category": "bottom", "color": "black", "style": "casual", "tokens": "dark jeans"},
+      {"category": "shoes", "color": "white", "style": "casual", "tokens": "white sneakers"}
+    ]
+  },
+  {
+    "id": "ref-date-02",
+    "venues": ["casualDate"],
+    "fashionDbCategory": "Casual",
+    "style": "smartCasual",
+    "tokens": "cream knit navy skirt date smart casual",
+    "items": [
+      {"category": "top", "color": "cream", "style": "smartCasual", "tokens": "cream knit top"},
+      {"category": "bottom", "color": "navy", "style": "smartCasual", "tokens": "navy skirt"}
+    ]
+  },
+  {
+    "id": "ref-date-03",
+    "venues": ["casualDate"],
+    "fashionDbCategory": "Streetwear",
+    "style": "streetwear",
+    "tokens": "graphic hoodie cargo pants sneakers streetwear date",
+    "items": [
+      {"category": "top", "color": "black", "style": "streetwear", "tokens": "graphic hoodie"},
+      {"category": "bottom", "color": "khaki", "style": "streetwear", "tokens": "cargo pants"},
+      {"category": "shoes", "color": "white", "style": "streetwear", "tokens": "chunky sneakers"}
+    ]
+  },
+  {
+    "id": "ref-date-04",
+    "venues": ["casualDate", "lecture"],
+    "fashionDbCategory": "Casual",
+    "style": "casual",
+    "tokens": "denim jacket white tee midi skirt date campus",
+    "items": [
+      {"category": "top", "color": "white", "style": "casual", "tokens": "white tee"},
+      {"category": "bottom", "color": "beige", "style": "casual", "tokens": "midi skirt"},
+      {"category": "outerwear", "color": "blue", "style": "casual", "tokens": "denim jacket"}
+    ]
+  },
+  {
+    "id": "ref-date-05",
+    "venues": ["casualDate"],
+    "fashionDbCategory": "Formal_Dress",
+    "style": "casual",
+    "tokens": "simple midi dress sneakers casual date",
+    "items": [
+      {"category": "dress", "color": "navy", "style": "casual", "tokens": "navy midi dress"},
+      {"category": "shoes", "color": "white", "style": "casual", "tokens": "white sneakers"}
+    ]
+  },
+  {
+    "id": "ref-hall-01",
+    "venues": ["hallGathering"],
+    "fashionDbCategory": "Athletic_Sport",
+    "style": "sporty",
+    "tokens": "team tee joggers sneakers hall gathering sporty",
+    "items": [
+      {"category": "top", "color": "red", "style": "sporty", "tokens": "athletic tee jersey"},
+      {"category": "bottom", "color": "black", "style": "sporty", "tokens": "black joggers"},
+      {"category": "shoes", "color": "white", "style": "sporty", "tokens": "running sneakers"}
+    ]
+  },
+  {
+    "id": "ref-hall-02",
+    "venues": ["hallGathering"],
+    "fashionDbCategory": "Casual",
+    "style": "casual",
+    "tokens": "oversized tee shorts slides hall hangout",
+    "items": [
+      {"category": "top", "color": "gray", "style": "casual", "tokens": "oversized tee"},
+      {"category": "bottom", "color": "navy", "style": "casual", "tokens": "navy shorts"}
+    ]
+  },
+  {
+    "id": "ref-hall-03",
+    "venues": ["hallGathering"],
+    "fashionDbCategory": "Streetwear",
+    "style": "streetwear",
+    "tokens": "hoodie baggy jeans sneakers hall streetwear",
+    "items": [
+      {"category": "top", "color": "black", "style": "streetwear", "tokens": "black hoodie"},
+      {"category": "bottom", "color": "blue", "style": "streetwear", "tokens": "baggy jeans"}
+    ]
+  },
+  {
+    "id": "ref-hall-04",
+    "venues": ["hallGathering", "lecture"],
+    "fashionDbCategory": "Loungewear",
+    "style": "casual",
+    "tokens": "lounge set matching hall comfortable",
+    "items": [
+      {"category": "top", "color": "beige", "style": "casual", "tokens": "beige lounge top"},
+      {"category": "bottom", "color": "beige", "style": "casual", "tokens": "beige lounge pants"}
+    ]
+  },
+  {
+    "id": "ref-hall-05",
+    "venues": ["hallGathering"],
+    "fashionDbCategory": "Athletic_Sport",
+    "style": "sporty",
+    "tokens": "track jacket tee sweatpants hall sporty",
+    "items": [
+      {"category": "top", "color": "white", "style": "sporty", "tokens": "white sport tee"},
+      {"category": "bottom", "color": "gray", "style": "sporty", "tokens": "grey sweatpants"},
+      {"category": "outerwear", "color": "black", "style": "sporty", "tokens": "track jacket"}
+    ]
+  },
+  {
+    "id": "ref-formal-01",
+    "venues": ["formal"],
+    "fashionDbCategory": "Formal_Dress",
+    "style": "formal",
+    "tokens": "black midi dress heels formal banquet",
+    "items": [
+      {"category": "dress", "color": "black", "style": "formal", "tokens": "black midi dress"},
+      {"category": "shoes", "color": "black", "style": "formal", "tokens": "black heels"}
+    ]
+  },
+  {
+    "id": "ref-formal-02",
+    "venues": ["formal"],
+    "fashionDbCategory": "Formal_Dress",
+    "style": "formal",
+    "tokens": "navy evening dress formal ceremony",
+    "items": [
+      {"category": "dress", "color": "navy", "style": "formal", "tokens": "navy evening dress"}
+    ]
+  },
+  {
+    "id": "ref-formal-03",
+    "venues": ["formal"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "formal",
+    "tokens": "white shirt black trousers black blazer formal men",
+    "items": [
+      {"category": "top", "color": "white", "style": "formal", "tokens": "white dress shirt"},
+      {"category": "bottom", "color": "black", "style": "formal", "tokens": "black dress trousers"},
+      {"category": "outerwear", "color": "black", "style": "formal", "tokens": "black suit jacket blazer"}
+    ]
+  },
+  {
+    "id": "ref-formal-04",
+    "venues": ["formal", "careerFair"],
+    "fashionDbCategory": "Business_Smart",
+    "style": "formal",
+    "tokens": "navy suit white shirt formal career",
+    "items": [
+      {"category": "top", "color": "white", "style": "formal", "tokens": "white shirt"},
+      {"category": "bottom", "color": "navy", "style": "formal", "tokens": "navy suit trousers"},
+      {"category": "outerwear", "color": "navy", "style": "formal", "tokens": "navy suit jacket"}
+    ]
+  },
+  {
+    "id": "ref-formal-05",
+    "venues": ["formal"],
+    "fashionDbCategory": "Formal_Dress",
+    "style": "formal",
+    "tokens": "burgundy dress black outerwear formal dinner",
+    "items": [
+      {"category": "dress", "color": "burgundy", "style": "formal", "tokens": "burgundy dress"},
+      {"category": "outerwear", "color": "black", "style": "formal", "tokens": "black wrap coat"}
+    ]
+  },
+  {
+    "id": "ref-formal-06",
+    "venues": ["formal"],
+    "fashionDbCategory": "Outerwear",
+    "style": "smartCasual",
+    "tokens": "camel coat white shirt black trousers formal smart",
+    "items": [
+      {"category": "top", "color": "white", "style": "smartCasual", "tokens": "white shirt"},
+      {"category": "bottom", "color": "black", "style": "smartCasual", "tokens": "black trousers"},
+      {"category": "outerwear", "color": "camel", "style": "smartCasual", "tokens": "camel coat outerwear"}
+    ]
+  },
+  {
+    "id": "ref-outer-01",
+    "venues": ["lecture", "casualDate"],
+    "fashionDbCategory": "Outerwear",
+    "style": "casual",
+    "tokens": "navy puffer white tee jeans cool campus",
+    "items": [
+      {"category": "top", "color": "white", "style": "casual", "tokens": "white tee"},
+      {"category": "bottom", "color": "blue", "style": "casual", "tokens": "blue jeans"},
+      {"category": "outerwear", "color": "navy", "style": "casual", "tokens": "navy puffer jacket"}
+    ]
+  },
+  {
+    "id": "ref-outer-02",
+    "venues": ["careerFair", "lecture"],
+    "fashionDbCategory": "Outerwear",
+    "style": "smartCasual",
+    "tokens": "grey overcoat shirt chinos smart outerwear",
+    "items": [
+      {"category": "top", "color": "light blue", "style": "smartCasual", "tokens": "light blue shirt"},
+      {"category": "bottom", "color": "khaki", "style": "smartCasual", "tokens": "khaki chinos"},
+      {"category": "outerwear", "color": "gray", "style": "smartCasual", "tokens": "grey overcoat"}
+    ]
+  },
+  {
+    "id": "ref-bottom-01",
+    "venues": ["lecture", "hallGathering"],
+    "fashionDbCategory": "Bottoms",
+    "style": "casual",
+    "tokens": "tee straight jeans sneakers everyday bottoms",
+    "items": [
+      {"category": "top", "color": "white", "style": "casual", "tokens": "plain tee"},
+      {"category": "bottom", "color": "blue", "style": "casual", "tokens": "straight jeans"}
+    ]
+  },
+  {
+    "id": "ref-bottom-02",
+    "venues": ["careerFair"],
+    "fashionDbCategory": "Bottoms",
+    "style": "smartCasual",
+    "tokens": "shirt tailored trousers career bottoms",
+    "items": [
+      {"category": "top", "color": "white", "style": "smartCasual", "tokens": "crisp shirt"},
+      {"category": "bottom", "color": "navy", "style": "smartCasual", "tokens": "tailored trousers"}
+    ]
+  }
+]

@@ -1,0 +1,2378 @@
+[
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_469292_us_sub3.jpg",
+    "file": "sport_men_469292_us_sub3.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_469292_us_sub4.jpg",
+    "file": "sport_men_469292_us_sub4.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_482211_us_sub3.jpg",
+    "file": "sport_men_482211_us_sub3.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_482211_us_sub4.jpg",
+    "file": "sport_men_482211_us_sub4.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_482305_wc_sub1.jpg",
+    "file": "sport_men_482305_wc_sub1.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_482305_wc_sub2.jpg",
+    "file": "sport_men_482305_wc_sub2.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_485744_us_sub6.jpg",
+    "file": "sport_men_485744_us_sub6.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_486116_us_sub3.jpg",
+    "file": "sport_men_486116_us_sub3.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_486116_us_sub4.jpg",
+    "file": "sport_men_486116_us_sub4.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_488774_us_sub3.jpg",
+    "file": "sport_men_488774_us_sub3.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Athletic_Sport",
+    "path": "Fashion_DB/Uniqlo/Athletic_Sport/sport_men_488774_us_sub6.jpg",
+    "file": "sport_men_488774_us_sub6.jpg",
+    "category": "top",
+    "style": "sporty",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_471809_us_sub1.jpg",
+    "file": "bottoms_men_471809_us_sub1.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_475344_us_sub6.jpg",
+    "file": "bottoms_men_475344_us_sub6.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_477345_us_sub6.jpg",
+    "file": "bottoms_men_477345_us_sub6.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_479000_us_sub1.jpg",
+    "file": "bottoms_men_479000_us_sub1.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_479000_us_sub6.jpg",
+    "file": "bottoms_men_479000_us_sub6.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_480740_us_sub1.jpg",
+    "file": "bottoms_men_480740_us_sub1.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_482280_us_sub1.jpg",
+    "file": "bottoms_men_482280_us_sub1.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_482758_us_sub3.jpg",
+    "file": "bottoms_men_482758_us_sub3.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_483285_us_sub3.jpg",
+    "file": "bottoms_men_483285_us_sub3.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_484807_us_sub1.jpg",
+    "file": "bottoms_men_484807_us_sub1.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_484875_us_sub3.jpg",
+    "file": "bottoms_men_484875_us_sub3.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_484875_us_sub6.jpg",
+    "file": "bottoms_men_484875_us_sub6.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_486120_us_sub6.jpg",
+    "file": "bottoms_men_486120_us_sub6.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_488743_us_sub3.jpg",
+    "file": "bottoms_men_488743_us_sub3.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_488743_us_sub6.jpg",
+    "file": "bottoms_men_488743_us_sub6.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Bottoms",
+    "path": "Fashion_DB/Uniqlo/Bottoms/bottoms_men_489565_us_sub3.jpg",
+    "file": "bottoms_men_489565_us_sub3.jpg",
+    "category": "bottom",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_483877_us_sub3.jpg",
+    "file": "shirts_blouses_women_483877_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_483877_us_sub6.jpg",
+    "file": "shirts_blouses_women_483877_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_484928_us_sub3.jpg",
+    "file": "shirts_blouses_women_484928_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_484928_us_sub6.jpg",
+    "file": "shirts_blouses_women_484928_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_485265_us_sub3.jpg",
+    "file": "shirts_blouses_women_485265_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_485265_us_sub6.jpg",
+    "file": "shirts_blouses_women_485265_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_486600_us_sub3.jpg",
+    "file": "shirts_blouses_women_486600_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_486600_us_sub6.jpg",
+    "file": "shirts_blouses_women_486600_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_488520_us_sub3.jpg",
+    "file": "shirts_blouses_women_488520_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_488520_us_sub6.jpg",
+    "file": "shirts_blouses_women_488520_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_488522_us_sub3.jpg",
+    "file": "shirts_blouses_women_488522_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_488522_us_sub6.jpg",
+    "file": "shirts_blouses_women_488522_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_488559_us_sub3.jpg",
+    "file": "shirts_blouses_women_488559_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_488560_us_sub3.jpg",
+    "file": "shirts_blouses_women_488560_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_489406_us_sub3.jpg",
+    "file": "shirts_blouses_women_489406_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_489406_us_sub6.jpg",
+    "file": "shirts_blouses_women_489406_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_489407_us_sub3.jpg",
+    "file": "shirts_blouses_women_489407_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_489427_us_sub3.jpg",
+    "file": "shirts_blouses_women_489427_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_blouses_women_489508_us_sub3.jpg",
+    "file": "shirts_blouses_women_489508_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_455957_us_sub3.jpg",
+    "file": "shirts_men_455957_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_462369_us_sub3.jpg",
+    "file": "shirts_men_462369_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_462369_us_sub6.jpg",
+    "file": "shirts_men_462369_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_470182_us_sub3.jpg",
+    "file": "shirts_men_470182_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_470182_us_sub6.jpg",
+    "file": "shirts_men_470182_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_470187_us_sub3.jpg",
+    "file": "shirts_men_470187_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_470187_us_sub6.jpg",
+    "file": "shirts_men_470187_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_481224_us_sub1.jpg",
+    "file": "shirts_men_481224_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_481224_us_sub3.jpg",
+    "file": "shirts_men_481224_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_482434_us_sub3.jpg",
+    "file": "shirts_men_482434_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486579_us_sub3.jpg",
+    "file": "shirts_men_486579_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486579_us_sub6.jpg",
+    "file": "shirts_men_486579_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486588_us_sub3.jpg",
+    "file": "shirts_men_486588_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486594_us_sub1.jpg",
+    "file": "shirts_men_486594_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486594_us_sub3.jpg",
+    "file": "shirts_men_486594_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486595_us_sub1.jpg",
+    "file": "shirts_men_486595_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486595_us_sub6.jpg",
+    "file": "shirts_men_486595_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486596_us_sub1.jpg",
+    "file": "shirts_men_486596_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486596_us_sub3.jpg",
+    "file": "shirts_men_486596_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486597_us_sub1.jpg",
+    "file": "shirts_men_486597_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486597_us_sub3.jpg",
+    "file": "shirts_men_486597_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486598_us_sub1.jpg",
+    "file": "shirts_men_486598_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486598_us_sub3.jpg",
+    "file": "shirts_men_486598_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486600_us_sub3.jpg",
+    "file": "shirts_men_486600_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486600_us_sub6.jpg",
+    "file": "shirts_men_486600_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486602_us_sub1.jpg",
+    "file": "shirts_men_486602_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486602_us_sub3.jpg",
+    "file": "shirts_men_486602_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486604_us_sub1.jpg",
+    "file": "shirts_men_486604_us_sub1.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486604_us_sub3.jpg",
+    "file": "shirts_men_486604_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486615_us_sub3.jpg",
+    "file": "shirts_men_486615_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_486615_us_sub6.jpg",
+    "file": "shirts_men_486615_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_488794_us_sub3.jpg",
+    "file": "shirts_men_488794_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_488794_us_sub6.jpg",
+    "file": "shirts_men_488794_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_488795_us_sub3.jpg",
+    "file": "shirts_men_488795_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_488795_us_sub6.jpg",
+    "file": "shirts_men_488795_us_sub6.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Business_Smart",
+    "path": "Fashion_DB/Uniqlo/Business_Smart/shirts_men_488796_us_sub3.jpg",
+    "file": "shirts_men_488796_us_sub3.jpg",
+    "category": "top",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_465193_us_sub3.jpg",
+    "file": "hoodies_men_465193_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_465193_wc_sub1.jpg",
+    "file": "hoodies_men_465193_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_471808_us_sub3.jpg",
+    "file": "hoodies_men_471808_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_471808_us_sub6.jpg",
+    "file": "hoodies_men_471808_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_481040_us_sub3.jpg",
+    "file": "hoodies_men_481040_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_481040_us_sub6.jpg",
+    "file": "hoodies_men_481040_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_483546_us_sub3.jpg",
+    "file": "hoodies_men_483546_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_483546_us_sub4.jpg",
+    "file": "hoodies_men_483546_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_485735_us_sub3.jpg",
+    "file": "hoodies_men_485735_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_485735_us_sub6.jpg",
+    "file": "hoodies_men_485735_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486080_us_sub3.jpg",
+    "file": "hoodies_men_486080_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486080_wc_sub1.jpg",
+    "file": "hoodies_men_486080_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486117_wc_sub1.jpg",
+    "file": "hoodies_men_486117_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486117_wc_sub2.jpg",
+    "file": "hoodies_men_486117_wc_sub2.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486119_wc_sub1.jpg",
+    "file": "hoodies_men_486119_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486119_wc_sub2.jpg",
+    "file": "hoodies_men_486119_wc_sub2.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486191_us_sub3.jpg",
+    "file": "hoodies_men_486191_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_486191_us_sub6.jpg",
+    "file": "hoodies_men_486191_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_488798_us_sub3.jpg",
+    "file": "hoodies_men_488798_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_488798_us_sub6.jpg",
+    "file": "hoodies_men_488798_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_491119_us_sub3.jpg",
+    "file": "hoodies_men_491119_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/hoodies_men_491119_us_sub6.jpg",
+    "file": "hoodies_men_491119_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_450535_us_sub3.jpg",
+    "file": "sweaters_men_450535_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_450543_us_sub3.jpg",
+    "file": "sweaters_men_450543_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_453754_us_sub3.jpg",
+    "file": "sweaters_men_453754_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_453754_us_sub6.jpg",
+    "file": "sweaters_men_453754_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_460939_us_sub1.jpg",
+    "file": "sweaters_men_460939_us_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_474146_us_sub3.jpg",
+    "file": "sweaters_men_474146_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_478550_us_sub3.jpg",
+    "file": "sweaters_men_478550_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_478550_us_sub5.jpg",
+    "file": "sweaters_men_478550_us_sub5.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_481004_us_sub5.jpg",
+    "file": "sweaters_men_481004_us_sub5.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_482321_us_sub3.jpg",
+    "file": "sweaters_men_482321_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_482321_us_sub6.jpg",
+    "file": "sweaters_men_482321_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_482325_us_sub3.jpg",
+    "file": "sweaters_men_482325_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_482325_us_sub6.jpg",
+    "file": "sweaters_men_482325_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_485340_us_sub3.jpg",
+    "file": "sweaters_men_485340_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_485340_us_sub6.jpg",
+    "file": "sweaters_men_485340_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486071_us_sub3.jpg",
+    "file": "sweaters_men_486071_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486071_us_sub6.jpg",
+    "file": "sweaters_men_486071_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486078_us_sub3.jpg",
+    "file": "sweaters_men_486078_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486080_us_sub3.jpg",
+    "file": "sweaters_men_486080_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486080_wc_sub1.jpg",
+    "file": "sweaters_men_486080_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486086_us_sub3.jpg",
+    "file": "sweaters_men_486086_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486086_us_sub6.jpg",
+    "file": "sweaters_men_486086_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486087_us_sub3.jpg",
+    "file": "sweaters_men_486087_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_486087_us_sub6.jpg",
+    "file": "sweaters_men_486087_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_487487_us_sub3.jpg",
+    "file": "sweaters_men_487487_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_488181_us_sub3.jpg",
+    "file": "sweaters_men_488181_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_488181_us_sub6.jpg",
+    "file": "sweaters_men_488181_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_488760_us_sub3.jpg",
+    "file": "sweaters_men_488760_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_488760_us_sub4.jpg",
+    "file": "sweaters_men_488760_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_491360_us_sub3.jpg",
+    "file": "sweaters_men_491360_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_men_491360_us_sub6.jpg",
+    "file": "sweaters_men_491360_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_465734_us_sub3.jpg",
+    "file": "sweaters_women_465734_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_465735_us_sub3.jpg",
+    "file": "sweaters_women_465735_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_465735_us_sub4.jpg",
+    "file": "sweaters_women_465735_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_465736_us_sub3.jpg",
+    "file": "sweaters_women_465736_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_485310_us_sub3.jpg",
+    "file": "sweaters_women_485310_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_485310_us_sub4.jpg",
+    "file": "sweaters_women_485310_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_485329_us_sub3.jpg",
+    "file": "sweaters_women_485329_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_485342_us_sub3.jpg",
+    "file": "sweaters_women_485342_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_487514_us_sub3.jpg",
+    "file": "sweaters_women_487514_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_487520_us_sub3.jpg",
+    "file": "sweaters_women_487520_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_487855_us_sub3.jpg",
+    "file": "sweaters_women_487855_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_487855_us_sub6.jpg",
+    "file": "sweaters_women_487855_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_488691_us_sub3.jpg",
+    "file": "sweaters_women_488691_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/sweaters_women_488761_us_sub3.jpg",
+    "file": "sweaters_women_488761_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_424873_us_sub3.jpg",
+    "file": "tops_women_424873_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_465760_us_sub1.jpg",
+    "file": "tops_women_465760_us_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_465760_us_sub3.jpg",
+    "file": "tops_women_465760_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_470143_us_sub3.jpg",
+    "file": "tops_women_470143_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_479791_us_sub3.jpg",
+    "file": "tops_women_479791_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_487579_us_sub3.jpg",
+    "file": "tops_women_487579_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_487595_us_sub3.jpg",
+    "file": "tops_women_487595_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_487908_us_sub4.jpg",
+    "file": "tops_women_487908_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_487908_wc_sub3.jpg",
+    "file": "tops_women_487908_wc_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_488228_us_sub3.jpg",
+    "file": "tops_women_488228_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_488228_us_sub4.jpg",
+    "file": "tops_women_488228_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_488230_us_sub3.jpg",
+    "file": "tops_women_488230_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_488230_us_sub4.jpg",
+    "file": "tops_women_488230_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_488298_us_sub3.jpg",
+    "file": "tops_women_488298_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_488298_us_sub4.jpg",
+    "file": "tops_women_488298_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_489040_us_sub3.jpg",
+    "file": "tops_women_489040_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_489040_us_sub4.jpg",
+    "file": "tops_women_489040_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tops_women_489372_us_sub3.jpg",
+    "file": "tops_women_489372_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_422992_us_sub3.jpg",
+    "file": "tshirts_men_422992_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_422992_us_sub6.jpg",
+    "file": "tshirts_men_422992_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_450179_us_sub3.jpg",
+    "file": "tshirts_men_450179_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_450179_us_sub4.jpg",
+    "file": "tshirts_men_450179_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_465185_us_sub3.jpg",
+    "file": "tshirts_men_465185_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_465185_us_sub6.jpg",
+    "file": "tshirts_men_465185_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_465193_us_sub3.jpg",
+    "file": "tshirts_men_465193_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_465193_wc_sub1.jpg",
+    "file": "tshirts_men_465193_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_479791_us_sub3.jpg",
+    "file": "tshirts_men_479791_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_479791_us_sub6.jpg",
+    "file": "tshirts_men_479791_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_482766_us_sub3.jpg",
+    "file": "tshirts_men_482766_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_482766_us_sub6.jpg",
+    "file": "tshirts_men_482766_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_484780_us_sub3.jpg",
+    "file": "tshirts_men_484780_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_484780_us_sub4.jpg",
+    "file": "tshirts_men_484780_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_486103_wc_sub1.jpg",
+    "file": "tshirts_men_486103_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_486103_wc_sub2.jpg",
+    "file": "tshirts_men_486103_wc_sub2.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_486129_us_sub3.jpg",
+    "file": "tshirts_men_486129_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_486129_us_sub4.jpg",
+    "file": "tshirts_men_486129_us_sub4.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Casual",
+    "path": "Fashion_DB/Uniqlo/Casual/tshirts_men_488751_us_sub3.jpg",
+    "file": "tshirts_men_488751_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_484705_us_sub3.jpg",
+    "file": "dresses_skirts_women_484705_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_484706_us_sub3.jpg",
+    "file": "dresses_skirts_women_484706_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_486098_us_sub3.jpg",
+    "file": "dresses_skirts_women_486098_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_487753_us_sub3.jpg",
+    "file": "dresses_skirts_women_487753_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_487995_us_sub3.jpg",
+    "file": "dresses_skirts_women_487995_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488008_us_sub3.jpg",
+    "file": "dresses_skirts_women_488008_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488009_us_sub3.jpg",
+    "file": "dresses_skirts_women_488009_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488009_us_sub4.jpg",
+    "file": "dresses_skirts_women_488009_us_sub4.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488083_us_sub3.jpg",
+    "file": "dresses_skirts_women_488083_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488204_us_sub3.jpg",
+    "file": "dresses_skirts_women_488204_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488816_us_sub3.jpg",
+    "file": "dresses_skirts_women_488816_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Formal_Dress",
+    "path": "Fashion_DB/Uniqlo/Formal_Dress/dresses_skirts_women_488934_us_sub3.jpg",
+    "file": "dresses_skirts_women_488934_us_sub3.jpg",
+    "category": "dress",
+    "style": "formal",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_458325_us_sub3.jpg",
+    "file": "lounge_men_458325_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_458325_wc_sub1.jpg",
+    "file": "lounge_men_458325_wc_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_461420_us_sub6.jpg",
+    "file": "lounge_men_461420_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_477753_us_sub1.jpg",
+    "file": "lounge_men_477753_us_sub1.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_479134_us_sub6.jpg",
+    "file": "lounge_men_479134_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_481582_us_sub6.jpg",
+    "file": "lounge_men_481582_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_485856_us_sub3.jpg",
+    "file": "lounge_men_485856_us_sub3.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_486467_us_sub6.jpg",
+    "file": "lounge_men_486467_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_486468_us_sub6.jpg",
+    "file": "lounge_men_486468_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Loungewear",
+    "path": "Fashion_DB/Uniqlo/Loungewear/lounge_men_486471_us_sub6.jpg",
+    "file": "lounge_men_486471_us_sub6.jpg",
+    "category": "top",
+    "style": "casual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_470067_us_sub3.jpg",
+    "file": "outerwear_men_470067_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_470067_us_sub4.jpg",
+    "file": "outerwear_men_470067_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_470077_us_sub3.jpg",
+    "file": "outerwear_men_470077_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_478270_us_sub1.jpg",
+    "file": "outerwear_men_478270_us_sub1.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_478270_us_sub3.jpg",
+    "file": "outerwear_men_478270_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_478280_us_sub3.jpg",
+    "file": "outerwear_men_478280_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_478280_us_sub4.jpg",
+    "file": "outerwear_men_478280_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_479755_us_sub1.jpg",
+    "file": "outerwear_men_479755_us_sub1.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_480045_us_sub3.jpg",
+    "file": "outerwear_men_480045_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_480045_us_sub4.jpg",
+    "file": "outerwear_men_480045_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_484610_us_sub3.jpg",
+    "file": "outerwear_men_484610_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_484610_us_sub6.jpg",
+    "file": "outerwear_men_484610_us_sub6.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486167_us_sub3.jpg",
+    "file": "outerwear_men_486167_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486167_us_sub6.jpg",
+    "file": "outerwear_men_486167_us_sub6.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486171_us_sub3.jpg",
+    "file": "outerwear_men_486171_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486171_us_sub4.jpg",
+    "file": "outerwear_men_486171_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486172_us_sub3.jpg",
+    "file": "outerwear_men_486172_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486176_us_sub3.jpg",
+    "file": "outerwear_men_486176_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486176_us_sub4.jpg",
+    "file": "outerwear_men_486176_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486177_us_sub3.jpg",
+    "file": "outerwear_men_486177_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_486177_us_sub4.jpg",
+    "file": "outerwear_men_486177_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_487323_us_sub3.jpg",
+    "file": "outerwear_men_487323_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_487323_us_sub4.jpg",
+    "file": "outerwear_men_487323_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_487326_us_sub3.jpg",
+    "file": "outerwear_men_487326_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_487326_us_sub6.jpg",
+    "file": "outerwear_men_487326_us_sub6.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_487348_us_sub3.jpg",
+    "file": "outerwear_men_487348_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_488830_us_sub3.jpg",
+    "file": "outerwear_men_488830_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_488830_us_sub4.jpg",
+    "file": "outerwear_men_488830_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_491096_us_sub3.jpg",
+    "file": "outerwear_men_491096_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_491096_us_sub6.jpg",
+    "file": "outerwear_men_491096_us_sub6.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_491292_us_sub3.jpg",
+    "file": "outerwear_men_491292_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_men_491292_us_sub6.jpg",
+    "file": "outerwear_men_491292_us_sub6.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "male"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_469863_us_sub3.jpg",
+    "file": "outerwear_women_469863_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_469863_us_sub4.jpg",
+    "file": "outerwear_women_469863_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_469871_us_sub3.jpg",
+    "file": "outerwear_women_469871_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_469871_us_sub4.jpg",
+    "file": "outerwear_women_469871_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_478577_us_sub3.jpg",
+    "file": "outerwear_women_478577_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_478577_us_sub4.jpg",
+    "file": "outerwear_women_478577_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_478579_us_sub3.jpg",
+    "file": "outerwear_women_478579_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_478579_us_sub4.jpg",
+    "file": "outerwear_women_478579_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_479751_us_sub3.jpg",
+    "file": "outerwear_women_479751_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_479751_us_sub4.jpg",
+    "file": "outerwear_women_479751_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487408_us_sub3.jpg",
+    "file": "outerwear_women_487408_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487408_us_sub4.jpg",
+    "file": "outerwear_women_487408_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487424_us_sub3.jpg",
+    "file": "outerwear_women_487424_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487424_us_sub4.jpg",
+    "file": "outerwear_women_487424_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487425_us_sub3.jpg",
+    "file": "outerwear_women_487425_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487425_us_sub4.jpg",
+    "file": "outerwear_women_487425_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487882_us_sub3.jpg",
+    "file": "outerwear_women_487882_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_487882_us_sub4.jpg",
+    "file": "outerwear_women_487882_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_489410_us_sub3.jpg",
+    "file": "outerwear_women_489410_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_489410_us_sub4.jpg",
+    "file": "outerwear_women_489410_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_489429_us_sub3.jpg",
+    "file": "outerwear_women_489429_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_489429_us_sub4.jpg",
+    "file": "outerwear_women_489429_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_489430_us_sub3.jpg",
+    "file": "outerwear_women_489430_us_sub3.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  },
+  {
+    "brand": "Uniqlo",
+    "fashionDbCategory": "Outerwear",
+    "path": "Fashion_DB/Uniqlo/Outerwear/outerwear_women_489430_us_sub4.jpg",
+    "file": "outerwear_women_489430_us_sub4.jpg",
+    "category": "outerwear",
+    "style": "smartCasual",
+    "itemGender": "female"
+  }
+]
