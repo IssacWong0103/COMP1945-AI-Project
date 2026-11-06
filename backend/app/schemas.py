@@ -105,6 +105,15 @@ class WardrobeListResponse(CamelModel):
     items: list[WardrobeItemOut]
 
 
+class WardrobeItemUpdate(CamelModel):
+    category: str | None = None
+    color: str | None = None
+    cut: str | None = None
+    style: str | None = None
+    description: str | None = None
+    item_gender: str | None = None
+
+
 class ProfileOut(CamelModel):
     body_photo_url: str | None = None
     height_cm: float | None = None

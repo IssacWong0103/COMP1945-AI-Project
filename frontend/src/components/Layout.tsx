@@ -21,6 +21,8 @@ export function Layout() {
   const location = useLocation()
   const [backendUp, setBackendUp] = useState<boolean | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const isHome = location.pathname === '/'
+  const flushHeader = isHome || location.pathname === '/wardrobe'
 
   useEffect(() => {
     setMenuOpen(false)
@@ -67,17 +69,21 @@ export function Layout() {
       ) : null}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-64 flex-col bg-navy text-white transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col bg-sidebar text-white transition-transform lg:static lg:translate-x-0 ${
           menuOpen ? 'translate-x-0' : 'max-lg:-translate-x-full'
         }`}
       >
-        <div className="flex items-center gap-3 px-5 py-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold text-sm font-bold text-navy">
-            US
+        <div className="flex items-center gap-3 px-5 pt-6 pb-7">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-gold text-lg font-bold text-navy">
+            U
           </span>
-          <div>
+          <div className="min-w-0 leading-tight">
             <p className="text-[15px] font-semibold tracking-tight">USTyle</p>
-            <p className="text-[11px] text-white/55">HKUST · Group 18</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-white/55">
+              HKUST student outfit
+              <br />
+              assistant
+            </p>
           </div>
         </div>
 
@@ -88,7 +94,7 @@ export function Layout() {
               to={link.to}
               end={link.end}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium no-underline transition ${
+                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium no-underline transition ${
                   isActive ? 'bg-white/12 text-white' : 'text-white/70 hover:bg-white/8 hover:text-white'
                 }`
               }
@@ -99,43 +105,63 @@ export function Layout() {
           ))}
         </nav>
 
-        <div className="mx-3 mb-4 rounded-lg bg-white/8 px-3 py-3">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-white/45">System</p>
-          <p className="mt-2 flex items-center gap-2 text-sm">
-            <span
-              className={`h-2 w-2 rounded-full ${backendUp ? 'bg-emerald-400' : backendUp === false ? 'bg-red-400' : 'bg-white/40'}`}
-            />
-            {backendUp ? 'API connected' : backendUp === false ? 'API offline' : 'Checking API…'}
-          </p>
-          <p className="mt-1 text-[12px] text-white/50">Local demo · no login</p>
+        <div className="px-3 pb-3">
+          <div className="rounded-xl bg-white/8 px-3.5 py-3">
+            <p className="flex items-center gap-2 text-sm font-medium">
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  backendUp ? 'bg-emerald-400' : backendUp === false ? 'bg-red-400' : 'bg-white/40'
+                }`}
+              />
+              {backendUp ? 'API connected' : backendUp === false ? 'API offline' : 'Checking API…'}
+            </p>
+            <p className="mt-0.5 pl-4 text-[12px] text-white/50">
+              {backendUp ? 'Backend responding' : backendUp === false ? 'Cannot reach backend' : 'Waiting for backend'}
+            </p>
+          </div>
+          <p className="px-1 pt-3 text-[11px] text-white/40">Group 18 · COMP1945</p>
         </div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-surface px-4 py-3 lg:px-8">
-          <div className="flex items-center gap-3">
+        {flushHeader ? (
+          <header className="sticky top-0 z-20 flex items-center gap-3 bg-canvas px-4 py-3 lg:hidden">
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line text-navy lg:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-navy"
               aria-label="Open menu"
               onClick={() => setMenuOpen(true)}
             >
               <MenuIcon />
             </button>
-            <div>
-              <p className="text-[11px] font-medium uppercase tracking-wider text-muted">Workspace</p>
-              <h1 className="text-base font-semibold text-ink">{pageTitle}</h1>
+            <p className="text-sm font-semibold text-ink">USTyle</p>
+          </header>
+        ) : (
+          <header className="sticky top-0 z-20 flex items-center justify-between gap-3 border-b border-line bg-surface px-4 py-3 lg:px-8">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line text-navy lg:hidden"
+                aria-label="Open menu"
+                onClick={() => setMenuOpen(true)}
+              >
+                <MenuIcon />
+              </button>
+              <div>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted">Workspace</p>
+                <h1 className="text-base font-semibold text-ink">{pageTitle}</h1>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="hidden rounded-full bg-canvas px-3 py-1 text-xs font-medium text-muted sm:inline">
-              Student demo
-            </span>
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-navy text-xs font-semibold text-white">
-              HK
-            </span>
-          </div>
-        </header>
+            <div className="flex items-center gap-2">
+              <span className="hidden rounded-full bg-canvas px-3 py-1 text-xs font-medium text-muted sm:inline">
+                Student demo
+              </span>
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-navy text-xs font-semibold text-white">
+                HK
+              </span>
+            </div>
+          </header>
+        )}
 
         <ConnectionBanner visible={backendUp === false} />
 
@@ -158,10 +184,10 @@ function MenuIcon() {
 function DashboardIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <rect x="3" y="3" width="6.5" height="6.5" rx="1.4" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10.5" y="3" width="6.5" height="4" rx="1.4" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="11.5" width="6.5" height="5.5" rx="1.4" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10.5" y="9" width="6.5" height="8" rx="1.4" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="3" y="3" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="10.8" y="3" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="3" y="10.8" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="10.8" y="10.8" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   )
 }
@@ -169,8 +195,12 @@ function DashboardIcon() {
 function WardrobeIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <path d="M6 5.5h8v11H6z" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M10 5.5V4M8.5 9v3M11.5 9v3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M7.1 4.6 10 7.2 12.9 4.6 16.4 7.2l-1.8 1.6v7.4H5.4V8.8L3.6 7.2 7.1 4.6Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }
@@ -178,8 +208,13 @@ function WardrobeIcon() {
 function GenerateIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <path d="M4 14.5 10 4l6 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <path d="M6.5 14.5h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path
+        d="M10 3.2 11.15 7.1 15 8.2 11.15 9.3 10 13.2 8.85 9.3 5 8.2l3.85-1.1L10 3.2Z"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinejoin="round"
+      />
+      <path d="M14.6 12.4v3.2M13 14h3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
     </svg>
   )
 }
@@ -187,8 +222,13 @@ function GenerateIcon() {
 function ProfileIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <circle cx="10" cy="7" r="2.6" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M4.5 16c.8-2.6 2.8-4 5.5-4s4.7 1.4 5.5 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="10" cy="7.2" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M4.8 16c.7-2.5 2.6-3.8 5.2-3.8s4.5 1.3 5.2 3.8"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
     </svg>
   )
 }

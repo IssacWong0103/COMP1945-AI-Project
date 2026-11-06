@@ -66,7 +66,7 @@ export function friendlyError(err: unknown): string {
   if (err instanceof DOMException && err.name === 'AbortError') return 'Cancelled.'
   if (err instanceof ApiError) return err.message
   if (err instanceof TypeError) {
-    return 'Backend not running on port 8000. Start the API, then try again.'
+    return 'Backend not running on port 8018. Start the USTyle API, then try again.'
   }
   if (err instanceof Error && err.message) return err.message
   return 'Something went sideways. Try again in a moment.'
@@ -100,6 +100,25 @@ export async function uploadWardrobeItem(file: File, notes?: string): Promise<Wa
   body.append('file', file)
   if (notes) body.append('notes', notes)
   const res = await fetch('/api/wardrobe/items', { method: 'POST', body })
+  return parseJson<WardrobeItem>(res)
+}
+
+export async function updateWardrobeItem(
+  id: string,
+  patch: {
+    category?: string
+    color?: string
+    cut?: string
+    style?: string
+    description?: string
+    itemGender?: string
+  },
+): Promise<WardrobeItem> {
+  const res = await fetch(`/api/wardrobe/items/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(patch),
+  })
   return parseJson<WardrobeItem>(res)
 }
 

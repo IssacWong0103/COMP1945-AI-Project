@@ -2,11 +2,11 @@
 
 Frontend (`frontend/`) and backend (`backend/`) **must** follow this contract. Do not invent extra required fields. Optional fields are marked.
 
-Base URL (dev): `http://127.0.0.1:8000`
+Base URL (dev): `http://127.0.0.1:8018`
 
-Frontend Vite proxy: `/api` → `http://127.0.0.1:8000/api`
+Frontend Vite proxy: `/api` → `http://127.0.0.1:8018/api`
 
-CORS: allow `http://localhost:5173` and `http://127.0.0.1:5173`.
+CORS: allow `http://localhost:1945` and `http://127.0.0.1:1945`.
 
 All JSON request/response bodies use camelCase.
 
@@ -147,6 +147,23 @@ Response `201`: `WardrobeItem`
 ```json
 { "items": WardrobeItem[] }
 ```
+
+### `PATCH /api/wardrobe/items/{id}`
+
+JSON body. All fields optional; omitted fields stay as they are.
+
+```json
+{
+  "category": "top",
+  "color": "white",
+  "cut": "regular fit",
+  "style": "smartCasual",
+  "description": "Crisp white cotton button-up with a pointed collar.",
+  "itemGender": "unisex"
+}
+```
+
+Response `200`: `WardrobeItem`
 
 ### `DELETE /api/wardrobe/items/{id}`
 

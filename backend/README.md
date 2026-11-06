@@ -28,14 +28,14 @@ The app runs without keys: wardrobe tagging uses filename/color heuristics, and 
 ## Run
 
 ```bash
-uvicorn app.main:app --reload --port 8000
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8018
 ```
 
-API: `http://127.0.0.1:8000`  
-Docs: `http://127.0.0.1:8000/docs`  
-Health: `http://127.0.0.1:8000/api/health`
+API: `http://127.0.0.1:8018`  
+Docs: `http://127.0.0.1:8018/docs`  
+Health: `http://127.0.0.1:8018/api/health`
 
-Frontend (Vite) should proxy `/api` to this origin. CORS allows `http://localhost:5173` and `http://127.0.0.1:5173`.
+Frontend (Vite) should proxy `/api` to this origin. CORS allows `http://localhost:1945` and `http://127.0.0.1:1945`. These ports are dedicated to USTyle so they do not collide with other local apps on 5173/8000.
 
 ## Optional Fashion_DB indexer
 

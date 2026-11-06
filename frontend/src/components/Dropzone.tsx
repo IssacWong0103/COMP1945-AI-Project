@@ -1,6 +1,8 @@
 import { useId, useState, type DragEvent, type ChangeEvent } from 'react'
 import { IMAGE_ACCEPT, isAllowedImage } from '../constants'
 
+type Variant = 'default' | 'hero' | 'bar'
+
 type Props = {
   id?: string
   label: string
@@ -8,6 +10,8 @@ type Props = {
   multiple?: boolean
   disabled?: boolean
   compact?: boolean
+  variant?: Variant
+  cta?: string
   onFiles: (files: File[]) => void
   onInvalid?: (names: string[]) => void
 }
@@ -19,6 +23,8 @@ export function Dropzone({
   multiple = false,
   disabled = false,
   compact = false,
+  variant = 'default',
+  cta,
   onFiles,
   onInvalid,
 }: Props) {
@@ -55,16 +61,21 @@ export function Dropzone({
     event.target.value = ''
   }
 
+  const tone = over ? 'border-navy bg-navy/5' : 'border-slate-300 bg-surface hover:border-navy/40 hover:bg-canvas'
+  const disabledClass = disabled ? 'cursor-not-allowed opacity-60' : ''
+
   return (
     <label
       htmlFor={inputId}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
-      className={`flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed text-center transition ${
-        compact ? 'px-4 py-6' : 'px-5 py-8'
-      } ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${
-        over ? 'border-navy bg-navy/5' : 'border-line bg-surface hover:border-navy/40 hover:bg-canvas'
+      className={`flex cursor-pointer text-center transition ${
+        variant === 'hero'
+          ? `flex-col items-center justify-center rounded-2xl border-2 border-dashed px-6 py-14 ${tone} ${disabledClass}`
+          : variant === 'bar'
+            ? `items-center justify-center rounded-2xl border border-dashed px-4 py-3.5 ${tone} ${disabledClass}`
+            : `flex-col items-center justify-center rounded-xl border border-dashed ${compact ? 'px-4 py-6' : 'px-5 py-8'} ${tone} ${disabledClass}`
       }`}
     >
       <input
@@ -76,21 +87,44 @@ export function Dropzone({
         disabled={disabled}
         onChange={onChange}
       />
-      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-canvas text-navy">
-        <UploadIcon />
-      </span>
-      <span className="mt-3 text-sm font-semibold text-ink">{label}</span>
-      {hint ? <span className="mt-1 text-sm text-muted">{hint}</span> : null}
-      <span className="mt-2 text-[11px] font-medium uppercase tracking-wide text-muted">
-        JPEG · PNG · WebP
-      </span>
+      {variant === 'bar' ? (
+        <span className="flex items-center gap-2 text-sm font-medium text-ink">
+          <UploadIcon className="h-4 w-4 text-navy" />
+          <span>
+            {label}
+            {hint ? <span className="font-normal text-muted">{` · ${hint}`}</span> : null}
+          </span>
+        </span>
+      ) : variant === 'hero' ? (
+        <>
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e8eef6] text-navy">
+            <UploadIcon className="h-5 w-5" />
+          </span>
+          <span className="mt-4 text-[15px] font-semibold text-ink">{label}</span>
+          {hint ? <span className="mt-1 text-sm text-muted">{hint}</span> : null}
+          <span className="mt-4 inline-flex rounded-lg bg-navy px-4 py-2 text-sm font-semibold text-white">
+            {cta || 'Choose photos'}
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-canvas text-navy">
+            <UploadIcon className="h-4 w-4" />
+          </span>
+          <span className="mt-3 text-sm font-semibold text-ink">{label}</span>
+          {hint ? <span className="mt-1 text-sm text-muted">{hint}</span> : null}
+          <span className="mt-2 text-[11px] font-medium uppercase tracking-wide text-muted">
+            JPEG · PNG · WebP
+          </span>
+        </>
+      )}
     </label>
   )
 }
 
-function UploadIcon() {
+function UploadIcon({ className = 'h-4 w-4' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+    <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden>
       <path d="M10 13.5V4M10 4 7 7M10 4l3 3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
       <path d="M4 13.5V16h12v-2.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     </svg>

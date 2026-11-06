@@ -10,7 +10,14 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import WardrobeItem
-from app.schemas import WardrobeItemOut, WardrobeListResponse
+from app.schemas import (
+    CATEGORIES,
+    ITEM_GENDERS,
+    PREFERRED_STYLES,
+    WardrobeItemOut,
+    WardrobeItemUpdate,
+    WardrobeListResponse,
+)
 from app.services.storage import local_path_for, save_upload
 from app.services.vlm import describe_garment
 
@@ -51,6 +58,55 @@ async def create_item(
 def list_items(db: Session = Depends(get_db)) -> WardrobeListResponse:
     rows = db.scalars(select(WardrobeItem).order_by(WardrobeItem.created_at.desc())).all()
     return WardrobeListResponse(items=[_to_out(row) for row in rows])
+
+
+@router.patch("/items/{item_id}", response_model=WardrobeItemOut)
+def update_item(
+    item_id: str,
+    payload: WardrobeItemUpdate,
+    db: Session = Depends(get_db),
+) -> WardrobeItemOut:
+    item = db.get(WardrobeItem, item_id)
+    if item is None:
+        raise HTTPException(status_code=404, detail="Wardrobe item not found.")
+
+    data = payload.model_dump(exclude_unset=True)
+    if "category" in data:
+        category = (data["category"] or "").strip()
+        if category not in CATEGORIES:
+            raise HTTPException(
+                status_code=400,
+                detail="Category must be top, bottom, outerwear, dress, shoes, or accessory.",
+            )
+        data["category"] = category
+    if "style" in data:
+        style = (data["style"] or "").strip()
+        if style not in PREFERRED_STYLES:
+            raise HTTPException(
+                status_code=400,
+                detail="Style must be casual, smart casual, streetwear, sporty, minimal, or formal.",
+            )
+        data["style"] = style
+    if "item_gender" in data:
+        gender = (data["item_gender"] or "").strip()
+        if gender not in ITEM_GENDERS:
+            raise HTTPException(
+                status_code=400,
+                detail="Fits must be male, female, or unisex.",
+            )
+        data["item_gender"] = gender
+    if "color" in data:
+        data["color"] = (data["color"] or "").strip()
+    if "cut" in data:
+        data["cut"] = (data["cut"] or "").strip()
+    if "description" in data:
+        data["description"] = (data["description"] or "").strip()
+
+    for key, value in data.items():
+        setattr(item, key, value)
+    db.commit()
+    db.refresh(item)
+    return _to_out(item)
 
 
 @router.delete("/items/{item_id}", status_code=204)
