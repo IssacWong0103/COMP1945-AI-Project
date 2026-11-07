@@ -69,7 +69,7 @@ export function Layout() {
       ) : null}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex w-[240px] flex-col bg-sidebar text-white transition-transform lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-svh w-[240px] flex-col bg-sidebar text-white transition-transform lg:translate-x-0 ${
           menuOpen ? 'translate-x-0' : 'max-lg:-translate-x-full'
         }`}
       >
@@ -127,7 +127,7 @@ export function Layout() {
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col lg:ml-[240px]">
         {flushHeader ? (
           <header className="sticky top-0 z-20 flex items-center gap-3 bg-canvas px-4 py-3 lg:hidden">
             <button
