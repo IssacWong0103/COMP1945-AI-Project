@@ -5,6 +5,7 @@ export type ActivityKind =
   | 'run_partial'
   | 'tryon_started'
   | 'tryon_ready'
+  | 'tryon_preview'
   | 'tryon_failed'
   | 'swap_applied'
   | 'look_saved'
@@ -108,6 +109,8 @@ export type LocalSavedLook = {
   overallScore: number
   createdAt: string
   thumbnailUrl: string | null
+  /** Set when the thumbnail is a try-on image. Collage must stay badged. */
+  thumbnailResultKind?: 'generated' | 'collage' | null
   items?: Array<{ id: string; category: string; imageUrl: string; description: string; color: string }>
 }
 

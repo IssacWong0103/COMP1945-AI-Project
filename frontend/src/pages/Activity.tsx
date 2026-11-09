@@ -11,6 +11,7 @@ const KIND_LABEL: Record<string, string> = {
   run_partial: 'Run',
   tryon_started: 'Try-on',
   tryon_ready: 'Try-on',
+  tryon_preview: 'Preview',
   tryon_failed: 'Try-on',
   swap_applied: 'Swap',
   look_saved: 'Looks',
