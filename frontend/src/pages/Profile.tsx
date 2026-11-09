@@ -39,7 +39,7 @@ export function Profile() {
   const [formEpoch, setFormEpoch] = useState(0)
 
   useEffect(() => {
-    document.title = 'Profile — USTyle'
+    document.title = 'Settings — USTyle'
   }, [])
 
   useEffect(() => {
@@ -154,7 +154,7 @@ export function Profile() {
         <div className="min-w-0">
           <h2 className="text-[26px] font-semibold tracking-tight text-ink">Profile</h2>
         </div>
-        <ButtonLink to="/dress-me" variant="secondary" className="rounded-xl px-4">
+        <ButtonLink to="/studio" variant="secondary" className="rounded-xl px-4">
           <PlusIcon />
           Create outfit
         </ButtonLink>

@@ -284,7 +284,7 @@ export function Closet() {
 
         <div className="text-right">
           <ButtonLink
-            to="/dress-me"
+            to="/studio"
             disabled={items.length === 0}
             className={
               items.length === 0
@@ -515,7 +515,7 @@ export function Closet() {
                   item={item}
                   onOpen={() => setSelectedId(item.id)}
                   onRequestDelete={() => setPendingDelete(item)}
-                  onBuild={() => navigate('/dress-me')}
+                  onBuild={() => navigate('/studio')}
                 />
               ))}
             </div>
@@ -859,7 +859,7 @@ function ItemDrawer({
             <button
               type="button"
               className="text-sm font-semibold text-navy hover:underline"
-              onClick={() => navigate('/dress-me')}
+              onClick={() => navigate('/studio')}
             >
               Build an outfit around this
             </button>

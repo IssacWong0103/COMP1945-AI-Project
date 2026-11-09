@@ -1,20 +1,44 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { getHealth, getProfile, listWardrobeItems } from '../api/client'
+import { listAlerts } from '../lib/activityStore'
+import { track } from '../lib/analytics'
 import { ConnectionBanner } from './ConnectionBanner'
 
-const LINKS = [
-  { to: '/', label: 'Home', end: true, icon: HomeIcon },
-  { to: '/wardrobe', label: 'Closet', end: false, icon: ClosetIcon },
-  { to: '/dress-me', label: 'Studio', end: false, icon: StudioIcon },
-  { to: '/profile', label: 'Me', end: false, icon: ProfileIcon },
-] as const
+type NavItem = {
+  to: string
+  label: string
+  end?: boolean
+  icon: () => ReactNode
+  section?: 'primary' | 'system'
+  badge?: number
+}
+
+const PRIMARY_LINKS: NavItem[] = [
+  { to: '/', label: 'Home', end: true, icon: HomeIcon, section: 'primary' },
+  { to: '/wardrobe', label: 'Closet', icon: ClosetIcon, section: 'primary' },
+  { to: '/studio', label: 'Studio', icon: StudioIcon, section: 'primary' },
+  { to: '/looks', label: 'Looks', icon: LooksIcon, section: 'primary' },
+  { to: '/try-on', label: 'Try-On', icon: TryOnIcon, section: 'primary' },
+]
+
+const SYSTEM_LINKS: NavItem[] = [
+  { to: '/activity', label: 'Activity', icon: ActivityIcon, section: 'system' },
+  { to: '/alerts', label: 'Alerts', icon: AlertsIcon, section: 'system' },
+  { to: '/settings', label: 'Settings', icon: SettingsIcon, section: 'system' },
+]
 
 const TITLES: Record<string, string> = {
   '/': 'Home',
   '/wardrobe': 'Closet',
+  '/studio': 'Studio',
   '/dress-me': 'Studio',
-  '/profile': 'Me',
+  '/looks': 'Looks',
+  '/try-on': 'Try-On',
+  '/activity': 'Activity',
+  '/alerts': 'Alerts',
+  '/settings': 'Settings',
+  '/profile': 'Settings',
 }
 
 export function Layout() {
@@ -22,11 +46,17 @@ export function Layout() {
   const [backendUp, setBackendUp] = useState<boolean | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [setupDone, setSetupDone] = useState<number | null>(null)
+  const [alertCount, setAlertCount] = useState(0)
   const isHome = location.pathname === '/'
-  const flushHeader = isHome || location.pathname === '/wardrobe' || location.pathname === '/profile'
+  const flushHeader =
+    isHome ||
+    location.pathname === '/wardrobe' ||
+    location.pathname === '/settings' ||
+    location.pathname === '/profile'
 
   useEffect(() => {
     setMenuOpen(false)
+    setAlertCount(listAlerts().length)
   }, [location.pathname])
 
   useEffect(() => {
@@ -72,6 +102,42 @@ export function Layout() {
   }, [location.pathname])
 
   const pageTitle = TITLES[location.pathname] ?? 'USTyle'
+  const systemLinks = SYSTEM_LINKS.map((link) =>
+    link.to === '/alerts' ? { ...link, badge: alertCount } : link,
+  )
+
+  function renderLink(link: NavItem) {
+    return (
+      <NavLink
+        key={link.to}
+        to={link.to}
+        end={link.end}
+        onClick={() => track('nav_tab_opened', { tab: link.label.toLowerCase() })}
+        className={({ isActive }) =>
+          `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium no-underline transition ${
+            isActive ? 'bg-navy text-white' : 'text-muted hover:bg-canvas hover:text-ink'
+          }`
+        }
+      >
+        {({ isActive }) => (
+          <>
+            <link.icon />
+            <span className="flex-1">{link.label}</span>
+            {link.badge ? (
+              <span
+                className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                  isActive ? 'bg-white/20 text-white' : 'bg-red-100 text-danger'
+                }`}
+              >
+                {link.badge}
+              </span>
+            ) : null}
+            {isActive ? <span className="h-4 w-[3px] rounded-full bg-gold" aria-hidden /> : null}
+          </>
+        )}
+      </NavLink>
+    )
+  }
 
   return (
     <div className="min-h-svh bg-canvas lg:flex">
@@ -110,27 +176,15 @@ export function Layout() {
           </div>
         </div>
 
-        <nav aria-label="Primary" className="flex flex-1 flex-col gap-1 px-3">
-          {LINKS.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.end}
-              className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium no-underline transition ${
-                  isActive ? 'bg-navy text-white' : 'text-muted hover:bg-canvas hover:text-ink'
-                }`
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <link.icon />
-                  <span className="flex-1">{link.label}</span>
-                  {isActive ? <span className="h-4 w-[3px] rounded-full bg-gold" aria-hidden /> : null}
-                </>
-              )}
-            </NavLink>
-          ))}
+        <nav aria-label="Primary" className="flex flex-1 flex-col gap-1 overflow-y-auto px-3 pb-4">
+          <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            Create
+          </p>
+          {PRIMARY_LINKS.map(renderLink)}
+          <p className="mt-4 px-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
+            System
+          </p>
+          {systemLinks.map(renderLink)}
         </nav>
 
         <div className="px-5 pb-5">
@@ -148,7 +202,15 @@ export function Layout() {
               backendUp ? 'text-success' : backendUp === false ? 'text-danger' : 'text-muted'
             }`}
           >
-            {backendUp ? <CheckIcon /> : <span className={`h-2 w-2 rounded-full ${backendUp === false ? 'bg-red-400' : 'bg-slate-300'}`} />}
+            {backendUp ? (
+              <CheckIcon />
+            ) : (
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  backendUp === false ? 'bg-red-400' : 'bg-slate-300'
+                }`}
+              />
+            )}
             {backendUp ? 'API connected' : backendUp === false ? 'API offline' : 'Checking API…'}
           </p>
           <p className="mt-2 text-[11px] text-muted">Group 18</p>
@@ -180,7 +242,9 @@ export function Layout() {
                 <MenuIcon />
               </button>
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-muted">Workspace</p>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-muted">
+                  Workspace
+                </p>
                 <h1 className="text-base font-semibold text-ink">{pageTitle}</h1>
               </div>
             </div>
@@ -264,12 +328,61 @@ function StudioIcon() {
   )
 }
 
-function ProfileIcon() {
+function LooksIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <circle cx="10" cy="7.2" r="2.5" stroke="currentColor" strokeWidth="1.5" />
       <path
-        d="M4.8 16c.7-2.5 2.6-3.8 5.2-3.8s4.5 1.3 5.2 3.8"
+        d="M4 6.5h12v9.2A1.3 1.3 0 0 1 14.7 17H5.3A1.3 1.3 0 0 1 4 15.7V6.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      />
+      <path d="M7 6.5V5.2A1.2 1.2 0 0 1 8.2 4h3.6A1.2 1.2 0 0 1 13 5.2V6.5" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function TryOnIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <circle cx="10" cy="5.5" r="2.2" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M5.5 16.5v-2.2c0-2.1 2-3.8 4.5-3.8s4.5 1.7 4.5 3.8v2.2"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function ActivityIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <path d="M3.5 10h3l2-4.5 3 9 2-4.5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function AlertsIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <path
+        d="M10 3.5 16.5 15H3.5L10 3.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M10 8.2v3.2M10 13.4h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function SettingsIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <circle cx="10" cy="10" r="2.4" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M10 3.4v1.4M10 15.2v1.4M3.4 10h1.4M15.2 10h1.4M5.3 5.3l1 1M13.7 13.7l1 1M14.7 5.3l-1 1M6.3 13.7l-1 1"
         stroke="currentColor"
         strokeWidth="1.5"
         strokeLinecap="round"
@@ -282,7 +395,13 @@ function CheckIcon() {
   return (
     <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden>
       <circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth="1.4" />
-      <path d="M5.2 8.1 7.1 10l3.7-4.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M5.2 8.1 7.1 10l3.7-4.2"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }

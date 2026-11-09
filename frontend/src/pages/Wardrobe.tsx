@@ -634,7 +634,7 @@ function ItemDrawer({
           <button
             type="button"
             className="mt-3 w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm font-semibold text-ink hover:bg-canvas"
-            onClick={() => navigate('/dress-me')}
+            onClick={() => navigate('/studio')}
           >
             Build an outfit around this
           </button>

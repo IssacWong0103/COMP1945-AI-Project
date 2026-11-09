@@ -74,7 +74,7 @@ export function Home() {
       <div className="flex items-start justify-between gap-4">
         <h1 className="text-[28px] font-semibold tracking-tight text-navy">Home</h1>
         {loading ? null : setupComplete ? (
-          <ButtonLink to="/dress-me" className="whitespace-nowrap rounded-full px-4">
+          <ButtonLink to="/studio" className="whitespace-nowrap rounded-full px-4">
             <PlusIcon />
             Create outfit
           </ButtonLink>
@@ -124,14 +124,14 @@ export function Home() {
           <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatusCard to="/wardrobe" icon={<ShirtIcon />} label="Closet" value={pieceLabel} />
             <StatusCard
-              to="/profile"
+              to="/settings"
               icon={<ScanIcon />}
               label="Body photo"
               value={hasPhoto ? 'Ready for try-on' : 'Not added'}
             />
-            <StatusCard to="/profile" icon={<PersonIcon />} label="Profile" value={`${filledCount} of 5 filled`} />
+            <StatusCard to="/settings" icon={<PersonIcon />} label="Settings" value={`${filledCount} of 5 filled`} />
             <StatusCard
-              to="/profile"
+              to="/settings"
               icon={<SlidersIcon />}
               label="Preferred style"
               value={profile?.preferredStyle ? humanize(profile.preferredStyle) : 'Not set'}
@@ -191,7 +191,7 @@ export function Home() {
             <section className="mt-8">
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-[17px] font-semibold text-navy">Saved looks</h3>
-                <Link to="/dress-me" className="text-sm font-semibold text-navy no-underline hover:underline">
+                <Link to="/studio" className="text-sm font-semibold text-navy no-underline hover:underline">
                   View all
                 </Link>
               </div>
@@ -199,7 +199,7 @@ export function Home() {
                 {looks.map((look) => (
                   <Link
                     key={look.id}
-                    to={`/dress-me?venue=${encodeURIComponent(look.venue)}`}
+                    to={`/studio?venue=${encodeURIComponent(look.venue)}`}
                     className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-3 no-underline shadow-sm transition hover:border-navy/20"
                   >
                     <span className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-[#ddd3c4]">
@@ -273,7 +273,7 @@ function ReadyHero() {
           return (
             <Link
               key={venue.id}
-              to={`/dress-me?venue=${encodeURIComponent(venue.id)}`}
+              to={`/studio?venue=${encodeURIComponent(venue.id)}`}
               className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-3 text-sm font-medium text-ink no-underline transition hover:border-navy/30 hover:bg-canvas"
             >
               <span className="text-navy">

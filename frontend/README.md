@@ -29,6 +29,14 @@ If the backend is down, a banner reads: **Backend not running on port 8018**.
 ## Pages
 
 - `/` — Home
-- `/wardrobe` — Upload and manage clothing photos
-- `/you` — Full-body photo and profile
-- `/dress-me` — Venue picker, outfit recommendations, virtual try-on
+- `/wardrobe` — Closet (upload and manage clothing photos)
+- `/studio` — Plan, create outfits, try-on, swap, save
+- `/looks` — Saved looks gallery
+- `/try-on` — Try-on session history
+- `/activity` — Recent Studio actions
+- `/alerts` — API / run / render failures
+- `/settings` — Body photo, fit attrs, preferred style
+
+Legacy redirects: `/dress-me` → `/studio`, `/profile` and `/you` → `/settings`.
+
+Engineering handoff: `docs/STUDIO_ENGINEERING_SPEC.md`.

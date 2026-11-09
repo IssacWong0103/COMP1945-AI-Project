@@ -228,6 +228,97 @@ If generation is still running: `{ "outfitId", "tryOnUrl": null, "status": "proc
 
 If failed: HTTP 502 with `{ "detail": "..." }`
 
+### `GET /api/outfits`
+
+Recent generated/saved looks gallery (camelCase).
+
+Response `200`:
+
+```json
+{ "looks": SavedLook[] }
+```
+
+```ts
+type SavedLook = {
+  id: string;
+  venue: string;
+  overallScore: number;
+  createdAt: string;       // ISO-8601
+  thumbnailUrl: string | null;
+};
+```
+
+---
+
+## Studio pipeline contracts (BA handoff)
+
+These map UI Studio actions to services. Current product uses `POST /api/recommend` as the run creator. Future async run APIs below are optional extensions — frontend already models the state machine for them.
+
+### Run create (current)
+
+`POST /api/recommend` is the Studio **Create outfits** pipeline.
+
+Partial success: return fewer than requested outfits and set `warning`.
+
+Failure: non-2xx with `{ "detail": "..." }`.
+
+### Run status (future / optional)
+
+`GET /api/studio/runs/{runId}`
+
+```json
+{
+  "runId": "...",
+  "status": "queued|running|partial|completed|failed",
+  "outfits": Outfit[],
+  "warning": null,
+  "elapsedMs": 1200
+}
+```
+
+### Swap a piece (future / optional)
+
+`POST /api/studio/swaps`
+
+```json
+{
+  "outfitId": "...",
+  "slot": "top",
+  "replacementItemId": "...",
+  "constraints": { "keepVenue": true }
+}
+```
+
+Response `200`:
+
+```json
+{ "outfit": Outfit }
+```
+
+Until this endpoint ships, the frontend applies swaps client-side from `GET /api/wardrobe/items` candidates of the same category.
+
+### Save look (current hybrid)
+
+- Generation already persists outfits via recommend.
+- Explicit “Save look” also stores a local gallery entry for Looks tab reliability.
+- Future: `POST /api/looks` with `{ "outfitId": "..." }`.
+
+### Try-on (current)
+
+`POST /api/try-on` + client poll until `status=ready` or timeout/502.
+
+---
+
+## Error → recovery mapping
+
+| HTTP | Studio recovery |
+|------|-----------------|
+| network / TypeError | offline panel + Alerts |
+| 400 / 422 | adjust inputs |
+| 502 try-on | try-on failed + Retry |
+| 200 + warning | partial results + Retry missing looks |
+| 200 + empty outfits | failure + Add clothes |
+
 ---
 
 ## Static files

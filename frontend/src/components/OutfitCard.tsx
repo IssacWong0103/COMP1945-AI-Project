@@ -1,54 +1,31 @@
-import { useEffect, useRef, useState } from 'react'
-import { apiUrl, friendlyError, pollTryOn } from '../api/client'
+import { apiUrl } from '../api/client'
 import { humanize } from '../constants'
 import type { Outfit } from '../types'
 import { Button } from './Button'
 import { Chip } from './Chip'
-import { ErrorNote } from './ErrorNote'
 import { ScoreBar } from './ScoreBar'
-import { Spinner } from './Spinner'
 
 type Props = {
   outfit: Outfit
   index: number
+  tryOnUrl?: string | null
+  onTryOn?: () => void
+  onSwap?: () => void
+  onSave?: () => void
+  saved?: boolean
 }
 
-export function OutfitCard({ outfit, index }: Props) {
+export function OutfitCard({
+  outfit,
+  index,
+  tryOnUrl,
+  onTryOn,
+  onSwap,
+  onSave,
+  saved,
+}: Props) {
   const look = index + 1
-  const [tryOnUrl, setTryOnUrl] = useState(outfit.tryOnUrl)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [elapsed, setElapsed] = useState(0)
-  const abortRef = useRef<AbortController | null>(null)
-
-  useEffect(() => {
-    return () => abortRef.current?.abort()
-  }, [])
-
-  useEffect(() => {
-    if (!busy) return
-    const started = Date.now()
-    const id = window.setInterval(() => setElapsed((Date.now() - started) / 1000), 200)
-    return () => window.clearInterval(id)
-  }, [busy])
-
-  async function onTryOn() {
-    abortRef.current?.abort()
-    const ctrl = new AbortController()
-    abortRef.current = ctrl
-    setError(null)
-    setBusy(true)
-    setElapsed(0)
-    try {
-      const result = await pollTryOn(outfit.id, { signal: ctrl.signal })
-      setTryOnUrl(result.tryOnUrl)
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return
-      setError(friendlyError(err))
-    } finally {
-      setBusy(false)
-    }
-  }
+  const preview = tryOnUrl || outfit.tryOnUrl
 
   return (
     <article className="flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-sm">
@@ -59,27 +36,37 @@ export function OutfitCard({ outfit, index }: Props) {
         </p>
       </header>
 
-      <div className="grid grid-cols-3 gap-2">
-        {outfit.items.map((item) => (
-          <figure key={item.id} className="overflow-hidden rounded-lg bg-canvas">
-            {item.imageUrl ? (
-              <img
-                src={apiUrl(item.imageUrl)}
-                alt={item.description || humanize(item.category)}
-                className="aspect-[3/4] w-full object-cover"
-              />
-            ) : (
-              <div className="flex aspect-[3/4] items-end bg-navy p-2 text-[10px] font-medium uppercase tracking-wide text-white">
+      {preview ? (
+        <div className="mb-3 overflow-hidden rounded-lg border border-line">
+          <img
+            src={apiUrl(preview)}
+            alt={`Try-on preview for outfit ${look}`}
+            className="aspect-[3/4] w-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-2">
+          {outfit.items.map((item) => (
+            <figure key={item.id} className="overflow-hidden rounded-lg bg-canvas">
+              {item.imageUrl ? (
+                <img
+                  src={apiUrl(item.imageUrl)}
+                  alt={item.description || humanize(item.category)}
+                  className="aspect-[3/4] w-full object-cover"
+                />
+              ) : (
+                <div className="flex aspect-[3/4] items-end bg-navy p-2 text-[10px] font-medium uppercase tracking-wide text-white">
+                  {humanize(item.category)}
+                </div>
+              )}
+              <figcaption className="truncate px-1.5 py-1.5 text-[11px] text-muted">
                 {humanize(item.category)}
-              </div>
-            )}
-            <figcaption className="truncate px-1.5 py-1.5 text-[11px] text-muted">
-              {humanize(item.category)}
-              {item.color ? ` · ${item.color}` : ''}
-            </figcaption>
-          </figure>
-        ))}
-      </div>
+                {item.color ? ` · ${item.color}` : ''}
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      )}
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {outfit.items.map((item) => (
@@ -95,41 +82,25 @@ export function OutfitCard({ outfit, index }: Props) {
 
       <p className="mt-4 flex-1 text-sm leading-relaxed text-muted">{outfit.rationale}</p>
 
-      <div className="mt-4">
-        <Button type="button" className="w-full" disabled={busy} onClick={() => void onTryOn()}>
-          {busy ? `Rendering try-on · ${elapsed.toFixed(0)}s` : 'Virtual try-on'}
-        </Button>
+      <div className="mt-4 grid gap-2">
+        {onTryOn ? (
+          <Button type="button" className="w-full" onClick={onTryOn}>
+            Try on
+          </Button>
+        ) : null}
+        <div className="grid grid-cols-2 gap-2">
+          {onSwap ? (
+            <Button type="button" variant="secondary" onClick={onSwap}>
+              Swap a piece
+            </Button>
+          ) : null}
+          {onSave ? (
+            <Button type="button" variant="secondary" onClick={onSave} disabled={saved}>
+              {saved ? 'Saved' : 'Save look'}
+            </Button>
+          ) : null}
+        </div>
       </div>
-
-      {busy ? (
-        <div className="mt-3">
-          <Spinner
-            label={
-              elapsed < 8
-                ? 'Generating try-on image…'
-                : elapsed < 20
-                  ? 'Still rendering — usually under 20s.'
-                  : 'Taking longer than usual. Hang on.'
-            }
-          />
-        </div>
-      ) : null}
-
-      {error ? (
-        <div className="mt-3">
-          <ErrorNote message={error} title="Try-on failed" />
-        </div>
-      ) : null}
-
-      {tryOnUrl ? (
-        <div className="mt-4 overflow-hidden rounded-xl border border-line">
-          <img
-            src={apiUrl(tryOnUrl)}
-            alt={`Virtual try-on for outfit ${look}`}
-            className="aspect-[3/4] w-full object-cover"
-          />
-        </div>
-      ) : null}
     </article>
   )
 }
