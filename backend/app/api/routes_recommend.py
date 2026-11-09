@@ -45,7 +45,13 @@ def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> Recom
         _persist(db, outfit, payload.venue)
     db.commit()
     elapsed_ms = int((perf_counter() - started) * 1000)
-    return RecommendResponse(outfits=outfits, elapsed_ms=elapsed_ms, warning=warning)
+    # Fashion-photo text search is not wired yet; reference_outfits.json stays the catalog.
+    return RecommendResponse(
+        outfits=outfits,
+        elapsed_ms=elapsed_ms,
+        warning=warning,
+        search_mode="simpleFallback",
+    )
 
 
 def _thumbnail(items_json: str) -> str | None:

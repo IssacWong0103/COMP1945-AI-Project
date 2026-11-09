@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_serializer, model_validator
 from pydantic.alias_generators import to_camel
 
 Venue = Literal["lecture", "careerFair", "casualDate", "hallGathering", "formal"]
@@ -19,6 +19,16 @@ PreferredStyle = Literal[
     "formal",
 ]
 Category = Literal["top", "bottom", "outerwear", "dress", "shoes", "accessory"]
+SearchMode = Literal["textThenPhotos", "simpleFallback"]
+TryOnStatus = Literal["ready", "processing", "failed"]
+TryOnResultKind = Literal["generated", "collage"]
+TryOnFallbackReason = Literal[
+    "local_images_not_public",
+    "provider_error",
+    "timeout",
+    "missing_key",
+    "missing_inputs",
+]
 
 VENUES: tuple[Venue, ...] = (
     "lecture",
@@ -154,12 +164,27 @@ class OutfitOut(CamelModel):
     overall_score: float = Field(ge=0, le=1)
     rationale: str
     try_on_url: str | None = None
+    # Wording or id for the chosen look. Omitted until a fashion-photo text catalog is wired in.
+    style_reference: str | None = None
+
+    @model_serializer(mode="wrap")
+    def _omit_empty_style_reference(self, handler, _info):
+        data = handler(self)
+        if not isinstance(data, dict):
+            return data
+        reference = (self.style_reference or "").strip()
+        if not reference:
+            data.pop("styleReference", None)
+            data.pop("style_reference", None)
+        return data
 
 
 class RecommendResponse(CamelModel):
     outfits: list[OutfitOut]
     elapsed_ms: int
     warning: str | None = None
+    # simpleFallback until matching can search a fashion-photo text catalog, then textThenPhotos.
+    search_mode: SearchMode | None = "simpleFallback"
 
 
 class SavedLookOut(CamelModel):
@@ -176,9 +201,22 @@ class SavedLookListResponse(CamelModel):
 
 class TryOnRequest(CamelModel):
     outfit_id: str
+    # True only when the student asked to "Show a local preview instead."
+    accept_preview: bool = False
 
 
 class TryOnResponse(CamelModel):
     outfit_id: str
     try_on_url: str | None
-    status: str
+    status: TryOnStatus
+    # Required whenever status is ready and tryOnUrl is present.
+    result_kind: TryOnResultKind | None = None
+    fallback_reason: TryOnFallbackReason | None = None
+    style_reference_url: str | None = None
+    detail: str | None = None
+
+    @model_validator(mode="after")
+    def ready_image_names_its_kind(self) -> TryOnResponse:
+        if self.status == "ready" and self.try_on_url and not self.result_kind:
+            raise ValueError("resultKind is required when status is ready and tryOnUrl is set")
+        return self

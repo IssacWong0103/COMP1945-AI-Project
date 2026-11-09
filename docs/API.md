@@ -95,6 +95,8 @@ type OutfitItemRef = {
   imageUrl: string;
 };
 
+type SearchMode = "textThenPhotos" | "simpleFallback";
+
 type Outfit = {
   id: string;
   items: OutfitItemRef[];
@@ -103,6 +105,26 @@ type Outfit = {
   overallScore: number;      // 0-1
   rationale: string;
   tryOnUrl: string | null;
+  styleReference?: string;   // optional wording or id; omitted until a text catalog is wired
+};
+
+type TryOnResultKind = "generated" | "collage";
+
+type TryOnFallbackReason =
+  | "local_images_not_public"
+  | "provider_error"
+  | "timeout"
+  | "missing_key"
+  | "missing_inputs";
+
+type TryOnResponse = {
+  outfitId: string;
+  tryOnUrl: string | null;
+  status: "ready" | "processing" | "failed";
+  resultKind?: TryOnResultKind | null;       // required when status is ready and tryOnUrl is set
+  fallbackReason?: TryOnFallbackReason | null;
+  styleReferenceUrl?: string | null;
+  detail?: string | null;                    // short drawer copy, especially on failure
 };
 
 type VenueInfo = {
@@ -202,31 +224,70 @@ Response `200`:
 ```json
 {
   "outfits": Outfit[],
-  "elapsedMs": 1234
+  "elapsedMs": 1234,
+  "searchMode": "simpleFallback"
 }
 ```
 
 Return **2 or 3** outfits. If wardrobe is too small, still return what is possible and include a `warning` string field (optional).
 
+`searchMode` is optional in the contract and is one of `textThenPhotos` or `simpleFallback`. Until a fashion-photo text catalog is wired into matching, the server returns `simpleFallback` and **omits** `styleReference` on each outfit. Do not invent reference wording. The seeded `backend/app/data/reference_outfits.json` path stays as it is. When text-then-photo search exists, `searchMode` may be `textThenPhotos` and an outfit may include `styleReference` (wording or id for the chosen look).
+
 ### `POST /api/try-on`
 
 ```json
-{ "outfitId": "..." }
+{ "outfitId": "...", "acceptPreview": false }
 ```
 
-Response `200`:
+`acceptPreview` is optional and defaults to `false`. Set it to `true` only when the student tapped “Show a local preview instead.” The server may then return a local collage even if the provider cannot run (including `missing_key` or a public-URL misconfig). If `acceptPreview` is `false` or omitted, a collage is never returned as a successful try-on.
+
+Success and expected provider/config failures use the **same** `TryOnResponse` shape and **HTTP 200**:
 
 ```json
 {
   "outfitId": "...",
-  "tryOnUrl": "https://...",
-  "status": "ready"
+  "tryOnUrl": "/uploads/tryon/....jpg",
+  "status": "ready",
+  "resultKind": "generated",
+  "fallbackReason": null,
+  "styleReferenceUrl": null,
+  "detail": null
 }
 ```
 
-If generation is still running: `{ "outfitId", "tryOnUrl": null, "status": "processing" }`
+| Field | When |
+| --- | --- |
+| `status` | `ready`, `processing`, or `failed` |
+| `resultKind` | `generated` or `collage`. **Required** whenever `status` is `ready` and `tryOnUrl` is present. `collage` is a local preview, not a generated try-on. |
+| `fallbackReason` | Optional. `local_images_not_public`, `provider_error`, `timeout`, `missing_key`, or `missing_inputs`. |
+| `styleReferenceUrl` | Optional URL for the look’s style reference, when one exists. |
+| `detail` | Optional short string for the try-on drawer. On failure it distinguishes Retry from “Show a local preview instead.” |
 
-If failed: HTTP 502 with `{ "detail": "..." }`
+Expected generation/config failures (`missing_key`, `provider_error`, `timeout`, `local_images_not_public` when `acceptPreview` is not true, `missing_inputs` after a well-formed request) return HTTP 200:
+
+```json
+{
+  "outfitId": "...",
+  "tryOnUrl": null,
+  "status": "failed",
+  "resultKind": null,
+  "fallbackReason": "missing_key",
+  "styleReferenceUrl": null,
+  "detail": "No try-on provider key is configured. Retry after it is set, or show a local preview instead."
+}
+```
+
+Do **not** use HTTP 502 for those cases.
+
+When `acceptPreview` is true and the provider cannot run, the server may return HTTP 200 with `status: "ready"`, `resultKind: "collage"`, a local `tryOnUrl`, the `fallbackReason`, and a `detail` that says it is a local preview. A missing key does not by itself return that collage.
+
+`processing` means a provider job was accepted and is not finished when the server responds (`tryOnUrl` null). Clients should call `POST /api/try-on` again with the same `outfitId`. This server waits for the provider inside the request; if that wait elapses, the response is `failed` with `fallbackReason: "timeout"` instead of HTTP 502 or a collage. A later retry resumes the same provider task when one is still in flight.
+
+Cached ready try-ons persist `resultKind` (and fallback metadata) and return that kind on a later hit. A cached collage is returned only when `acceptPreview` is true, still marked `resultKind: "collage"`. A ready row saved before `resultKind` existed is not served as a successful try-on.
+
+HTTP **400** for bad requests: no body photo, unknown or invalid `outfitId`, outfit with no garments, and similar validation errors. Body is `{ "detail": "..." }`.
+
+HTTP **5xx** only when this server itself errors. HTTP 422 remains the framework response for a body that does not match the schema (for example `acceptPreview` not a boolean).
 
 ### `GET /api/outfits`
 
@@ -305,7 +366,12 @@ Until this endpoint ships, the frontend applies swaps client-side from `GET /api
 
 ### Try-on (current)
 
-`POST /api/try-on` + client poll until `status=ready` or timeout/502.
+`POST /api/try-on` + client poll until `status` is `ready` or `failed`.
+
+- `ready` + `resultKind: "generated"` — provider image.
+- `ready` + `resultKind: "collage"` — local preview. Only when the request set `acceptPreview: true` (including a later cache hit of that preview).
+- `failed` + `fallbackReason` + `detail` — expected provider/config failure, still HTTP 200. `detail` tells Retry apart from “Show a local preview instead.”
+- HTTP 400 — bad request. HTTP 5xx — this server errored. Do not treat `missing_key` or a public-URL misconfig as HTTP 502, and do not show those as a generated try-on.
 
 ---
 
@@ -315,7 +381,9 @@ Until this endpoint ships, the frontend applies swaps client-side from `GET /api
 |------|-----------------|
 | network / TypeError | offline panel + Alerts |
 | 400 / 422 | adjust inputs |
-| 502 try-on | try-on failed + Retry |
+| 200 try-on `status: "failed"` | try-on drawer failed; `detail` distinguishes Retry from “Show a local preview instead” |
+| 200 try-on `resultKind: "collage"` | local preview, not a generated try-on |
+| 5xx | this server errored; retry |
 | 200 + warning | partial results + Retry missing looks |
 | 200 + empty outfits | failure + Add clothes |
 
