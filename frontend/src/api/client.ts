@@ -4,6 +4,7 @@ import type {
   RecommendRequest,
   RecommendResponse,
   SavedLook,
+  TryOnRequest,
   TryOnResponse,
   VenueInfo,
   WardrobeItem,
@@ -179,11 +180,14 @@ export async function recommend(payload: RecommendRequest): Promise<RecommendRes
 export async function tryOn(
   outfitId: string,
   signal?: AbortSignal,
+  options?: { acceptPreview?: boolean },
 ): Promise<TryOnResponse> {
+  const body: TryOnRequest = { outfitId }
+  if (options?.acceptPreview) body.acceptPreview = true
   const res = await fetch('/api/try-on', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ outfitId }),
+    body: JSON.stringify(body),
     signal,
   })
   return parseJson<TryOnResponse>(res)
@@ -206,26 +210,45 @@ function delay(ms: number, signal?: AbortSignal): Promise<void> {
 
 export async function pollTryOn(
   outfitId: string,
-  options?: { intervalMs?: number; timeoutMs?: number; signal?: AbortSignal },
+  options?: {
+    intervalMs?: number
+    timeoutMs?: number
+    signal?: AbortSignal
+    acceptPreview?: boolean
+  },
 ): Promise<TryOnResponse> {
   const intervalMs = options?.intervalMs ?? 2000
   const timeoutMs = options?.timeoutMs ?? 90_000
   const signal = options?.signal
   const deadline = Date.now() + timeoutMs
+  const failedFallback =
+    'The try-on did not finish. Retry, or show a local preview instead.'
 
   for (;;) {
-    const result = await tryOn(outfitId, signal)
+    const result = await tryOn(outfitId, signal, { acceptPreview: options?.acceptPreview })
     if (result.status === 'ready') {
-      if (!result.tryOnUrl) {
+      const kindKnown = result.resultKind === 'generated' || result.resultKind === 'collage'
+      if (!result.tryOnUrl || !kindKnown) {
         throw new ApiError(
-          'The try-on finished but no image came back. Try another look.',
-          502,
+          result.detail?.trim() ||
+            'The try-on finished but no usable image came back. Retry, or show a local preview instead.',
+          200,
+        )
+      }
+      if (result.resultKind === 'collage' && !options?.acceptPreview) {
+        throw new ApiError(
+          result.detail?.trim() ||
+            'This image is a local preview, not a generated try-on. Retry, or show a local preview instead.',
+          200,
         )
       }
       return result
     }
+    if (result.status === 'failed') {
+      throw new ApiError(result.detail?.trim() || failedFallback, 200)
+    }
     if (result.status !== 'processing') {
-      throw new ApiError('The try-on studio returned an unexpected status. Try again.', 502)
+      throw new ApiError(result.detail?.trim() || failedFallback, 200)
     }
     if (Date.now() >= deadline) {
       throw new ApiError(

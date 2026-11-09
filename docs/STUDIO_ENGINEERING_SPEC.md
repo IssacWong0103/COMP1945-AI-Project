@@ -60,7 +60,7 @@ Source: `frontend/src/studio/eventPipeline.ts`
 |----------|---------|------------|------------|
 | Create outfits | `POST /api/recommend` | Result cards | RecoveryPanel failure |
 | Retry | same | results/partial | failure |
-| Try on | `POST /api/try-on` + poll | TryOnDrawer ready | TryOnDrawer failed |
+| Try on | `POST /api/try-on` + poll | TryOnDrawer ready (`resultKind: generated`, or `collage` only if `acceptPreview`) | TryOnDrawer failed (`status: failed`, HTTP 200, `detail`) |
 | Swap a piece | wardrobe candidates (+ optional future `/api/studio/swaps`) | Outfit card updates | Drawer inline error |
 | Save look | local save + `/api/outfits` gallery | Saved badge + Looks | Inline error |
 | Saved looks tab | navigate `/looks` | Gallery | Empty/error |
@@ -98,8 +98,8 @@ Never trap users in a dead-end modal. Always expose one progressive action.
 
 ### Try-on drawer (`12`)
 - States: idle → rendering → ready | failed.
-- Ready: Download, Save look, Close.
-- Failed: Retry.
+- Ready: Download, Save look, Close. A `resultKind` of `collage` is a local preview, not a generated try-on. The server only returns that preview when the request set `acceptPreview: true`.
+- Failed: Retry. Expected provider/config failures are HTTP 200 with `status: "failed"`, `fallbackReason`, and `detail` (so Retry is distinct from “Show a local preview instead”). See `docs/API.md`.
 
 ### Swap drawer (`13`)
 - Slot chips from outfit categories.

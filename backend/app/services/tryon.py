@@ -3,8 +3,10 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from dataclasses import dataclass
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 from PIL import Image, ImageDraw, ImageFont
@@ -181,6 +183,94 @@ class TryOnFailed(Exception):
     pass
 
 
+FAILURE_DETAIL = {
+    "missing_key": (
+        "No try-on provider key is configured. Retry after it is set, "
+        "or show a local preview instead."
+    ),
+    "local_images_not_public": (
+        "These photos are not on a public URL, so the provider cannot fetch them. "
+        "Retry once they are reachable, or show a local preview instead."
+    ),
+    "missing_inputs": (
+        "This request does not include enough photos for the provider. "
+        "Retry, or show a local preview instead."
+    ),
+    "provider_error": (
+        "The try-on provider could not generate an image. "
+        "Retry, or show a local preview instead."
+    ),
+    "timeout": (
+        "The try-on provider timed out. Retry, or show a local preview instead."
+    ),
+}
+
+PREVIEW_DETAIL = {
+    "missing_key": "Local preview only. The try-on provider key is not configured.",
+    "local_images_not_public": "Local preview only. Input photos are not on a public URL.",
+    "missing_inputs": "Local preview only. Not enough photos for the provider.",
+    "provider_error": "Local preview only. The try-on provider returned an error.",
+    "timeout": "Local preview only. The try-on provider timed out.",
+}
+
+
+@dataclass
+class TryOnResult:
+    status: str
+    try_on_url: str | None
+    task_id: str | None = None
+    result_kind: str | None = None
+    fallback_reason: str | None = None
+    detail: str | None = None
+    style_reference_url: str | None = None
+
+
+def _public_image_url(image_url: str) -> str | None:
+    raw = image_url.strip()
+    if not raw:
+        return None
+    url = public_url_for(raw)
+    if not url:
+        return None
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        return None
+    if parsed.path in {"", "/"}:
+        return None
+    return url
+
+
+def _collect_input_urls(body_photo_url: str | None, garments: list[dict]) -> list[str]:
+    urls: list[str] = []
+    body = _public_image_url(body_photo_url or "")
+    if body:
+        urls.append(body)
+    for item in garments:
+        raw = str(item.get("imageUrl") or item.get("image_url") or "")
+        url = _public_image_url(raw)
+        if url:
+            urls.append(url)
+    return urls
+
+
+def tryon_block_reason(body_photo_url: str | None, garments: list[dict]) -> str | None:
+    """Why kie.ai cannot run, or None when the provider call is possible.
+
+    missing_key wins over a public-URL misconfig so the first setup gap is reported.
+    The body photo has to be one of the public input URLs. Local uploads without a
+    public origin are local_images_not_public, not a ready collage.
+    """
+    if not settings.kie_api_key.strip():
+        return "missing_key"
+    body = _public_image_url(body_photo_url or "")
+    urls = _collect_input_urls(body_photo_url, garments)
+    if body and len(urls) >= 2:
+        return None
+    if not settings.public_uploads_reachable():
+        return "local_images_not_public"
+    return "missing_inputs"
+
+
 def _parse_result_urls(payload: dict) -> str | None:
     data = payload.get("data") or payload
     result_json = data.get("resultJson") if isinstance(data, dict) else None
@@ -285,6 +375,41 @@ async def _download_result(url: str, stem: str) -> str:
         return save_jpeg_bytes(data, "tryon", stem=stem)
 
 
+def _blocked_result(
+    reason: str,
+    *,
+    accept_preview: bool,
+    body_path: Path | None,
+    garments: list[dict],
+    stem: str,
+    task_id: str | None,
+    style_reference_url: str | None,
+) -> TryOnResult:
+    """Collage only when the student asked for a local preview. Otherwise status failed."""
+    if accept_preview:
+        url = save_fallback_collage(body_path, garments, stem=stem)
+        logger.info("Returning local try-on preview (%s)", reason)
+        return TryOnResult(
+            status="ready",
+            try_on_url=url,
+            task_id=task_id,
+            result_kind="collage",
+            fallback_reason=reason,
+            detail=PREVIEW_DETAIL.get(reason),
+            style_reference_url=style_reference_url,
+        )
+    logger.info("Try-on provider unavailable (%s); not returning a collage", reason)
+    return TryOnResult(
+        status="failed",
+        try_on_url=None,
+        task_id=task_id,
+        result_kind=None,
+        fallback_reason=reason,
+        detail=FAILURE_DETAIL.get(reason),
+        style_reference_url=style_reference_url,
+    )
+
+
 async def generate_tryon(
     *,
     outfit_id: str,
@@ -295,13 +420,19 @@ async def generate_tryon(
     height_cm: float | None = None,
     weight_kg: float | None = None,
     existing_task_id: str | None = None,
-) -> tuple[str, str | None, str | None]:
+    accept_preview: bool = False,
+    style_reference_url: str | None = None,
+) -> TryOnResult:
     """
-    Returns (status, try_on_url, kie_task_id).
-    status is 'ready' or 'processing'.
+    Returns a try-on outcome.
+
+    status is ready or failed. result_kind is generated or collage whenever a URL
+    is returned. A collage is ready only when accept_preview is true. If the
+    provider wait elapses, status is failed and fallback_reason is timeout.
     """
     body_path = local_path_for(body_photo_url or "")
     stem = f"{outfit_id}"
+    reference = (style_reference_url or "").strip() or None
     prompt = build_tryon_prompt(
         garments,
         gender=gender,
@@ -310,32 +441,58 @@ async def generate_tryon(
         weight_kg=weight_kg,
     )
 
-    can_call_kie = bool(settings.kie_api_key.strip()) and settings.public_uploads_reachable()
-    input_urls: list[str] = []
-    if can_call_kie:
-        body_public = public_url_for(body_photo_url or "")
-        if body_public:
-            input_urls.append(body_public)
-        for item in garments:
-            url = public_url_for(str(item.get("imageUrl") or item.get("image_url") or ""))
-            if url:
-                input_urls.append(url)
-        if len(input_urls) < 2:
-            can_call_kie = False
-
-    if not can_call_kie:
-        logger.info("Using PIL try-on collage (missing KIE key or public image URLs)")
-        url = save_fallback_collage(body_path, garments, stem=stem)
-        return "ready", url, None
+    reason = tryon_block_reason(body_photo_url, garments)
+    input_urls = _collect_input_urls(body_photo_url, garments)
+    if reason:
+        return _blocked_result(
+            reason,
+            accept_preview=accept_preview,
+            body_path=body_path,
+            garments=garments,
+            stem=stem,
+            task_id=existing_task_id,
+            style_reference_url=reference,
+        )
 
     try:
         task_id = existing_task_id or await _create_kie_task(prompt, input_urls)
         result_url = await _poll_kie_task(task_id)
         local_url = await _download_result(result_url, stem=stem)
-        return "ready", local_url, task_id
+        return TryOnResult(
+            status="ready",
+            try_on_url=local_url,
+            task_id=task_id,
+            result_kind="generated",
+            style_reference_url=reference,
+        )
     except TryOnPending as pending:
-        return "processing", None, pending.task_id
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("kie.ai try-on failed (%s); using collage fallback", exc)
-        url = save_fallback_collage(body_path, garments, stem=stem)
-        return "ready", url, existing_task_id
+        return _blocked_result(
+            "timeout",
+            accept_preview=accept_preview,
+            body_path=body_path,
+            garments=garments,
+            stem=stem,
+            task_id=pending.task_id,
+            style_reference_url=reference,
+        )
+    except (httpx.TimeoutException, TimeoutError):
+        return _blocked_result(
+            "timeout",
+            accept_preview=accept_preview,
+            body_path=body_path,
+            garments=garments,
+            stem=stem,
+            task_id=existing_task_id,
+            style_reference_url=reference,
+        )
+    except (httpx.HTTPError, TryOnFailed) as exc:
+        logger.warning("kie.ai try-on failed (%s)", type(exc).__name__)
+        return _blocked_result(
+            "provider_error",
+            accept_preview=accept_preview,
+            body_path=body_path,
+            garments=garments,
+            stem=stem,
+            task_id=existing_task_id,
+            style_reference_url=reference,
+        )
