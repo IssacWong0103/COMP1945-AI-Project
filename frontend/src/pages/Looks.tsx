@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { apiUrl, friendlyError, listSavedLooks } from '../api/client'
+import { friendlyError, listSavedLooks } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
+import { ResultImage } from '../components/LocalPreviewBadge'
 import { ErrorNote } from '../components/ErrorNote'
 import { Spinner } from '../components/Spinner'
 import { StudioShell } from '../components/StudioShell'
@@ -21,6 +22,7 @@ type LookCard = {
   overallScore: number
   createdAt: string
   thumbnailUrl: string | null
+  thumbnailResultKind?: 'generated' | 'collage' | null
   source: 'local' | 'api'
 }
 
@@ -63,6 +65,7 @@ export function Looks() {
         overallScore: look.overallScore,
         createdAt: look.createdAt,
         thumbnailUrl: look.thumbnailUrl,
+        thumbnailResultKind: look.thumbnailResultKind ?? null,
         source: 'local',
       })
     }
@@ -74,6 +77,7 @@ export function Looks() {
         overallScore: look.overallScore,
         createdAt: look.createdAt,
         thumbnailUrl: look.thumbnailUrl,
+        thumbnailResultKind: null,
         source: 'api',
       })
     }
@@ -119,9 +123,14 @@ export function Looks() {
           <article key={look.id} className="rounded-xl border border-line bg-surface p-4 shadow-sm">
             <div className="overflow-hidden rounded-lg bg-canvas">
               {look.thumbnailUrl ? (
-                <img
-                  src={apiUrl(look.thumbnailUrl)}
-                  alt=""
+                <ResultImage
+                  src={look.thumbnailUrl}
+                  alt={
+                    look.thumbnailResultKind === 'collage'
+                      ? 'Local preview, not a generated try-on'
+                      : ''
+                  }
+                  resultKind={look.thumbnailResultKind}
                   className="aspect-[4/5] w-full object-cover"
                 />
               ) : (

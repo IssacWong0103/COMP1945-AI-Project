@@ -12,6 +12,7 @@ export type AnalyticsEventName =
   | 'studio_swap_applied'
   | 'studio_tryon_started'
   | 'studio_tryon_ready'
+  | 'studio_tryon_preview'
   | 'studio_tryon_failed'
   | 'studio_look_saved'
   | 'studio_retry_clicked'
@@ -52,7 +53,7 @@ export function clearAnalyticsBuffer() {
 /** Success metrics used by Activity / QA dashboards. */
 export const STUDIO_SUCCESS_METRICS = [
   { id: 'run_completion_rate', label: 'Run completion rate', formula: 'completed / started' },
-  { id: 'tryon_success_rate', label: 'Try-on success rate', formula: 'ready / started' },
+  { id: 'tryon_success_rate', label: 'Try-on success rate', formula: 'ready / started (preview is not ready)' },
   { id: 'swap_apply_rate', label: 'Swap apply rate', formula: 'applied / opened' },
   { id: 'save_rate', label: 'Save rate', formula: 'saved / completed_runs' },
   { id: 'retry_rate', label: 'Retry rate', formula: 'retries / failed_or_partial' },

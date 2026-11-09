@@ -59,6 +59,26 @@ export type OutfitItemRef = {
 
 export type SearchMode = 'textThenPhotos' | 'simpleFallback'
 
+export type TryOnResultKind = 'generated' | 'collage'
+
+export type TryOnFallbackReason =
+  | 'local_images_not_public'
+  | 'provider_error'
+  | 'timeout'
+  | 'missing_key'
+  | 'missing_inputs'
+
+/**
+ * Catalog shape from the UX contract. The API on this branch still sends a
+ * string (wording or id) and omits the field entirely in simpleFallback.
+ */
+export type StyleReference = {
+  id: string
+  imageUrl: string
+  label?: string
+  reason?: string
+}
+
 export type Outfit = {
   id: string
   items: OutfitItemRef[]
@@ -67,8 +87,16 @@ export type Outfit = {
   overallScore: number
   rationale: string
   tryOnUrl: string | null
-  /** Wording or id for the chosen look. Omitted until a text catalog is wired. */
-  styleReference?: string
+  /**
+   * Branch contract: optional wording or id. A later catalog may send
+   * StyleReference. Omitted until that catalog is wired — do not invent one.
+   */
+  styleReference?: string | StyleReference
+  /** Client-only. Set from the last try-on so a collage is not shown as generated. */
+  tryOnResultKind?: TryOnResultKind | null
+  tryOnFallbackReason?: TryOnFallbackReason | null
+  tryOnDetail?: string | null
+  tryOnStyleReferenceUrl?: string | null
 }
 
 export type VenueInfo = {
@@ -87,11 +115,24 @@ export type RecommendRequest = {
   preferredStyle?: string
 }
 
+/** Optional run-status values if recommend later becomes a longer async run. */
+export type StudioRunStatus =
+  | 'queued'
+  | 'running'
+  | 'searchingText'
+  | 'reviewingPhotos'
+  | 'buildingOutfits'
+  | 'partial'
+  | 'completed'
+  | 'failed'
+
 export type RecommendResponse = {
   outfits: Outfit[]
   elapsedMs: number
   warning?: string | null
   searchMode?: SearchMode
+  /** Not sent by the current recommend endpoint. Read if a run poll adds it. */
+  runStatus?: StudioRunStatus
 }
 
 export type SavedLook = {
@@ -101,15 +142,6 @@ export type SavedLook = {
   createdAt: string
   thumbnailUrl: string | null
 }
-
-export type TryOnResultKind = 'generated' | 'collage'
-
-export type TryOnFallbackReason =
-  | 'local_images_not_public'
-  | 'provider_error'
-  | 'timeout'
-  | 'missing_key'
-  | 'missing_inputs'
 
 export type TryOnRequest = {
   outfitId: string

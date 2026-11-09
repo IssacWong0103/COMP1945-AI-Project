@@ -14,7 +14,7 @@ export function TryOnPage() {
   const sessions = useMemo(
     () =>
       listActivity(40).filter((item) =>
-        ['tryon_started', 'tryon_ready', 'tryon_failed'].includes(item.kind),
+        ['tryon_started', 'tryon_ready', 'tryon_preview', 'tryon_failed'].includes(item.kind),
       ),
     [],
   )
@@ -33,7 +33,7 @@ export function TryOnPage() {
           <li>Create outfits in Studio.</li>
           <li>Press Try on on a result card.</li>
           <li>Wait for rendering (you can keep browsing).</li>
-          <li>Download, save, or retry if it fails.</li>
+          <li>Download or save a generated try-on. A local preview is labeled and is not that photo.</li>
         </ol>
       </div>
 
@@ -52,7 +52,14 @@ export function TryOnPage() {
             {sessions.map((item) => (
               <li key={item.id} className="flex items-start justify-between gap-3 px-4 py-3">
                 <div>
-                  <p className="text-sm font-medium text-ink">{item.title}</p>
+                  <p className="text-sm font-medium text-ink">
+                    {item.title}
+                    {item.kind === 'tryon_preview' ? (
+                      <span className="ml-2 inline-flex rounded-md bg-ink px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wide text-white">
+                        Local preview
+                      </span>
+                    ) : null}
+                  </p>
                   {item.detail ? <p className="text-xs text-muted">{item.detail}</p> : null}
                 </div>
                 <time className="shrink-0 text-xs text-muted">

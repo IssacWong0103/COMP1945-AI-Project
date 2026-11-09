@@ -1,14 +1,18 @@
 import { apiUrl } from '../api/client'
 import { humanize } from '../constants'
-import type { Outfit } from '../types'
+import { normalizeStyleReference } from '../studio/studioCopy'
+import type { Outfit, TryOnResultKind } from '../types'
 import { Button } from './Button'
 import { Chip } from './Chip'
+import { ResultImage } from './LocalPreviewBadge'
 import { ScoreBar } from './ScoreBar'
 
 type Props = {
   outfit: Outfit
   index: number
   tryOnUrl?: string | null
+  resultKind?: TryOnResultKind | null
+  rendering?: boolean
   onTryOn?: () => void
   onSwap?: () => void
   onSave?: () => void
@@ -19,13 +23,17 @@ export function OutfitCard({
   outfit,
   index,
   tryOnUrl,
+  resultKind,
+  rendering,
   onTryOn,
   onSwap,
   onSave,
   saved,
 }: Props) {
   const look = index + 1
-  const preview = tryOnUrl || outfit.tryOnUrl
+  const kind = resultKind ?? outfit.tryOnResultKind ?? null
+  const preview = kind === 'generated' || kind === 'collage' ? tryOnUrl || outfit.tryOnUrl : null
+  const reference = normalizeStyleReference(outfit.styleReference)
 
   return (
     <article className="flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-sm">
@@ -38,11 +46,19 @@ export function OutfitCard({
 
       {preview ? (
         <div className="mb-3 overflow-hidden rounded-lg border border-line">
-          <img
-            src={apiUrl(preview)}
-            alt={`Try-on preview for outfit ${look}`}
+          <ResultImage
+            src={preview}
+            alt={
+              kind === 'collage'
+                ? `Local preview for outfit ${look}, not a generated try-on`
+                : `Generated try-on for outfit ${look}`
+            }
+            resultKind={kind}
             className="aspect-[3/4] w-full object-cover"
           />
+          {kind === 'collage' ? (
+            <p className="px-2 py-1.5 text-xs text-ink">This is a preview, not a generated try-on.</p>
+          ) : null}
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-2">
@@ -67,6 +83,27 @@ export function OutfitCard({
           ))}
         </div>
       )}
+
+      {reference ? (
+        <div className="mt-3 flex gap-2.5 rounded-lg border border-line bg-canvas p-2">
+          {reference.imageUrl ? (
+            <img
+              src={apiUrl(reference.imageUrl)}
+              alt=""
+              className="h-14 w-11 shrink-0 rounded-md object-cover"
+            />
+          ) : null}
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-navy">Inspired by</p>
+            {reference.label || reference.id ? (
+              <p className="text-sm font-semibold text-ink">{reference.label || reference.id}</p>
+            ) : null}
+            {reference.reason ? <p className="text-xs leading-relaxed text-ink">{reference.reason}</p> : null}
+          </div>
+        </div>
+      ) : null}
+
+      {rendering ? <p className="mt-3 text-xs font-medium text-navy">Rendering try-on…</p> : null}
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {outfit.items.map((item) => (

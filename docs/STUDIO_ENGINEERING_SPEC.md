@@ -98,8 +98,10 @@ Never trap users in a dead-end modal. Always expose one progressive action.
 
 ### Try-on drawer (`12`)
 - States: idle → rendering → ready | failed.
-- Ready: Download, Save look, Close. A `resultKind` of `collage` is a local preview, not a generated try-on. The server only returns that preview when the request set `acceptPreview: true`.
-- Failed: Retry. Expected provider/config failures are HTTP 200 with `status: "failed"`, `fallbackReason`, and `detail` (so Retry is distinct from “Show a local preview instead”). See `docs/API.md`.
+- States: idle, rendering, ready-generated, ready-collage, failed.
+- Ready generated: Download, Save look, Close. This is the only state that fires `studio_tryon_ready`.
+- Ready collage: badge **Local preview** on the image, plus “This is a preview, not a generated try-on.” The server only returns that preview when the request set `acceptPreview: true`. Fires `studio_tryon_preview`, not `studio_tryon_ready`. The same badge is used on result cards, Looks, and the Try-On tab.
+- Failed: Retry is the primary action. HTTP 200 with `status: "failed"`, `fallbackReason`, and `detail` stays in this drawer (it is not “Studio is unreachable”). `provider_error`, `timeout`, `missing_key`, `missing_inputs`, and `local_images_not_public` can offer “Show a local preview instead”, which retries with `acceptPreview: true`. See `docs/API.md`.
 
 ### Swap drawer (`13`)
 - Slot chips from outfit categories.
@@ -118,7 +120,7 @@ Source: `frontend/src/lib/analytics.ts`
 
 Required events:
 - `studio_run_started|completed|failed|partial`
-- `studio_tryon_started|ready|failed`
+- `studio_tryon_started|ready|preview|failed` (`preview` is a collage, not a successful try-on)
 - `studio_swap_opened|applied`
 - `studio_look_saved`
 - `studio_retry_clicked`

@@ -2,6 +2,15 @@
  * Standardized recovery UX for partial / failure / offline Studio states.
  */
 
+import {
+  recoveryCopyForApiError,
+  SERVER_UNREACHABLE_MESSAGE,
+  SERVER_UNREACHABLE_TITLE,
+  type ApiRecoveryContext,
+} from './studioCopy'
+
+export type { ApiRecoveryContext }
+
 export type RecoveryKind = 'success' | 'partial' | 'failure' | 'offline' | 'emptyCloset' | 'noBodyPhoto'
 
 export type RecoveryAction = {
@@ -30,8 +39,8 @@ export function resolveRecovery(input: {
   if (input.offline) {
     return {
       kind: 'offline',
-      title: "We can't reach the USTyle server",
-      message: 'Check that the API is running, then retry. Your closet edits stay local until reconnect.',
+      title: SERVER_UNREACHABLE_TITLE,
+      message: SERVER_UNREACHABLE_MESSAGE,
       primary: { id: 'retry', label: 'Retry connection' },
       secondary: { id: 'openAlerts', label: 'Open alerts', to: '/alerts' },
     }
@@ -78,21 +87,19 @@ export function resolveRecovery(input: {
   return null
 }
 
-export function mapApiErrorToRecovery(status: number, detail: string): RecoverySpec {
-  if (status === 0 || status === 502) {
-    return {
-      kind: 'offline',
-      title: 'Studio is unreachable',
-      message: detail || 'The styling studio had a moment. Give it another go.',
-      primary: { id: 'retry', label: 'Retry' },
-      secondary: { id: 'openAlerts', label: 'Open alerts', to: '/alerts' },
-    }
-  }
+export function mapApiErrorToRecovery(
+  status: number,
+  detail: string,
+  context?: ApiRecoveryContext,
+): RecoverySpec {
+  const copy = recoveryCopyForApiError(status, detail, context)
   return {
-    kind: 'failure',
-    title: "Couldn't create outfits",
-    message: detail,
-    primary: { id: 'retry', label: 'Retry' },
-    secondary: { id: 'adjust', label: 'Adjust inputs' },
+    kind: copy.kind,
+    title: copy.title,
+    message: copy.message,
+    primary: { id: 'retry', label: copy.primaryLabel },
+    secondary: copy.secondary
+      ? { id: copy.secondary.id, label: copy.secondary.label, to: copy.secondary.to }
+      : undefined,
   }
 }
