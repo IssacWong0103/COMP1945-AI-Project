@@ -14,7 +14,7 @@ from app.schemas import CATEGORIES, ITEM_GENDERS, PREFERRED_STYLES, Category, It
 
 logger = logging.getLogger(__name__)
 
-DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions"
+DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 DEEPSEEK_MODEL = "deepseek-flash"
 
 SYSTEM_PROMPT = """You are a clothing cataloguer for USTyle, a campus outfit assistant for HKUST students.
@@ -346,6 +346,7 @@ async def describe_garment(
     body = {
         "model": DEEPSEEK_MODEL,
         "temperature": 0.2,
+        "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
             {
