@@ -1,28 +1,29 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
-import { getHealth } from '../api/client'
+import { getHealth, getProfile, listWardrobeItems } from '../api/client'
 import { ConnectionBanner } from './ConnectionBanner'
 
 const LINKS = [
-  { to: '/', label: 'Home', end: true, icon: DashboardIcon },
+  { to: '/', label: 'Home', end: true, icon: HomeIcon },
   { to: '/wardrobe', label: 'Closet', end: false, icon: ClosetIcon },
-  { to: '/dress-me', label: 'Studio', end: false, icon: GenerateIcon },
-  { to: '/you', label: 'Me', end: false, icon: ProfileIcon },
+  { to: '/dress-me', label: 'Studio', end: false, icon: StudioIcon },
+  { to: '/profile', label: 'Me', end: false, icon: ProfileIcon },
 ] as const
 
 const TITLES: Record<string, string> = {
   '/': 'Home',
   '/wardrobe': 'Closet',
   '/dress-me': 'Studio',
-  '/you': 'Me',
+  '/profile': 'Me',
 }
 
 export function Layout() {
   const location = useLocation()
   const [backendUp, setBackendUp] = useState<boolean | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [setupDone, setSetupDone] = useState<number | null>(null)
   const isHome = location.pathname === '/'
-  const flushHeader = isHome || location.pathname === '/wardrobe' || location.pathname === '/you'
+  const flushHeader = isHome || location.pathname === '/wardrobe' || location.pathname === '/profile'
 
   useEffect(() => {
     setMenuOpen(false)
@@ -48,6 +49,28 @@ export function Layout() {
     }
   }, [])
 
+  useEffect(() => {
+    let cancelled = false
+    async function loadSetup() {
+      try {
+        const [items, profile] = await Promise.all([listWardrobeItems(), getProfile()])
+        if (cancelled) return
+        const done = [
+          items.length >= 2,
+          Boolean(profile.bodyPhotoUrl),
+          Boolean(profile.heightCm && profile.preferredStyle),
+        ].filter(Boolean).length
+        setSetupDone(done)
+      } catch {
+        if (!cancelled) setSetupDone(null)
+      }
+    }
+    void loadSetup()
+    return () => {
+      cancelled = true
+    }
+  }, [location.pathname])
+
   const pageTitle = TITLES[location.pathname] ?? 'USTyle'
 
   return (
@@ -69,17 +92,17 @@ export function Layout() {
       ) : null}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-40 flex h-svh w-[240px] flex-col bg-sidebar text-white transition-transform lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-40 flex h-svh w-[240px] flex-col border-r border-line bg-white transition-transform lg:translate-x-0 ${
           menuOpen ? 'translate-x-0' : 'max-lg:-translate-x-full'
         }`}
       >
         <div className="flex items-center gap-3 px-5 pt-6 pb-7">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-gold text-lg font-bold text-navy">
-            U
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-navy text-white">
+            <LogoShirtIcon />
           </span>
           <div className="min-w-0 leading-tight">
-            <p className="text-[15px] font-semibold tracking-tight">USTyle</p>
-            <p className="mt-0.5 text-[11px] leading-snug text-white/55">
+            <p className="text-[15px] font-semibold tracking-tight text-navy">USTyle</p>
+            <p className="mt-0.5 text-[11px] leading-snug text-muted">
               HKUST student outfit
               <br />
               assistant
@@ -95,35 +118,40 @@ export function Layout() {
               end={link.end}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium no-underline transition ${
-                  isActive ? 'bg-white/12 text-white' : 'text-white/70 hover:bg-white/8 hover:text-white'
+                  isActive ? 'bg-navy text-white' : 'text-muted hover:bg-canvas hover:text-ink'
                 }`
               }
             >
-              <link.icon />
-              {link.label}
+              {({ isActive }) => (
+                <>
+                  <link.icon />
+                  <span className="flex-1">{link.label}</span>
+                  {isActive ? <span className="h-4 w-[3px] rounded-full bg-gold" aria-hidden /> : null}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
-        <div className="px-3 pb-3">
-          <div className="rounded-xl bg-white/8 px-3.5 py-3">
-            <p className="flex items-center gap-2 text-sm font-medium">
-              <span
-                className={`h-2 w-2 rounded-full ${
-                  backendUp ? 'bg-emerald-400' : backendUp === false ? 'bg-red-400' : 'bg-white/40'
-                }`}
-              />
-              {backendUp ? 'API connected' : backendUp === false ? 'API offline' : 'Checking API…'}
-            </p>
-            <p className="mt-0.5 pl-4 text-[12px] text-white/50">
-              {backendUp
-                ? 'Your workspace is connected'
-                : backendUp === false
-                  ? 'Your workspace is offline'
-                  : 'Checking workspace…'}
-            </p>
-          </div>
-          <p className="px-1 pt-3 text-[11px] text-white/40">Group 18 · COMP1945</p>
+        <div className="px-5 pb-5">
+          {setupDone !== null && setupDone < 3 ? (
+            <div className="mb-6">
+              <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted">
+                Setup · {setupDone} of 3 done
+              </p>
+              <div className="mt-2 h-px bg-line" />
+              <p className="mt-2 text-[12px] text-muted">A little setup, easier mornings.</p>
+            </div>
+          ) : null}
+          <p
+            className={`flex items-center gap-2 text-sm font-medium ${
+              backendUp ? 'text-success' : backendUp === false ? 'text-danger' : 'text-muted'
+            }`}
+          >
+            {backendUp ? <CheckIcon /> : <span className={`h-2 w-2 rounded-full ${backendUp === false ? 'bg-red-400' : 'bg-slate-300'}`} />}
+            {backendUp ? 'API connected' : backendUp === false ? 'API offline' : 'Checking API…'}
+          </p>
+          <p className="mt-2 text-[11px] text-muted">Group 18</p>
         </div>
       </aside>
 
@@ -185,13 +213,30 @@ function MenuIcon() {
   )
 }
 
-function DashboardIcon() {
+function LogoShirtIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-5 w-5" fill="none" aria-hidden>
+      <path
+        d="M7.1 4.6 10 7.2 12.9 4.6 16.2 7v8.8H3.8V7L7.1 4.6Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M10 7.2v8.6" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function HomeIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <rect x="3" y="3" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10.8" y="3" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="10.8" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10.8" y="10.8" width="6.2" height="6.2" rx="1.3" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M3.6 9.2 10 3.8 16.4 9.2V16c0 .7-.5 1.2-1.2 1.2H4.8A1.2 1.2 0 0 1 3.6 16V9.2Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M8 17.2v-4.4h4v4.4" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -210,16 +255,11 @@ function ClosetIcon() {
   )
 }
 
-function GenerateIcon() {
+function StudioIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <path
-        d="M10 3.2 11.15 7.1 15 8.2 11.15 9.3 10 13.2 8.85 9.3 5 8.2l3.85-1.1L10 3.2Z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
-      <path d="M14.6 12.4v3.2M13 14h3.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      <rect x="3.2" y="4" width="13.6" height="12" rx="1.6" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8.2 4v12M3.2 9.2h5" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   )
 }
@@ -234,6 +274,15 @@ function ProfileIcon() {
         strokeWidth="1.5"
         strokeLinecap="round"
       />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" aria-hidden>
+      <circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M5.2 8.1 7.1 10l3.7-4.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

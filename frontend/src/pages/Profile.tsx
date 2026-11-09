@@ -19,6 +19,9 @@ const EMPTY: ProfileData = {
 const FIELD =
   'w-full appearance-none rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink outline-none transition focus:border-navy [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
 
+const BADGE =
+  'inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-semibold'
+
 export function Profile() {
   const photoInputId = useId()
   const [profile, setProfile] = useState<ProfileData>(EMPTY)
@@ -36,7 +39,7 @@ export function Profile() {
   const [formEpoch, setFormEpoch] = useState(0)
 
   useEffect(() => {
-    document.title = 'Me — USTyle'
+    document.title = 'Profile — USTyle'
   }, [])
 
   useEffect(() => {
@@ -93,7 +96,7 @@ export function Profile() {
     })
   }
 
-  function onDrop(event: DragEvent<HTMLLabelElement>) {
+  function onDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
     const file = event.dataTransfer.files[0]
     if (file) takeFile(file)
@@ -149,14 +152,16 @@ export function Profile() {
     <div className="mx-auto max-w-6xl">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <h2 className="text-[26px] font-semibold tracking-tight text-ink">Me</h2>
-          <p className="mt-1 max-w-xl text-sm text-muted">
-            Your photo and preferences. Only used to help style your own clothes.
-          </p>
+          <h2 className="text-[26px] font-semibold tracking-tight text-ink">Profile</h2>
         </div>
-        <ButtonLink to="/dress-me" className="rounded-xl px-4">
+        <ButtonLink to="/dress-me" variant="secondary" className="rounded-xl px-4">
+          <PlusIcon />
           Create outfit
         </ButtonLink>
+      </div>
+      <div className="mt-6">
+        <h3 className="text-[34px] font-semibold tracking-tight text-navy">A little about you</h3>
+        <p className="mt-1 text-sm text-muted">Make try-on more useful. Every attribute is optional.</p>
       </div>
 
       {loading ? (
@@ -167,29 +172,56 @@ export function Profile() {
         <form onSubmit={onSubmit} className="mt-6">
           <div className="grid gap-4 lg:grid-cols-12">
             <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm lg:col-span-5">
-              <h3 className="text-[15px] font-semibold text-ink">Your full-body photo</h3>
-              <label
-                htmlFor={photoInputId}
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-[28px] font-semibold tracking-tight text-navy">Your full-body photo</h3>
+                <span
+                  className={`${BADGE} ${
+                    shownPhoto ? 'border-emerald-200 bg-emerald-50 text-success' : 'border-line bg-canvas text-muted'
+                  }`}
+                >
+                  {shownPhoto ? (
+                    <>
+                      <CheckMiniIcon />
+                      Photo added
+                    </>
+                  ) : (
+                    'Optional'
+                  )}
+                </span>
+              </div>
+              <div
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={onDrop}
-                className="mt-4 block cursor-pointer overflow-hidden rounded-xl bg-canvas"
+                className="mt-4 overflow-hidden rounded-xl border-2 border-dashed border-line bg-canvas p-3"
               >
                 {shownPhoto ? (
                   <img
                     src={shownPhoto}
                     alt="Full-body photo for virtual try-on"
-                    className="aspect-[3/4] w-full object-cover"
+                    className="aspect-[3/4] w-full rounded-lg object-cover"
                   />
                 ) : (
-                  <div className="flex aspect-[3/4] flex-col items-center justify-center gap-2 px-6 text-center">
+                  <div className="flex aspect-[3/4] flex-col items-center justify-center px-6 text-center">
                     <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-navy shadow-sm">
                       <PersonIcon />
                     </span>
-                    <p className="text-sm font-semibold text-ink">Add a full-body photo</p>
-                    <p className="text-xs text-muted">Stand straight, even lighting, full figure in frame.</p>
+                    <p className="mt-3 text-[32px] font-semibold tracking-tight text-navy">No photo yet</p>
+                    <label
+                      htmlFor={photoInputId}
+                      className={`mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-deep ${
+                        saving ? 'pointer-events-none opacity-60' : ''
+                      }`}
+                    >
+                      <UploadIcon />
+                      Upload photo
+                    </label>
+                    <p className="mt-2 text-xs text-muted">JPEG, PNG or WebP</p>
+                    <p className="mt-3 max-w-[250px] text-xs text-muted">
+                      Stand straight - Use even light. Show your full figure - Keep shoes in frame.
+                    </p>
                   </div>
                 )}
-              </label>
+              </div>
               <input
                 id={photoInputId}
                 type="file"
@@ -203,44 +235,48 @@ export function Profile() {
                 }}
               />
 
-              {meta ? (
-                <p className="mt-3 text-xs text-muted">
-                  {meta.name} · {meta.kind}
-                </p>
+              {shownPhoto && meta ? (
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-ink">{meta.name}</p>
+                    <p className="text-xs text-muted">{meta.kind} · Full-body photo</p>
+                  </div>
+                  <label
+                    htmlFor={photoInputId}
+                    className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-semibold text-navy transition hover:bg-canvas ${
+                      saving ? 'pointer-events-none opacity-60' : ''
+                    }`}
+                  >
+                    <ReplaceIcon />
+                    Replace photo
+                  </label>
+                </div>
               ) : null}
-
-              <div className="mt-3">
-                <label
-                  htmlFor={photoInputId}
-                  className="inline-flex cursor-pointer rounded-xl border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink transition hover:bg-canvas"
-                >
-                  {shownPhoto ? 'Replace photo' : 'Upload photo'}
-                </label>
+              <div className="mt-3 rounded-xl bg-canvas px-3 py-2.5">
+                <p className="flex items-start gap-2 text-xs text-muted">
+                  <span className="mt-0.5 text-navy">
+                    <ShieldIcon />
+                  </span>
+                  Your photo is only used for virtual try-on. It is not shared or shown as a public profile.
+                </p>
               </div>
-              <p className="mt-2 text-xs text-muted">JPEG, PNG or WebP</p>
-              <hr className="my-4 border-line" />
-              <p className="text-xs leading-relaxed text-muted">
-                Your photo is only used for virtual try-on. It is not shared or shown as a public profile.
-              </p>
             </section>
 
             <section className="rounded-2xl border border-line bg-surface p-5 shadow-sm lg:col-span-7">
-              <h3 className="text-[15px] font-semibold text-ink">A little about you</h3>
-              <div className="mt-2 flex items-center justify-between gap-3">
-                <p className="text-xs text-muted">
-                  {filled} of 5 filled — height and style matter most
-                </p>
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-[28px] font-semibold tracking-tight text-navy">Your attributes</h3>
+                <span className={`${BADGE} border-transparent bg-canvas text-muted`}>All optional</span>
               </div>
+              <p className="mt-2 text-sm text-muted">{filled} of 5 filled - height and style matter most</p>
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
                 <div
                   className="h-full rounded-full bg-gold transition-all"
                   style={{ width: `${(filled / 5) * 100}%` }}
                 />
               </div>
-              <p className="mt-3 text-sm text-muted">All optional. You can create outfits without these.</p>
-
-              <div className="mt-5 grid gap-4">
-                <Field label="Height" htmlFor="heightCm" hint="Helps proportions in try-on. Range: 100–250 cm.">
+              <div className="mt-4 grid gap-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Height · cm" htmlFor="heightCm" hint="Helps proportions in try-on.">
                   <div className="relative">
                     <input
                       id="heightCm"
@@ -255,16 +291,13 @@ export function Profile() {
                         setHeightCm(event.target.value)
                         setSaved(false)
                       }}
-                      className={`${FIELD} pr-12`}
-                      placeholder="178"
+                      className={FIELD}
+                      placeholder="-"
                     />
-                    <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">
-                      cm
-                    </span>
                   </div>
                 </Field>
 
-                <Field label="Weight" htmlFor="weightKg" hint="Helps fit in try-on. Range: 30–200 kg.">
+                <Field label="Weight · kg" htmlFor="weightKg" hint="Helps fit in try-on.">
                   <div className="relative">
                     <input
                       id="weightKg"
@@ -279,14 +312,13 @@ export function Profile() {
                         setWeightKg(event.target.value)
                         setSaved(false)
                       }}
-                      className={`${FIELD} pr-12`}
-                      placeholder="68"
+                      className={FIELD}
+                      placeholder="-"
                     />
-                    <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-sm text-muted">
-                      kg
-                    </span>
                   </div>
                 </Field>
+                </div>
+                <p className="mt-1 text-xs text-muted">Height 100-250 cm · Weight 30-200 kg</p>
 
                 <Field label="Gender" htmlFor="gender" hint="Helps suggest suitable pieces.">
                   <div className="relative">
@@ -300,7 +332,7 @@ export function Profile() {
                       }}
                       className={`${FIELD} pr-10`}
                     >
-                      <option value="">Select</option>
+                      <option value="">Select gender</option>
                       {GENDER_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
                           {option.label}
@@ -318,9 +350,8 @@ export function Profile() {
                     name="skinTone"
                     value={skinTone}
                     options={SKIN_TONE_OPTIONS}
-                    placeholder="Select"
+                    placeholder="Select skin tone"
                     customPlaceholder="e.g. olive with warm undertone"
-                    customHint="Presets are a starting point. Your own words go to try-on as a colour hint."
                     onChange={(next) => {
                       setSkinTone(next)
                       setSaved(false)
@@ -336,9 +367,8 @@ export function Profile() {
                     name="preferredStyle"
                     value={preferredStyle}
                     options={STYLE_OPTIONS}
-                    placeholder="Select"
+                    placeholder="Select style"
                     customPlaceholder="e.g. dark academia, preppy, Y2K"
-                    customHint="Presets help match tagged clothes. Custom words are a soft hint, not a hard filter."
                     onChange={(next) => {
                       setPreferredStyle(next)
                       setSaved(false)
@@ -347,6 +377,10 @@ export function Profile() {
                   />
                 </Field>
               </div>
+              <p className="mt-4 text-xs text-muted">
+                Gender: Male / Female / Non-binary / Prefer not to say Skin tone: Fair / Light / Medium / Tan / Deep
+                Style: Casual / Smart casual / Streetwear / Sporty / Minimal / Formal
+              </p>
             </section>
           </div>
 
@@ -357,8 +391,11 @@ export function Profile() {
           ) : null}
 
           {dirty ? (
-            <div className="sticky bottom-4 z-10 mt-4 flex flex-col gap-3 rounded-2xl border border-line bg-surface px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-ink">You have unsaved changes</p>
+            <div className="sticky bottom-4 z-10 mt-4 flex flex-col gap-3 rounded-2xl border border-amber-200 bg-surface px-4 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+              <p className="flex items-center gap-2 text-sm font-medium text-ink">
+                <WarningDotIcon />
+                You have unsaved changes
+              </p>
               <div className="flex items-center justify-end gap-2">
                 <Button type="button" variant="secondary" className="rounded-xl" onClick={discard} disabled={saving}>
                   Discard
@@ -420,6 +457,57 @@ function PersonIcon() {
       <circle cx="10" cy="7" r="2.4" stroke="currentColor" strokeWidth="1.5" />
       <path d="M5 16c.7-2.4 2.5-3.6 5-3.6s4.3 1.2 5 3.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden>
+      <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function UploadIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <path d="M10 13.4V5.2M10 5.2 7.4 7.8M10 5.2l2.6 2.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M4.8 13.2v1.8A1.2 1.2 0 0 0 6 16.2h8a1.2 1.2 0 0 0 1.2-1.2v-1.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function ReplaceIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <path d="M5.4 8.2a4.8 4.8 0 0 1 8.2-1.8l1.4 1.4M14.6 11.8a4.8 4.8 0 0 1-8.2 1.8L5 12.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M15 5.6v2.6h-2.6M5 14.4v-2.6h2.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <path d="M10 3.6 15.2 5.8v4.4c0 3.2-2.2 5.3-5.2 6.2-3-1-5.2-3-5.2-6.2V5.8L10 3.6Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M7.8 10.1 9.4 11.6l2.9-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function CheckMiniIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden>
+      <path d="M4.2 8.2 6.8 10.6 11.8 5.4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function WarningDotIcon() {
+  return (
+    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-amber-300 text-[10px] text-amber-600">
+      •
+    </span>
   )
 }
 

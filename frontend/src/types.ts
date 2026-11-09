@@ -89,6 +89,14 @@ export type RecommendResponse = {
   warning?: string
 }
 
+export type SavedLook = {
+  id: string
+  venue: string
+  overallScore: number
+  createdAt: string
+  thumbnailUrl: string | null
+}
+
 export type TryOnResponse = {
   outfitId: string
   tryOnUrl: string | null

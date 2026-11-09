@@ -3,6 +3,7 @@ import type {
   Profile,
   RecommendRequest,
   RecommendResponse,
+  SavedLook,
   TryOnResponse,
   VenueInfo,
   WardrobeItem,
@@ -158,6 +159,12 @@ export async function updateProfile(input: {
 
   const res = await fetch('/api/profile', { method: 'PUT', body })
   return parseJson<Profile>(res)
+}
+
+export async function listSavedLooks(): Promise<SavedLook[]> {
+  const res = await fetch('/api/outfits')
+  const data = await parseJson<{ looks: SavedLook[] }>(res)
+  return data.looks
 }
 
 export async function recommend(payload: RecommendRequest): Promise<RecommendResponse> {

@@ -162,6 +162,18 @@ class RecommendResponse(CamelModel):
     warning: str | None = None
 
 
+class SavedLookOut(CamelModel):
+    id: str
+    venue: str
+    overall_score: float
+    created_at: datetime
+    thumbnail_url: str | None = None
+
+
+class SavedLookListResponse(CamelModel):
+    looks: list[SavedLookOut]
+
+
 class TryOnRequest(CamelModel):
     outfit_id: str
 

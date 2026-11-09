@@ -108,8 +108,8 @@ export function Recommend() {
       {hasBodyPhoto === false ? (
         <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           No body photo yet.{' '}
-          <Link to="/you" className="font-semibold underline">
-            Add one in Me
+          <Link to="/profile" className="font-semibold underline">
+            Add one in Profile
           </Link>{' '}
           to enable virtual try-on. Matching still works without it.
         </p>
@@ -160,7 +160,7 @@ export function Recommend() {
                 options={STYLE_OPTIONS}
                 placeholder="Use profile default"
                 customPlaceholder="e.g. dark academia, preppy, Y2K"
-                customHint="Leave on default to use Me. Custom words are a soft hint."
+                customHint="Leave on default to use Profile. Custom words are a soft hint."
                 onChange={setStyleOverride}
                 disabled={busy}
               />

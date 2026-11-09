@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from time import perf_counter
 
@@ -9,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Outfit, Profile, WardrobeItem
-from app.schemas import OutfitOut, RecommendRequest, RecommendResponse
+from app.schemas import OutfitOut, RecommendRequest, RecommendResponse, SavedLookListResponse, SavedLookOut
 from app.services.matching import recommend_outfits
 
 router = APIRouter(tags=["recommend"])
@@ -45,3 +46,45 @@ def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> Recom
     db.commit()
     elapsed_ms = int((perf_counter() - started) * 1000)
     return RecommendResponse(outfits=outfits, elapsed_ms=elapsed_ms, warning=warning)
+
+
+def _thumbnail(items_json: str) -> str | None:
+    try:
+        snapshot = json.loads(items_json)
+    except json.JSONDecodeError:
+        return None
+    items = snapshot.get("items") if isinstance(snapshot, dict) else snapshot
+    if not isinstance(items, list) or not items:
+        return None
+    first = items[0]
+    if not isinstance(first, dict):
+        return None
+    url = first.get("imageUrl") or first.get("image_url")
+    return url if isinstance(url, str) and url else None
+
+
+@router.get("/outfits", response_model=SavedLookListResponse)
+def list_saved_looks(db: Session = Depends(get_db)) -> SavedLookListResponse:
+    rows = db.scalars(select(Outfit).order_by(Outfit.created_at.desc()).limit(24)).all()
+    unique: list[Outfit] = []
+    rest: list[Outfit] = []
+    seen: set[str] = set()
+    for row in rows:
+        if row.venue not in seen:
+            unique.append(row)
+            seen.add(row.venue)
+        else:
+            rest.append(row)
+    picked = (unique + rest)[:3]
+    return SavedLookListResponse(
+        looks=[
+            SavedLookOut(
+                id=row.id,
+                venue=row.venue,
+                overall_score=row.overall_score,
+                created_at=row.created_at,
+                thumbnail_url=_thumbnail(row.items_json),
+            )
+            for row in picked
+        ]
+    )

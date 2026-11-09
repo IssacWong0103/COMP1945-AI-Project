@@ -1,15 +1,30 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { apiUrl, friendlyError, getProfile, listWardrobeItems } from '../api/client'
+import { apiUrl, friendlyError, getProfile, listSavedLooks, listWardrobeItems } from '../api/client'
 import { ButtonLink } from '../components/Button'
 import { ErrorNote } from '../components/ErrorNote'
 import { Spinner } from '../components/Spinner'
-import { humanize } from '../constants'
-import type { Profile, WardrobeItem } from '../types'
+import { FALLBACK_VENUES, humanize, itemTitle } from '../constants'
+import type { Profile, SavedLook, WardrobeItem } from '../types'
+
+const HERO_SAMPLES = [
+  { src: '/home/shirt.svg', alt: 'White shirt' },
+  { src: '/home/pants.svg', alt: 'Beige trousers' },
+  { src: '/home/shoes.svg', alt: 'White sneakers' },
+] as const
+
+const VENUE_ICONS: Record<string, () => ReactNode> = {
+  lecture: LectureIcon,
+  careerFair: BriefcaseIcon,
+  casualDate: CoffeeIcon,
+  hallGathering: PeopleIcon,
+  formal: SparkleIcon,
+}
 
 export function Home() {
   const [items, setItems] = useState<WardrobeItem[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [looks, setLooks] = useState<SavedLook[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -25,6 +40,12 @@ export function Home() {
         if (cancelled) return
         setItems(wardrobe)
         setProfile(nextProfile)
+        try {
+          const saved = await listSavedLooks()
+          if (!cancelled) setLooks(saved)
+        } catch {
+          if (!cancelled) setLooks([])
+        }
       } catch (err) {
         if (!cancelled) setError(friendlyError(err))
       } finally {
@@ -40,64 +61,32 @@ export function Home() {
   const hasWardrobe = items.length >= 2
   const hasPhoto = Boolean(profile?.bodyPhotoUrl)
   const hasAttrs = Boolean(profile?.heightCm && profile?.preferredStyle)
-  const styleLabel = profile?.preferredStyle ? humanize(profile.preferredStyle) : ''
-
-  const checks = useMemo(
-    () => [
-      {
-        id: 'wardrobe',
-        n: 1,
-        label: 'Add at least 2 wardrobe items',
-        detail: 'USTyle only matches outfits from clothes you upload.',
-        done: hasWardrobe,
-        to: '/wardrobe',
-        action: 'Open Wardrobe',
-      },
-      {
-        id: 'photo',
-        n: 2,
-        label: 'Upload a full-body photo',
-        detail: 'Used only for virtual try-on, never shared.',
-        done: hasPhoto,
-        to: '/you',
-        action: 'Open Me',
-      },
-      {
-        id: 'profile',
-        n: 3,
-        label: 'Set height and preferred style',
-        detail: 'Improves venue fit and sizing.',
-        done: hasAttrs,
-        to: '/you',
-        action: 'Open Me',
-      },
-    ],
-    [hasWardrobe, hasPhoto, hasAttrs],
-  )
-
-  const readyCount = checks.filter((check) => check.done).length
-  const allReady = readyCount === 3
+  const setupComplete = hasWardrobe && hasPhoto && hasAttrs
+  const filledCount = [profile?.heightCm, profile?.weightKg, profile?.gender, profile?.skinTone, profile?.preferredStyle].filter(
+    (value) => value !== null && value !== undefined && String(value).trim() !== '',
+  ).length
+  const pieceLabel = items.length === 1 ? '1 piece' : `${items.length} pieces`
+  const greeting = useMemo(() => timeGreeting(), [])
+  const createHint = !hasWardrobe ? 'Add clothes first' : !hasPhoto ? 'Add a body photo first' : 'Finish profile first'
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h2 className="text-[26px] font-semibold tracking-tight text-ink">Home</h2>
-          <p className="mt-1 max-w-xl text-sm text-muted">
-            Finish three quick steps and USTyle can style you from your own closet.
-          </p>
-        </div>
-        <ButtonLink
-          to="/dress-me"
-          disabled={!allReady}
-          className={
-            allReady
-              ? ''
-              : 'border-0 bg-[#e8edf3] text-[#9aa3b2] shadow-none hover:bg-[#e8edf3]'
-          }
-        >
-          Generate outfit
-        </ButtonLink>
+      <div className="flex items-start justify-between gap-4">
+        <h1 className="text-[28px] font-semibold tracking-tight text-navy">Home</h1>
+        {loading ? null : setupComplete ? (
+          <ButtonLink to="/dress-me" className="whitespace-nowrap rounded-full px-4">
+            <PlusIcon />
+            Create outfit
+          </ButtonLink>
+        ) : (
+          <div className="flex flex-col items-end">
+            <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-[#e7edf3] px-4 py-2 text-sm font-semibold text-[#9aa3b2]">
+              <PlusIcon />
+              Create outfit
+            </span>
+            <p className="mt-1 text-[11px] text-muted">{createHint}</p>
+          </div>
+        )}
       </div>
 
       {error ? (
@@ -112,129 +101,46 @@ export function Home() {
         </div>
       ) : (
         <>
-          <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard
-              label="Wardrobe items"
-              value={String(items.length)}
-              hint="Upload clothes you already own"
-              muted={items.length === 0}
-              badge={
-                hasWardrobe
-                  ? { text: 'Ready', tone: 'ok' }
-                  : { text: 'Needs 2+', tone: 'warn' }
-              }
-            />
-            <StatCard
+          <section className="mt-8">
+            <h2 className="text-[28px] font-semibold tracking-tight text-navy">{greeting}</h2>
+            <p className="mt-1 text-sm text-muted">
+              {setupComplete
+                ? `Your closet has ${pieceLabel}. A good day starts with one less decision.`
+                : `Your closet has ${pieceLabel}. Let's make getting dressed a little easier.`}
+            </p>
+          </section>
+
+          {setupComplete ? <ReadyHero /> : <StartClosetHero />}
+
+          {setupComplete ? null : (
+            <ol className="relative mt-8 grid grid-cols-3 gap-3">
+              <span className="pointer-events-none absolute top-3.5 right-[16%] left-[16%] h-px bg-line" aria-hidden />
+              <SetupStep n={1} label="At least 2 wardrobe items" done={hasWardrobe} />
+              <SetupStep n={2} label="Full-body photo" done={hasPhoto} />
+              <SetupStep n={3} label="Height + preferred style" done={hasAttrs} />
+            </ol>
+          )}
+
+          <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <StatusCard to="/wardrobe" icon={<ShirtIcon />} label="Closet" value={pieceLabel} />
+            <StatusCard
+              to="/profile"
+              icon={<ScanIcon />}
               label="Body photo"
-              value={hasPhoto ? 'Added' : 'Missing'}
-              hint="Required for virtual try-on"
-              muted={!hasPhoto}
-              badge={hasPhoto ? { text: 'Added', tone: 'ok' } : { text: 'Not added', tone: 'warn' }}
+              value={hasPhoto ? 'Ready for try-on' : 'Not added'}
             />
-            <StatCard
-              label="About you"
-              value={hasAttrs ? 'Complete' : 'Incomplete'}
-              hint="Height + preferred style"
-              muted={!hasAttrs}
-              badge={hasAttrs ? { text: 'Set', tone: 'ok' } : { text: 'Not set', tone: 'warn' }}
-            />
-            <StatCard
+            <StatusCard to="/profile" icon={<PersonIcon />} label="Profile" value={`${filledCount} of 5 filled`} />
+            <StatusCard
+              to="/profile"
+              icon={<SlidersIcon />}
               label="Preferred style"
-              value={styleLabel || 'Not set'}
-              hint="Choose one in Me"
-              muted={!styleLabel}
+              value={profile?.preferredStyle ? humanize(profile.preferredStyle) : 'Not set'}
             />
           </section>
 
-          <section className="mt-5 grid gap-4 lg:grid-cols-5">
-            <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm lg:col-span-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-[15px] font-semibold text-ink">Setup checklist</h3>
-                  <p className="mt-0.5 text-sm text-muted">Complete these to unlock Generate.</p>
-                </div>
-                <div className="flex shrink-0 items-center gap-2 pt-1">
-                  <div className="h-1.5 w-20 overflow-hidden rounded-full bg-line">
-                    <div
-                      className="h-full rounded-full bg-navy transition-all"
-                      style={{ width: `${(readyCount / 3) * 100}%` }}
-                    />
-                  </div>
-                  <span className="text-xs font-medium text-muted">{readyCount} of 3 done</span>
-                </div>
-              </div>
-
-              <ul className="mt-2">
-                {checks.map((check) => (
-                  <li
-                    key={check.id}
-                    className="flex items-center gap-3 border-b border-line py-4 last:border-b-0 last:pb-1"
-                  >
-                    <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                        check.done
-                          ? 'bg-emerald-100 text-success'
-                          : 'border border-line bg-surface text-muted'
-                      }`}
-                    >
-                      {check.done ? '✓' : check.n}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-ink">{check.label}</p>
-                      <p className="mt-0.5 text-sm text-muted">{check.detail}</p>
-                    </div>
-                    <span
-                      className={`hidden shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium sm:inline-flex ${
-                        check.done ? 'bg-emerald-50 text-success' : 'bg-canvas text-muted'
-                      }`}
-                    >
-                      <span className={`h-1.5 w-1.5 rounded-full ${check.done ? 'bg-success' : 'bg-slate-400'}`} />
-                      {check.done ? 'Done' : 'To do'}
-                    </span>
-                    <Link
-                      to={check.to}
-                      className="shrink-0 text-sm font-semibold text-navy no-underline hover:underline"
-                    >
-                      {check.action}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm lg:col-span-2">
-              <h3 className="text-[15px] font-semibold text-ink">Quick actions</h3>
-              <div className="mt-3">
-                <QuickAction
-                  to="/wardrobe"
-                  title="Upload clothes"
-                  subtitle="Add photos to Wardrobe"
-                  icon={<UploadIcon />}
-                />
-                <QuickAction
-                  to="/you"
-                  title="Edit Me"
-                  subtitle="Body photo, height, style"
-                  icon={<PersonIcon />}
-                />
-                <QuickAction
-                  to="/dress-me"
-                  title="Generate for a venue"
-                  subtitle="Lecture, career fair, date…"
-                  icon={<SparkleIcon />}
-                />
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-5 rounded-2xl border border-line bg-surface p-5 shadow-sm">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-[15px] font-semibold text-ink">Recent wardrobe</h3>
-                <p className="mt-0.5 text-sm text-muted">
-                  {items.length === 0 ? 'Nothing uploaded yet' : `${items.length} item${items.length === 1 ? '' : 's'} in your closet`}
-                </p>
-              </div>
+          <section className="mt-8">
+            <div className="flex items-center justify-between gap-3">
+              <h3 className="text-[17px] font-semibold text-navy">Recent closet</h3>
               {items.length > 0 ? (
                 <Link to="/wardrobe" className="text-sm font-semibold text-navy no-underline hover:underline">
                   View all
@@ -243,102 +149,194 @@ export function Home() {
             </div>
 
             {items.length === 0 ? (
-              <div className="mt-4 flex flex-col items-center rounded-2xl border border-dashed border-line px-6 py-14 text-center">
-                <span className="flex h-12 w-12 items-center justify-center rounded-full bg-canvas text-navy">
-                  <ShirtIcon />
-                </span>
-                <p className="mt-4 text-[15px] font-semibold text-ink">Your closet is empty</p>
-                <p className="mt-1 max-w-md text-sm text-muted">
-                  Upload tops, bottoms and shoes you already own. USTyle only styles outfits from your own clothes.
-                </p>
-                <ButtonLink to="/wardrobe" className="mt-5 rounded-lg px-4">
-                  Upload clothes
-                </ButtonLink>
+              <div className="mt-3 flex min-h-[220px] items-center justify-center rounded-2xl border border-line bg-surface px-6 py-14 shadow-sm">
+                <div className="flex items-center gap-4 text-left">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#eef2f7] text-navy">
+                    <ShirtIcon className="h-6 w-6" />
+                  </span>
+                  <div>
+                    <p className="text-[15px] font-semibold text-ink">Nothing here yet</p>
+                    <p className="mt-1 text-sm text-muted">Your everyday favourites belong here.</p>
+                    <Link to="/wardrobe" className="mt-2 inline-block text-sm font-semibold text-navy no-underline hover:underline">
+                      Upload photos
+                    </Link>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
+              <div className="mt-4 grid grid-cols-3 gap-4 sm:grid-cols-4 md:grid-cols-6">
                 {items.slice(0, 6).map((item) => (
-                  <div key={item.id} className="overflow-hidden rounded-xl border border-line bg-canvas">
-                    {item.imageUrl ? (
-                      <img
-                        src={apiUrl(item.imageUrl)}
-                        alt={item.description || humanize(item.category)}
-                        className="aspect-square w-full object-cover"
-                      />
-                    ) : (
-                      <div className="flex aspect-square items-center justify-center text-xs text-muted">
-                        {humanize(item.category)}
-                      </div>
-                    )}
-                    <p className="truncate px-2 py-1.5 text-[11px] text-muted">{humanize(item.category)}</p>
-                  </div>
+                  <Link key={item.id} to="/wardrobe" className="min-w-0 no-underline">
+                    <div className="overflow-hidden rounded-xl bg-[#ddd3c4]">
+                      {item.imageUrl ? (
+                        <img
+                          src={apiUrl(item.imageUrl)}
+                          alt={itemTitle(item)}
+                          className="aspect-[4/5] w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex aspect-[4/5] items-center justify-center text-xs text-muted">
+                          {humanize(item.category)}
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-2 truncate text-[13px] text-ink">{itemTitle(item)}</p>
+                  </Link>
                 ))}
               </div>
             )}
           </section>
+
+          {setupComplete && looks.length > 0 ? (
+            <section className="mt-8">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-[17px] font-semibold text-navy">Saved looks</h3>
+                <Link to="/dress-me" className="text-sm font-semibold text-navy no-underline hover:underline">
+                  View all
+                </Link>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                {looks.map((look) => (
+                  <Link
+                    key={look.id}
+                    to={`/dress-me?venue=${encodeURIComponent(look.venue)}`}
+                    className="flex items-center gap-3 rounded-2xl border border-line bg-surface px-3 py-3 no-underline shadow-sm transition hover:border-navy/20"
+                  >
+                    <span className="h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-[#ddd3c4]">
+                      {look.thumbnailUrl ? (
+                        <img src={apiUrl(look.thumbnailUrl)} alt="" className="h-full w-full object-cover" />
+                      ) : null}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold text-ink">
+                        {humanize(look.venue)}
+                        {profile?.preferredStyle ? ` · ${humanize(profile.preferredStyle)}` : ''}
+                      </span>
+                      <span className="mt-0.5 block text-xs text-muted">
+                        {Math.round(look.overallScore * 100)}% match · {formatLookDate(look.createdAt)}
+                      </span>
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ) : null}
         </>
       )}
     </div>
   )
 }
 
-function StatCard({
-  label,
-  value,
-  hint,
-  badge,
-  muted = false,
-}: {
-  label: string
-  value: string
-  hint: string
-  badge?: { text: string; tone: 'warn' | 'ok' }
-  muted?: boolean
-}) {
+function StartClosetHero() {
   return (
-    <div className="rounded-2xl border border-line bg-surface p-5 shadow-sm">
-      <p className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">{label}</p>
-      <p className={`mt-2 text-[28px] font-semibold leading-none tracking-tight ${muted ? 'text-slate-400' : 'text-ink'}`}>
-        {value}
-      </p>
-      <p className="mt-2 text-sm text-muted">{hint}</p>
-      {badge ? (
-        <span
-          className={`mt-3 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ${
-            badge.tone === 'ok' ? 'bg-emerald-50 text-success' : 'bg-[#f8f0d8] text-[#b45309]'
-          }`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full ${badge.tone === 'ok' ? 'bg-success' : 'bg-[#e8b931]'}`} />
-          {badge.text}
-        </span>
-      ) : null}
-    </div>
+    <section className="mt-6 flex flex-col gap-6 rounded-2xl border border-line bg-surface p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+      <div className="max-w-lg">
+        <p className="text-[11px] font-semibold tracking-[0.16em] text-gold-deep">A SMALL START</p>
+        <h3 className="mt-2 text-[26px] font-semibold tracking-tight text-navy">Start your closet</h3>
+        <p className="mt-2 text-sm text-muted">Upload photos of tops, bottoms and shoes you already own.</p>
+        <ButtonLink to="/wardrobe" className="mt-5 whitespace-nowrap rounded-xl px-4">
+          <UploadIcon />
+          Upload clothes
+        </ButtonLink>
+      </div>
+      <div className="flex shrink-0 items-center gap-3">
+        {HERO_SAMPLES.map((sample) => (
+          <img
+            key={sample.src}
+            src={sample.src}
+            alt={sample.alt}
+            className="h-[132px] w-[108px] rounded-xl object-cover shadow-sm"
+          />
+        ))}
+      </div>
+    </section>
   )
 }
 
-function QuickAction({
-  to,
-  title,
-  subtitle,
-  icon,
-}: {
-  to: string
-  title: string
-  subtitle: string
-  icon: ReactNode
-}) {
+function ReadyHero() {
+  return (
+    <section className="relative mt-6 rounded-2xl border border-line bg-surface p-6 shadow-sm">
+      <p className="text-[11px] font-semibold tracking-[0.16em] text-gold-deep">YOUR CLOTHES. A FRESH COMBINATION.</p>
+      <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-[26px] font-semibold tracking-tight text-navy">Where are you headed today?</h3>
+          <p className="mt-1 text-sm text-muted">Choose an occasion. We&apos;ll put your own pieces together.</p>
+        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-success">
+          <CheckMiniIcon />
+          Setup complete
+        </span>
+      </div>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {FALLBACK_VENUES.map((venue) => {
+          const Icon = VENUE_ICONS[venue.id] ?? SparkleIcon
+          return (
+            <Link
+              key={venue.id}
+              to={`/dress-me?venue=${encodeURIComponent(venue.id)}`}
+              className="flex items-center gap-2 rounded-xl border border-line bg-surface px-3 py-3 text-sm font-medium text-ink no-underline transition hover:border-navy/30 hover:bg-canvas"
+            >
+              <span className="text-navy">
+                <Icon />
+              </span>
+              <span className="min-w-0 flex-1 truncate">{venue.label}</span>
+              <ArrowUpRightIcon />
+            </Link>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function SetupStep({ n, label, done }: { n: number; label: string; done: boolean }) {
+  return (
+    <li className="relative flex flex-col items-center text-center">
+      <span
+        className={`relative z-[1] flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
+          done ? 'bg-navy text-white' : 'border border-line bg-surface text-muted'
+        }`}
+      >
+        {done ? '✓' : n}
+      </span>
+      <p className="mt-2 text-xs text-muted sm:text-sm">{label}</p>
+    </li>
+  )
+}
+
+function StatusCard({ to, icon, label, value }: { to: string; icon: ReactNode; label: string; value: string }) {
   return (
     <Link
       to={to}
-      className="flex items-center gap-3 rounded-xl px-1 py-3 text-ink no-underline transition hover:bg-canvas"
+      className="flex items-start gap-3 rounded-2xl border border-line bg-surface px-4 py-4 no-underline shadow-sm transition hover:border-navy/20"
     >
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas text-navy">{icon}</span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold">{title}</span>
-        <span className="block text-sm text-muted">{subtitle}</span>
+      <span className="mt-0.5 text-navy">{icon}</span>
+      <span className="min-w-0">
+        <span className="block text-sm text-navy">{label}</span>
+        <span className="mt-0.5 block text-sm font-semibold text-ink">{value}</span>
       </span>
-      <ChevronIcon />
     </Link>
+  )
+}
+
+function timeGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning.'
+  if (hour < 18) return 'Good afternoon.'
+  return 'Good evening.'
+}
+
+function formatLookDate(value: string): string {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden>
+      <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
   )
 }
 
@@ -351,11 +349,100 @@ function UploadIcon() {
   )
 }
 
+function ShirtIcon({ className = 'h-[18px] w-[18px]' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 20 20" className={className} fill="none" aria-hidden>
+      <path
+        d="M7.2 4.8 10 7.2 12.8 4.8 16 7.1v8.7H4V7.1L7.2 4.8Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M10 7.2v8.6" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function ScanIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <path d="M4.5 7V5.2A1.2 1.2 0 0 1 5.7 4h1.8M15.5 7V5.2A1.2 1.2 0 0 0 14.3 4h-1.8M4.5 13v1.8A1.2 1.2 0 0 0 5.7 16h1.8M15.5 13v1.8a1.2 1.2 0 0 1-1.2 1.2h-1.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M7.4 8.2 10 10.2l2.6-2M8.2 12.4h3.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 function PersonIcon() {
   return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <circle cx="10" cy="7.2" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M4.8 16c.7-2.5 2.6-3.8 5.2-3.8s4.5 1.3 5.2 3.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function SlidersIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <path d="M4 6.5h12M4 13.5h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="8" cy="6.5" r="1.8" fill="currentColor" />
+      <circle cx="12.5" cy="13.5" r="1.8" fill="currentColor" />
+    </svg>
+  )
+}
+
+function CheckMiniIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden>
+      <circle cx="8" cy="8" r="6.2" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M5.2 8.1 7.1 10l3.7-4.2" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ArrowUpRightIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5 shrink-0 text-muted" fill="none" aria-hidden>
+      <path d="M5 11 11 5M6.5 5H11v4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function LectureIcon() {
+  return (
     <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-      <circle cx="10" cy="7" r="2.4" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5 16c.7-2.4 2.5-3.6 5-3.6s4.3 1.2 5 3.6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M3.5 9.2 10 5.8 16.5 9.2 10 12.6 3.5 9.2Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <path d="M6.2 10.8v3.2L10 16l3.8-2V10.8" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BriefcaseIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <rect x="3.2" y="6.5" width="13.6" height="9" rx="1.6" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M7.5 6.5V5.4A1.4 1.4 0 0 1 8.9 4h2.2A1.4 1.4 0 0 1 12.5 5.4v1.1" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+function CoffeeIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <path d="M5 8h8v5.2A2.8 2.8 0 0 1 10.2 16H7.8A2.8 2.8 0 0 1 5 13.2V8Z" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M13 9.2h1.4A1.8 1.8 0 0 1 16.2 11 1.8 1.8 0 0 1 14.4 12.8H13" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M8 4.6c.2.7-.2 1.2-.2 1.8M11 4.6c.2.7-.2 1.2-.2 1.8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function PeopleIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <circle cx="7.2" cy="7.2" r="2.1" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="13.2" cy="7.6" r="1.7" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M3.6 15.4c.6-2.2 2.2-3.3 4.4-3.3 2.2 0 3.8 1.1 4.4 3.3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <path d="M12.2 12.4c1.5 0 2.7.7 3.3 2.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }
@@ -363,35 +450,8 @@ function PersonIcon() {
 function SparkleIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
-      <path
-        d="M10 3.4 11 7.1 14.8 8.2 11 9.3 10 13 9 9.3 5.2 8.2 9 7.1 10 3.4Z"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinejoin="round"
-      />
+      <path d="M10 3.4 11 7.1 14.8 8.2 11 9.3 10 13 9 9.3 5.2 8.2 9 7.1 10 3.4Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
       <path d="M14.8 12.2v2.8M13.4 13.6h2.8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-    </svg>
-  )
-}
-
-function ChevronIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-4 w-4 shrink-0 text-slate-400" fill="none" aria-hidden>
-      <path d="M8 5.5 12.5 10 8 14.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function ShirtIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden>
-      <path
-        d="M8 7.2 12 10l4-2.8M7 9.5h10v10.2H7z"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <path d="M12 10v9.7" stroke="currentColor" strokeWidth="1.6" />
     </svg>
   )
 }
