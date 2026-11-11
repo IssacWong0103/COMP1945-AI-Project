@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   friendlyError,
@@ -16,7 +16,14 @@ import { SuggestSelect } from '../components/SuggestSelect'
 import { SwapDrawer } from '../components/SwapDrawer'
 import { TryOnDrawer, type TryOnDrawerStatus } from '../components/TryOnDrawer'
 import { Button } from '../components/Button'
-import { FALLBACK_VENUES, STYLE_OPTIONS } from '../constants'
+import {
+  DRESS_CODE_OPTIONS,
+  FALLBACK_VENUES,
+  FEEDBACK_SUGGESTIONS,
+  STYLE_OPTIONS,
+  TIME_OF_DAY_OPTIONS,
+  WEATHER_OPTIONS,
+} from '../constants'
 import { track } from '../lib/analytics'
 import {
   listLocalSavedLooks,
@@ -47,13 +54,21 @@ export function Studio() {
   const [elapsedMs, setElapsedMs] = useState<number | null>(null)
   const [hasBodyPhoto, setHasBodyPhoto] = useState<boolean | null>(null)
   const [bodyPhotoUrl, setBodyPhotoUrl] = useState<string | null>(null)
+  const [hasFacePhoto, setHasFacePhoto] = useState<boolean | null>(null)
   const [closetItems, setClosetItems] = useState<WardrobeItem[]>([])
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set())
   const [tryOnStatus, setTryOnStatus] = useState<TryOnDrawerStatus>('idle')
   const [tryOnUrl, setTryOnUrl] = useState<string | null>(null)
   const [tryOnError, setTryOnError] = useState<string | null>(null)
   const [tryOnElapsed, setTryOnElapsed] = useState(0)
+  const [feedbackText, setFeedbackText] = useState('')
+  const [feedbackHistory, setFeedbackHistory] = useState<{ id: string; text: string }[]>([])
+  const [weather, setWeather] = useState('')
+  const [timeOfDay, setTimeOfDay] = useState('')
+  const [dressCode, setDressCode] = useState('')
+  const [occasionNotes, setOccasionNotes] = useState('')
   const abortRef = useRef<AbortController | null>(null)
+  const lastFeedbackRef = useRef<string | null>(null)
 
   useEffect(() => {
     document.title = 'Studio — USTyle'
@@ -77,10 +92,12 @@ export function Studio() {
         if (cancelled) return
         setHasBodyPhoto(Boolean(profile.bodyPhotoUrl))
         setBodyPhotoUrl(profile.bodyPhotoUrl)
+        setHasFacePhoto(Boolean(profile.facePhotoUrl))
         setClosetItems(items)
       } catch {
         if (!cancelled) {
           setHasBodyPhoto(null)
+          setHasFacePhoto(null)
           setClosetItems([])
         }
       }
@@ -143,13 +160,19 @@ export function Studio() {
   function pickVenue(id: string) {
     setVenue(id)
     setParams(id ? { venue: id } : {}, { replace: true })
+    setFeedbackText('')
+    setFeedbackHistory([])
+    lastFeedbackRef.current = null
     emit({ type: 'EDIT_INPUTS' })
   }
 
-  async function runCreate() {
+  async function runCreate(feedback?: string) {
     if (!venue) {
       emit({ type: 'SUBMIT_INVALID' })
       return
+    }
+    if (feedback !== undefined) {
+      lastFeedbackRef.current = feedback.trim() || null
     }
     emit({ type: 'SUBMIT_VALID' })
     setOutfits(null)
@@ -163,8 +186,22 @@ export function Studio() {
       href: '/studio',
     })
     try {
-      const payload: { venue: string; preferredStyle?: string } = { venue }
+      const payload: {
+        venue: string
+        preferredStyle?: string
+        feedback?: string
+        weather?: string
+        timeOfDay?: string
+        dressCode?: string
+        notes?: string
+      } = { venue }
       if (styleOverride) payload.preferredStyle = styleOverride
+      const feedback = lastFeedbackRef.current
+      if (feedback) payload.feedback = feedback
+      if (weather) payload.weather = weather
+      if (timeOfDay) payload.timeOfDay = timeOfDay
+      if (dressCode && dressCode !== 'none') payload.dressCode = dressCode
+      if (occasionNotes.trim()) payload.notes = occasionNotes.trim()
       const result = await recommend(payload)
       setOutfits(result.outfits)
       setElapsedMs(result.elapsedMs)
@@ -225,6 +262,18 @@ export function Studio() {
   function onRetry() {
     track('studio_retry_clicked', { phase: machine.phase })
     void runCreate()
+  }
+
+  function refineWithFeedback(text: string) {
+    const trimmed = text.trim()
+    if (!trimmed) return
+    setFeedbackHistory((prev) => [
+      ...prev,
+      { id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, text: trimmed },
+    ])
+    setFeedbackText('')
+    track('studio_refine_submitted', { venue, length: trimmed.length })
+    void runCreate(trimmed)
   }
 
   function onSave(outfit: Outfit) {
@@ -373,6 +422,16 @@ export function Studio() {
         </p>
       ) : null}
 
+      {hasBodyPhoto !== false && hasFacePhoto === false && machine.phase === 'results' ? (
+        <p className="mb-4 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-muted">
+          Add a face close-up in{' '}
+          <Link to="/settings" className="font-semibold underline">
+            Settings
+          </Link>{' '}
+          for a more accurate try-on.
+        </p>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-12">
         <form
           onSubmit={(event) => void onSubmit(event)}
@@ -429,6 +488,65 @@ export function Studio() {
           </div>
 
           <div className="mt-5">
+            <p className="text-xs font-medium text-muted">Occasion details (optional)</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {WEATHER_OPTIONS.map((option) => (
+                <ContextChip
+                  key={option.value}
+                  selected={weather === option.value}
+                  disabled={busy}
+                  onClick={() => {
+                    setWeather(weather === option.value ? '' : option.value)
+                    emit({ type: 'EDIT_INPUTS' })
+                  }}
+                >
+                  <span aria-hidden>{option.icon}</span> {option.label}
+                </ContextChip>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {TIME_OF_DAY_OPTIONS.map((option) => (
+                <ContextChip
+                  key={option.value}
+                  selected={timeOfDay === option.value}
+                  disabled={busy}
+                  onClick={() => {
+                    setTimeOfDay(timeOfDay === option.value ? '' : option.value)
+                    emit({ type: 'EDIT_INPUTS' })
+                  }}
+                >
+                  {option.label}
+                </ContextChip>
+              ))}
+            </div>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {DRESS_CODE_OPTIONS.map((option) => (
+                <ContextChip
+                  key={option.value}
+                  selected={dressCode === option.value}
+                  disabled={busy}
+                  onClick={() => {
+                    setDressCode(dressCode === option.value ? '' : option.value)
+                    emit({ type: 'EDIT_INPUTS' })
+                  }}
+                >
+                  {option.label}
+                </ContextChip>
+              ))}
+            </div>
+            <input
+              value={occasionNotes}
+              onChange={(event) => {
+                setOccasionNotes(event.target.value)
+                emit({ type: 'EDIT_INPUTS' })
+              }}
+              disabled={busy}
+              placeholder="Anything else? e.g. standing all day, indoor event"
+              className="mt-2 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink outline-none transition focus:border-navy disabled:opacity-50"
+            />
+          </div>
+
+          <div className="mt-5">
             <button
               type="button"
               className="text-xs font-semibold text-navy"
@@ -441,8 +559,8 @@ export function Studio() {
             </button>
             {fineTuneOpen ? (
               <p className="mt-2 rounded-lg bg-canvas px-3 py-2 text-xs text-muted">
-                Using closet of {closetItems.length} pieces. Weather and color mood can be added when
-                the studio/swaps API ships — style + venue drive matching today.
+                Using {closetItems.length} closet pieces. Occasion details and style steer matching;
+                after results appear you can refine with free-form feedback.
               </p>
             ) : null}
           </div>
@@ -532,6 +650,58 @@ export function Studio() {
             </section>
           ) : null}
 
+          {outfits && outfits.length > 0 && (machine.phase === 'results' || machine.phase === 'partial') ? (
+            <section className="mt-5 rounded-xl border border-line bg-surface p-4 shadow-sm">
+              <p className="text-sm font-semibold text-ink">Not quite right?</p>
+              <p className="mt-1 text-xs text-muted">
+                Tell us what to change and we'll suggest a fresh set using your comment.
+              </p>
+              {feedbackHistory.length > 0 ? (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {feedbackHistory.map((entry) => (
+                    <span
+                      key={entry.id}
+                      className="rounded-full bg-canvas px-2.5 py-1 text-[11px] font-medium text-muted"
+                    >
+                      You said: {entry.text}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {FEEDBACK_SUGGESTIONS.map((suggestion) => (
+                  <button
+                    key={suggestion.label}
+                    type="button"
+                    disabled={busy}
+                    onClick={() => refineWithFeedback(suggestion.text)}
+                    className="rounded-full border border-line bg-canvas px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-navy/40 disabled:opacity-50"
+                  >
+                    {suggestion.label}
+                  </button>
+                ))}
+              </div>
+              <form
+                className="mt-3 flex gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  refineWithFeedback(feedbackText)
+                }}
+              >
+                <input
+                  value={feedbackText}
+                  onChange={(event) => setFeedbackText(event.target.value)}
+                  disabled={busy}
+                  placeholder="e.g. I don't like the jacket, it's too bulky"
+                  className="min-w-0 flex-1 rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink outline-none transition focus:border-navy disabled:opacity-50"
+                />
+                <Button type="submit" disabled={busy || !feedbackText.trim()}>
+                  Refine
+                </Button>
+              </form>
+            </section>
+          ) : null}
+
           {!busy && machine.phase === 'idle' && outfits === null ? (
             <div className="rounded-xl border border-dashed border-line bg-surface px-5 py-16 text-center">
               <p className="text-sm font-semibold text-ink">Your next outfit starts here</p>
@@ -562,6 +732,8 @@ export function Studio() {
           tryOnUrl={tryOnUrl}
           error={tryOnError}
           beforeUrl={bodyPhotoUrl}
+          hasBodyPhoto={hasBodyPhoto === true}
+          hasFacePhoto={hasFacePhoto === true}
           onStart={() => void startTryOn()}
           onRetry={() => void startTryOn()}
           onSave={() => onSave(activeOutfit)}
@@ -572,5 +744,33 @@ export function Studio() {
         />
       ) : null}
     </StudioShell>
+  )
+}
+
+function ContextChip({
+  children,
+  selected,
+  disabled,
+  onClick,
+}: {
+  children: ReactNode
+  selected: boolean
+  disabled?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={selected}
+      disabled={disabled}
+      onClick={onClick}
+      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+        selected
+          ? 'border-navy bg-navy text-white'
+          : 'border-line bg-canvas text-ink hover:border-navy/40'
+      }`}
+    >
+      {children}
+    </button>
   )
 }

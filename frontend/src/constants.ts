@@ -61,6 +61,42 @@ export const CUT_SUGGESTIONS = [
   'High-top',
 ] as const
 
+export type FeedbackSuggestion = {
+  label: string
+  text: string
+}
+
+export const FEEDBACK_SUGGESTIONS: FeedbackSuggestion[] = [
+  { label: 'Too formal', text: 'Too formal — make it more casual.' },
+  { label: 'Too casual', text: 'Too casual — make it more dressed up.' },
+  { label: 'Too warm', text: 'Too warm for the weather — lighter fabrics, no heavy layers.' },
+  { label: 'Too cold', text: 'Not warm enough — add layers or outerwear.' },
+  { label: 'More color', text: 'Too plain — add more color.' },
+  { label: 'Less color', text: 'Too loud — tone the colors down.' },
+  { label: 'Different shoes', text: 'Change the shoes.' },
+  { label: 'No jacket', text: 'Drop the jacket or blazer.' },
+  { label: 'Wear a dress', text: 'I would prefer a dress.' },
+] as const
+
+export const WEATHER_OPTIONS = [
+  { value: 'hot', label: 'Hot', icon: '☀️' },
+  { value: 'mild', label: 'Mild', icon: '🌤' },
+  { value: 'rainy', label: 'Rainy', icon: '🌧' },
+  { value: 'cold', label: 'Cold', icon: '❄️' },
+] as const
+
+export const TIME_OF_DAY_OPTIONS = [
+  { value: 'day', label: 'Daytime' },
+  { value: 'evening', label: 'Evening' },
+] as const
+
+export const DRESS_CODE_OPTIONS = [
+  { value: 'casual', label: 'Casual' },
+  { value: 'smartCasual', label: 'Smart casual' },
+  { value: 'formal', label: 'Formal' },
+  { value: 'none', label: 'No dress code' },
+] as const
+
 export const FALLBACK_VENUES: VenueInfo[] = [
   {
     id: 'lecture',

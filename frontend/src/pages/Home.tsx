@@ -60,6 +60,7 @@ export function Home() {
 
   const hasWardrobe = items.length >= 2
   const hasPhoto = Boolean(profile?.bodyPhotoUrl)
+  const hasFacePhoto = Boolean(profile?.facePhotoUrl)
   const hasAttrs = Boolean(profile?.heightCm && profile?.preferredStyle)
   const setupComplete = hasWardrobe && hasPhoto && hasAttrs
   const filledCount = [profile?.heightCm, profile?.weightKg, profile?.gender, profile?.skinTone, profile?.preferredStyle].filter(
@@ -113,11 +114,12 @@ export function Home() {
           {setupComplete ? <ReadyHero /> : <StartClosetHero />}
 
           {setupComplete ? null : (
-            <ol className="relative mt-8 grid grid-cols-3 gap-3">
-              <span className="pointer-events-none absolute top-3.5 right-[16%] left-[16%] h-px bg-line" aria-hidden />
+            <ol className="relative mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <span className="pointer-events-none absolute top-3.5 right-[12%] left-[12%] hidden h-px bg-line sm:block" aria-hidden />
               <SetupStep n={1} label="At least 2 wardrobe items" done={hasWardrobe} />
               <SetupStep n={2} label="Full-body photo" done={hasPhoto} />
-              <SetupStep n={3} label="Height + preferred style" done={hasAttrs} />
+              <SetupStep n={3} label="Face close-up (recommended)" done={hasFacePhoto} optional />
+              <SetupStep n={4} label="Height + preferred style" done={hasAttrs} />
             </ol>
           )}
 
@@ -126,8 +128,8 @@ export function Home() {
             <StatusCard
               to="/settings"
               icon={<ScanIcon />}
-              label="Body photo"
-              value={hasPhoto ? 'Ready for try-on' : 'Not added'}
+              label="Try-on photos"
+              value={hasPhoto && hasFacePhoto ? 'Body + face ready' : hasPhoto ? 'Body only' : 'Not added'}
             />
             <StatusCard to="/settings" icon={<PersonIcon />} label="Settings" value={`${filledCount} of 5 filled`} />
             <StatusCard
@@ -289,12 +291,16 @@ function ReadyHero() {
   )
 }
 
-function SetupStep({ n, label, done }: { n: number; label: string; done: boolean }) {
+function SetupStep({ n, label, done, optional }: { n: number; label: string; done: boolean; optional?: boolean }) {
   return (
     <li className="relative flex flex-col items-center text-center">
       <span
         className={`relative z-[1] flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold ${
-          done ? 'bg-navy text-white' : 'border border-line bg-surface text-muted'
+          done
+            ? 'bg-navy text-white'
+            : optional
+              ? 'border border-dashed border-line bg-surface text-muted'
+              : 'border border-line bg-surface text-muted'
         }`}
       >
         {done ? '✓' : n}

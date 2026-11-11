@@ -15,6 +15,7 @@ export type AnalyticsEventName =
   | 'studio_tryon_failed'
   | 'studio_look_saved'
   | 'studio_retry_clicked'
+  | 'studio_refine_submitted'
   | 'nav_tab_opened'
 
 export type AnalyticsProps = Record<string, string | number | boolean | null | undefined>

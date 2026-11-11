@@ -80,7 +80,33 @@ export function OutfitCard({
         <ScoreBar label="Overall" value={outfit.overallScore} />
       </div>
 
-      <p className="mt-4 flex-1 text-sm leading-relaxed text-muted">{outfit.rationale}</p>
+      <div className="mt-4 flex-1">
+        <p className="text-sm leading-relaxed text-muted">{outfit.rationale}</p>
+        {outfit.rationaleItems && outfit.rationaleItems.length > 0 ? (
+          <ul className="mt-3 space-y-2">
+            {outfit.rationaleItems.map((entry) => {
+              const item = outfit.items.find((candidate) => candidate.id === entry.itemId)
+              return (
+                <li key={entry.itemId} className="flex items-start gap-2">
+                  {item?.imageUrl ? (
+                    <img
+                      src={apiUrl(item.imageUrl)}
+                      alt=""
+                      className="mt-0.5 h-10 w-8 shrink-0 rounded object-cover"
+                    />
+                  ) : null}
+                  <p className="text-xs leading-relaxed text-muted">{entry.reason}</p>
+                </li>
+              )
+            })}
+          </ul>
+        ) : null}
+        {outfit.inspiration ? (
+          <p className="mt-3 rounded-lg bg-canvas px-2.5 py-1.5 text-xs text-muted">
+            How we picked this: {outfit.inspiration}
+          </p>
+        ) : null}
+      </div>
 
       <div className="mt-4 grid gap-2">
         {onTryOn ? (

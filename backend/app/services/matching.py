@@ -13,7 +13,7 @@ from pathlib import Path
 
 from app.config import settings
 from app.models import WardrobeItem
-from app.schemas import PREFERRED_STYLES, OutfitItemRef, OutfitOut
+from app.schemas import PREFERRED_STYLES, OutfitItemRef, OutfitOut, RationaleItemOut
 
 logger = logging.getLogger(__name__)
 
@@ -358,12 +358,19 @@ def _outfit_tokens(items: Sequence[WardrobeItem]) -> set[str]:
 
 
 def reference_similarity(items: Sequence[WardrobeItem], venue: str) -> float:
+    return _best_reference(items, venue)[1]
+
+
+def _best_reference(
+    items: Sequence[WardrobeItem], venue: str
+) -> tuple[dict | None, float]:
     refs = load_reference_outfits()
     if not refs:
-        return 0.0
+        return None, 0.0
     outfit_tokens = _outfit_tokens(items)
     if not outfit_tokens:
-        return 0.0
+        return None, 0.0
+    best_ref: dict | None = None
     best = 0.0
     for ref in refs:
         ref_venues = set(ref.get("venues") or [])
@@ -383,8 +390,11 @@ def reference_similarity(items: Sequence[WardrobeItem], venue: str) -> float:
         if not ref_tokens:
             continue
         overlap = len(outfit_tokens & ref_tokens) / len(outfit_tokens | ref_tokens)
-        best = max(best, overlap * weight)
-    return best
+        score = overlap * weight
+        if score > best:
+            best = score
+            best_ref = ref
+    return best_ref, best
 
 
 def _rationale(
@@ -418,6 +428,121 @@ def _rationale(
     else:
         fit = f"best available option for a {venue_label}"
     return f"{palette.capitalize()} — {fit}; {harmony}."
+
+
+HEAVY_FABRICS = ("coat", "jacket", "hoodie", "sweater", "knit", "cardigan", "parka", "windbreaker", "blazer")
+LIGHT_FABRICS = ("tee", "t-shirt", "shirt", "shorts", "linen", "sleeveless", "tank")
+
+
+def _feedback_delta(items: Sequence[WardrobeItem], feedback: str | None) -> float:
+    """Translate free-form refinement feedback into a small score adjustment.
+
+    Deliberately small (≤ ±0.25) so it re-ranks candidates rather than
+    overriding the venue/style heuristics.
+    """
+    if not feedback:
+        return 0.0
+    text = " ".join(feedback.lower().split())
+    if not text:
+        return 0.0
+
+    blob = " ".join(_blob(item) for item in items)
+    styles = {item.style for item in items}
+    colors = [item.color.lower() for item in items]
+    neutral_count = sum(1 for c in colors if _is_neutral(c))
+    delta = 0.0
+
+    def has(*words: str) -> bool:
+        return any(word in text for word in words)
+
+    # Formality direction
+    if has("too formal", "dressier", "less formal", "more casual", "casualize"):
+        delta += 0.10 * ("casual" in styles) + 0.06 * ("smartCasual" in styles) + 0.04 * ("minimal" in styles)
+        delta -= 0.12 * ("formal" in styles)
+    if has("too casual", "smarter", "more formal", "dressed up", "dressier", "elevate"):
+        delta += 0.12 * ("formal" in styles) + 0.08 * ("smartCasual" in styles)
+        delta -= 0.10 * (bool(styles & {"casual", "sporty", "streetwear"}))
+
+    # Temperature
+    if has("too warm", "too hot", "hot weather", "summer", "lighter", "too heavy"):
+        delta -= 0.10 * sum(1 for word in HEAVY_FABRICS if word in blob)
+        delta += 0.06 * sum(1 for word in LIGHT_FABRICS if word in blob)
+    if has("too cold", "not warm", "winter", "freezing", "add layers", "layer"):
+        delta += 0.08 * sum(1 for word in HEAVY_FABRICS if word in blob)
+
+    # Color direction
+    if has("more color", "too plain", "too boring", "colorful", "brighter", "pop"):
+        accent_count = len([c for c in colors if not _is_neutral(c)])
+        delta += 0.08 * accent_count
+        delta -= 0.06 * neutral_count
+    if has("less color", "too loud", "too much color", "tone down", "neutral", "muted"):
+        delta += 0.06 * neutral_count
+        delta -= 0.08 * (len(colors) - neutral_count)
+
+    # Garment swaps
+    if has("different shoes", "change the shoes", "other shoes", "no sneakers"):
+        if "loafer" in blob or "heel" in blob or "boot" in blob:
+            delta += 0.08
+        if "sneaker" in blob:
+            delta -= 0.10
+    if has("no jacket", "drop the jacket", "no blazer", "remove the jacket"):
+        delta -= 0.12 * sum(1 for item in items if item.category == "outerwear")
+    if has("add jacket", "add a jacket", "need outerwear", "with a jacket"):
+        delta += 0.10 * sum(1 for item in items if item.category == "outerwear")
+    if has("dress", "wear a dress"):
+        delta += 0.10 * sum(1 for item in items if item.category == "dress")
+    if has("jeans", "denim"):
+        delta += 0.08 * sum(1 for item in items if "jean" in _blob(item) or "denim" in _blob(item))
+
+    return max(-0.25, min(0.25, delta))
+
+
+def _context_delta(
+    items: Sequence[WardrobeItem],
+    weather: str | None,
+    time_of_day: str | None,
+    dress_code: str | None,
+    notes: str | None,
+) -> float:
+    """Translate structured occasion context into a score adjustment."""
+    delta = 0.0
+    blob = " ".join(_blob(item) for item in items)
+    styles = {item.style for item in items}
+
+    weather = (weather or "").strip().lower()
+    if weather == "hot":
+        delta -= 0.10 * sum(1 for word in HEAVY_FABRICS if word in blob)
+        delta += 0.06 * sum(1 for word in LIGHT_FABRICS if word in blob)
+    elif weather == "cold":
+        delta += 0.08 * sum(1 for word in HEAVY_FABRICS if word in blob)
+        if "shorts" in blob:
+            delta -= 0.06
+    elif weather == "rainy":
+        delta += 0.06 * ("boot" in blob)
+        delta -= 0.06 * ("sandal" in blob or "heel" in blob)
+        delta += 0.05 * sum(1 for item in items if item.category == "outerwear")
+
+    if time_of_day == "evening":
+        delta += 0.06 * bool(styles & {"formal", "smartCasual"})
+        delta -= 0.04 * bool(styles & {"sporty"})
+    elif time_of_day == "day":
+        delta += 0.04 * bool(styles & {"casual", "sporty"})
+
+    dc = (dress_code or "").strip().lower().replace("_", "").replace("-", "")
+    if dc == "casual":
+        delta += 0.08 * ("casual" in styles)
+        delta -= 0.08 * ("formal" in styles)
+    elif dc in {"smartcasual", "business"}:
+        delta += 0.08 * ("smartCasual" in styles)
+        delta -= 0.08 * bool(styles & {"sporty", "streetwear"})
+    elif dc == "formal":
+        delta += 0.10 * ("formal" in styles)
+        delta -= 0.10 * bool(styles & {"casual", "sporty", "streetwear"})
+
+    if notes:
+        delta += _feedback_delta(items, notes) * 0.5
+
+    return max(-0.25, min(0.25, delta))
 
 
 def _attach_optionals(
@@ -472,7 +597,60 @@ def _attach_optionals(
     return unique[:4]
 
 
-def _to_outfit(candidate: Candidate) -> OutfitOut:
+def _inspiration_text(ref: dict | None) -> str | None:
+    if not ref:
+        return None
+    category = str(ref.get("fashionDbCategory") or "").replace("_", " ")
+    style = str(ref.get("style") or "")
+    pieces: list[str] = []
+    for piece in (ref.get("items") or [])[:4]:
+        color = str(piece.get("color") or "")
+        cat = str(piece.get("category") or "")
+        if color or cat:
+            pieces.append(f"{color} {cat}".strip())
+    joined = " + ".join(pieces) if pieces else "a similar look"
+    return f"{category} · {style}: {joined}".strip(" ·")
+
+
+def _rationale_items(
+    items: Sequence[WardrobeItem],
+    venue: str,
+    cohesion: float,
+) -> list[RationaleItemOut]:
+    labels = {
+        "lecture": "lecture",
+        "careerFair": "career fair",
+        "casualDate": "casual date",
+        "hallGathering": "hall gathering",
+        "formal": "formal event",
+    }
+    venue_label = labels.get(venue, venue)
+    out: list[RationaleItemOut] = []
+    for item in items[:3]:
+        color = (item.color or "").strip()
+        cat = item.category
+        if cat == "outerwear":
+            reason = f"The {color} {cat} layers cleanly and lifts the whole look."
+        elif cat == "shoes":
+            reason = f"{color.capitalize()} {cat} ground the outfit for a {venue_label}."
+        elif cat in {"top", "dress"}:
+            if item.style in {"formal", "smartCasual"}:
+                reason = f"The {color} {cat} reads polished enough for a {venue_label}."
+            else:
+                reason = f"The {color} {cat} keeps it comfortable and on-theme."
+        elif cat == "bottom":
+            reason = f"The {color} {cat} anchor the silhouette."
+        elif cat == "accessory":
+            reason = f"A small {color} {cat} ties the set together."
+        else:
+            reason = f"The {color} {cat} balances the look."
+        if cohesion >= 0.75:
+            reason += " The palette stays cohesive."
+        out.append(RationaleItemOut(item_id=item.id, reason=reason))
+    return out
+
+
+def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
     refs = [
         OutfitItemRef(
             id=item.id,
@@ -483,6 +661,7 @@ def _to_outfit(candidate: Candidate) -> OutfitOut:
         )
         for item in candidate.items
     ]
+    best_ref, _ = _best_reference(candidate.items, venue)
     return OutfitOut(
         id=str(uuid.uuid4()),
         items=refs,
@@ -490,6 +669,8 @@ def _to_outfit(candidate: Candidate) -> OutfitOut:
         cohesion_score=round(candidate.cohesion, 4),
         overall_score=round(candidate.overall, 4),
         rationale=candidate.rationale,
+        rationale_items=_rationale_items(candidate.items, venue, candidate.cohesion),
+        inspiration=_inspiration_text(best_ref),
         try_on_url=None,
     )
 
@@ -521,6 +702,12 @@ def recommend_outfits(
     items: Sequence[WardrobeItem],
     venue: str,
     preferred_style: str | None = None,
+    feedback: str | None = None,
+    *,
+    weather: str | None = None,
+    time_of_day: str | None = None,
+    dress_code: str | None = None,
+    notes: str | None = None,
 ) -> tuple[list[OutfitOut], str | None]:
     wardrobe = list(items)
     warning: str | None = None
@@ -532,7 +719,10 @@ def recommend_outfits(
     if not has_core:
         warning = "Need a top+bottom or a dress for a complete look; returning the best available pieces."
 
-    rng = random.Random(venue + str(len(wardrobe)))
+    # Feedback changes the sample seed so refinement explores a fresh set of
+    # combinations, not just a re-ranking of the previous candidates.
+    seed_text = venue + str(len(wardrobe)) + (feedback or "")
+    rng = random.Random(seed_text)
     cores = generate_cores(wardrobe, rng)
     candidates: list[Candidate] = []
     seen: set[frozenset[str]] = set()
@@ -547,6 +737,11 @@ def recommend_outfits(
             coh = cohesion_score(combo, preferred_style)
             overall = 0.55 * v_fit + 0.45 * coh
             overall = min(1.0, overall + REFERENCE_BOOST * reference_similarity(combo, venue))
+            overall = max(0.0, min(1.0, overall + _feedback_delta(combo, feedback)))
+            overall = max(
+                0.0,
+                min(1.0, overall + _context_delta(combo, weather, time_of_day, dress_code, notes)),
+            )
             candidates.append(
                 Candidate(
                     items=combo,
@@ -579,7 +774,7 @@ def recommend_outfits(
     if target >= MIN_RETURN:
         target = min(MAX_RETURN, max(MIN_RETURN, target))
     selected = _select_diverse(candidates, target)
-    outfits = [_to_outfit(c) for c in selected]
+    outfits = [_to_outfit(c, venue) for c in selected]
 
     if len(outfits) < MIN_RETURN:
         warning = warning or "Not enough distinct combinations yet — add more wardrobe items for 2–3 looks."

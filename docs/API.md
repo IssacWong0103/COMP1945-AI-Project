@@ -80,6 +80,7 @@ type WardrobeItem = {
 
 type Profile = {
   bodyPhotoUrl: string | null;
+  facePhotoUrl: string | null;
   heightCm: number | null;
   weightKg: number | null;
   gender: string | null;
@@ -102,6 +103,8 @@ type Outfit = {
   cohesionScore: number;     // 0-1
   overallScore: number;      // 0-1
   rationale: string;
+  rationaleItems: { itemId: string; reason: string }[];  // per-item "why this works"
+  inspiration: string | null;                            // best-matching Fashion DB reference
   tryOnUrl: string | null;
 };
 
@@ -125,8 +128,17 @@ Error shape:
 ### `GET /api/health`
 
 ```json
-{ "status": "ok", "service": "ustyle" }
+{
+  "status": "ok",
+  "service": "ustyle",
+  "deepseekConfigured": true,
+  "kieConfigured": true,
+  "kiePublicUrlReady": false
+}
 ```
+
+`kiePublicUrlReady` is true only when `PUBLIC_BASE_URL` is set to a non-loopback
+origin so kie.ai can fetch uploaded images for virtual try-on.
 
 ### `GET /api/venues`
 
@@ -173,7 +185,8 @@ Response `200`: `WardrobeItem`
 
 `multipart/form-data`:
 
-- `file` optional body photo
+- `file` optional body photo (full-body)
+- `faceFile` optional face close-up photo
 - `heightCm` optional
 - `weightKg` optional
 - `gender` optional
@@ -191,11 +204,21 @@ Response `200`: `Profile` (defaults all null / empty if never set)
 ```json
 {
   "venue": "lecture",
-  "preferredStyle": "casual"
+  "preferredStyle": "casual",
+  "feedback": "Too formal — make it more casual.",
+  "weather": "hot",
+  "timeOfDay": "day",
+  "dressCode": "smartCasual",
+  "notes": "Standing all day, indoor event"
 }
 ```
 
 `preferredStyle` optional; fall back to profile.
+`feedback` optional; free-form refinement text that re-ranks and re-samples the
+candidate looks (see the Studio refinement loop below).
+`weather` optional (`hot` | `mild` | `rainy` | `cold`), `timeOfDay` optional
+(`day` | `evening`), `dressCode` optional (`casual` | `smartCasual` | `formal`),
+`notes` optional free-form occasion context.
 
 Response `200`:
 

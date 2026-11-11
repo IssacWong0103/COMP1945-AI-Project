@@ -68,6 +68,7 @@ def read_profile(db: Session = Depends(get_db)) -> ProfileOut:
 @router.put("", response_model=ProfileOut)
 async def update_profile(
     file: UploadFile | None = File(None),
+    faceFile: UploadFile | None = File(None),
     heightCm: str | None = Form(None),
     weightKg: str | None = Form(None),
     gender: str | None = Form(None),
@@ -80,6 +81,10 @@ async def update_profile(
     if file is not None and file.filename:
         _, image_url = await save_upload(file, "profile")
         profile.body_photo_url = image_url
+
+    if faceFile is not None and faceFile.filename:
+        _, image_url = await save_upload(faceFile, "profile")
+        profile.face_photo_url = image_url
 
     if heightCm is not None:
         profile.height_cm = _parse_number(heightCm, "heightCm", minimum=100, maximum=250)

@@ -87,6 +87,9 @@ class CamelModel(BaseModel):
 class HealthResponse(CamelModel):
     status: str
     service: str
+    deepseek_configured: bool | None = None
+    kie_configured: bool | None = None
+    kie_public_url_ready: bool | None = None
 
 
 class WardrobeItemOut(CamelModel):
@@ -116,6 +119,7 @@ class WardrobeItemUpdate(CamelModel):
 
 class ProfileOut(CamelModel):
     body_photo_url: str | None = None
+    face_photo_url: str | None = None
     height_cm: float | None = None
     weight_kg: float | None = None
     gender: str | None = None
@@ -136,6 +140,11 @@ class VenueListResponse(CamelModel):
 class RecommendRequest(CamelModel):
     venue: Venue
     preferred_style: str | None = Field(default=None, max_length=80)
+    feedback: str | None = Field(default=None, max_length=300)
+    weather: str | None = Field(default=None, max_length=40)
+    time_of_day: str | None = Field(default=None, max_length=40)
+    dress_code: str | None = Field(default=None, max_length=40)
+    notes: str | None = Field(default=None, max_length=200)
 
 
 class OutfitItemRef(CamelModel):
@@ -146,6 +155,11 @@ class OutfitItemRef(CamelModel):
     image_url: str
 
 
+class RationaleItemOut(CamelModel):
+    item_id: str
+    reason: str
+
+
 class OutfitOut(CamelModel):
     id: str
     items: list[OutfitItemRef]
@@ -153,6 +167,8 @@ class OutfitOut(CamelModel):
     cohesion_score: float = Field(ge=0, le=1)
     overall_score: float = Field(ge=0, le=1)
     rationale: str
+    rationale_items: list[RationaleItemOut] = []
+    inspiration: str | None = None
     try_on_url: str | None = None
 
 

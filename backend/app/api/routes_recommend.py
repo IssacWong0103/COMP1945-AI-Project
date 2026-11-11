@@ -40,7 +40,21 @@ def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> Recom
     items = db.scalars(select(WardrobeItem).order_by(WardrobeItem.created_at.asc())).all()
     profile = db.scalars(select(Profile).limit(1)).first()
     preferred = payload.preferred_style or (profile.preferred_style if profile else None)
-    outfits, warning = recommend_outfits(items, payload.venue, preferred)
+    feedback = (payload.feedback or "").strip() or None
+    weather = (payload.weather or "").strip() or None
+    time_of_day = (payload.time_of_day or "").strip() or None
+    dress_code = (payload.dress_code or "").strip() or None
+    notes = (payload.notes or "").strip() or None
+    outfits, warning = recommend_outfits(
+        items,
+        payload.venue,
+        preferred,
+        feedback,
+        weather=weather,
+        time_of_day=time_of_day,
+        dress_code=dress_code,
+        notes=notes,
+    )
     for outfit in outfits:
         _persist(db, outfit, payload.venue)
     db.commit()

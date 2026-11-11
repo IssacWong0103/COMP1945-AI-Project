@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { apiUrl } from '../api/client'
 import type { Outfit } from '../types'
 import { Button } from './Button'
@@ -12,6 +13,8 @@ type Props = {
   tryOnUrl: string | null
   error: string | null
   beforeUrl?: string | null
+  hasBodyPhoto: boolean
+  hasFacePhoto: boolean
   onStart: () => void
   onRetry: () => void
   onSave: () => void
@@ -25,6 +28,8 @@ export function TryOnDrawer({
   tryOnUrl,
   error,
   beforeUrl,
+  hasBodyPhoto,
+  hasFacePhoto,
   onStart,
   onRetry,
   onSave,
@@ -83,9 +88,23 @@ export function TryOnDrawer({
         <div className="space-y-3 p-4">
           {status === 'idle' ? (
             <>
-              <Button type="button" className="w-full" onClick={onStart}>
-                Start try-on
-              </Button>
+              <ul className="space-y-1.5 text-xs text-muted">
+                <CheckRow ok={hasBodyPhoto} label="Full-body photo" />
+                <CheckRow ok={hasFacePhoto} label="Face close-up (recommended)" />
+                <CheckRow ok={outfit.items.length >= 2} label="Outfit pieces ready" />
+              </ul>
+              {hasBodyPhoto ? (
+                <Button type="button" className="w-full" onClick={onStart}>
+                  Start try-on
+                </Button>
+              ) : (
+                <Link
+                  to="/settings"
+                  className="inline-flex w-full items-center justify-center rounded-lg bg-navy px-3.5 py-2 text-sm font-semibold text-white no-underline"
+                >
+                  Add a full-body photo in Settings
+                </Link>
+              )}
               <p className="text-xs text-muted">Usually under a minute and a half.</p>
             </>
           ) : null}
@@ -129,5 +148,14 @@ export function TryOnDrawer({
         </div>
       </div>
     </div>
+  )
+}
+
+function CheckRow({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span className={ok ? 'text-success' : 'text-muted'}>{ok ? '✓' : '•'}</span>
+      <span>{label}</span>
+    </li>
   )
 }

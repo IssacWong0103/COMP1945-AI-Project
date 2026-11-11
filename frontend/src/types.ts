@@ -42,6 +42,7 @@ export type WardrobeItem = {
 
 export type Profile = {
   bodyPhotoUrl: string | null
+  facePhotoUrl: string | null
   heightCm: number | null
   weightKg: number | null
   gender: string | null
@@ -57,6 +58,11 @@ export type OutfitItemRef = {
   imageUrl: string
 }
 
+export type RationaleItem = {
+  itemId: string
+  reason: string
+}
+
 export type Outfit = {
   id: string
   items: OutfitItemRef[]
@@ -64,6 +70,8 @@ export type Outfit = {
   cohesionScore: number
   overallScore: number
   rationale: string
+  rationaleItems?: RationaleItem[]
+  inspiration?: string | null
   tryOnUrl: string | null
 }
 
@@ -76,11 +84,19 @@ export type VenueInfo = {
 export type HealthResponse = {
   status: string
   service: string
+  deepseekConfigured?: boolean
+  kieConfigured?: boolean
+  kiePublicUrlReady?: boolean
 }
 
 export type RecommendRequest = {
   venue: string
   preferredStyle?: string
+  feedback?: string
+  weather?: string
+  timeOfDay?: string
+  dressCode?: string
+  notes?: string
 }
 
 export type RecommendResponse = {

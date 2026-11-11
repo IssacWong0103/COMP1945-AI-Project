@@ -43,6 +43,7 @@ async def create_try_on(payload: TryOnRequest, db: Session = Depends(get_db)) ->
         status, try_on_url, task_id = await generate_tryon(
             outfit_id=outfit.id,
             body_photo_url=body_photo,
+            face_photo_url=profile.face_photo_url if profile else None,
             garments=items,
             gender=profile.gender if profile else None,
             skin_tone=profile.skin_tone if profile else None,
