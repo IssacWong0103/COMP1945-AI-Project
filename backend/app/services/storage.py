@@ -23,6 +23,9 @@ def ensure_upload_dirs() -> None:
 
 def public_url_for(image_url: str) -> str | None:
     """Absolute URL kie.ai can fetch, or None if we only have a local path."""
+    image_url = (image_url or "").strip()
+    if not image_url:
+        return None
     if image_url.startswith("http://") or image_url.startswith("https://"):
         return image_url
     if not settings.public_uploads_reachable():

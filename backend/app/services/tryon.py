@@ -236,9 +236,15 @@ async def _create_kie_task(prompt: str, input_urls: list[str]) -> str:
         response = await client.post(KIE_CREATE_URL, headers=headers, json=body)
         response.raise_for_status()
         payload = response.json()
+    code = payload.get("code")
+    if code is not None and str(code) != "200":
+        message = str(payload.get("msg") or "kie.ai rejected the request")
+        logger.warning("kie.ai createTask rejected (%s): %s", code, message)
+        raise TryOnFailed(message)
     data = payload.get("data") if isinstance(payload.get("data"), dict) else payload
     task_id = (data or {}).get("taskId") or (data or {}).get("task_id") or payload.get("taskId")
     if not task_id:
+        logger.warning("kie.ai createTask returned no taskId: %s", str(payload)[:500])
         raise TryOnFailed("kie.ai did not return a taskId")
     return str(task_id)
 
@@ -322,9 +328,10 @@ async def generate_tryon(
         body_public = public_url_for(body_photo_url or "")
         if body_public:
             input_urls.append(body_public)
-        face_public = public_url_for(face_photo_url or "")
-        if face_public:
-            input_urls.append(face_public)
+        if face_photo_url:
+            face_public = public_url_for(face_photo_url)
+            if face_public:
+                input_urls.append(face_public)
         for item in garments:
             url = public_url_for(str(item.get("imageUrl") or item.get("image_url") or ""))
             if url:
