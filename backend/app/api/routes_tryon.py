@@ -31,6 +31,9 @@ async def create_try_on(payload: TryOnRequest, db: Session = Depends(get_db)) ->
     if not isinstance(items, list) or not items:
         raise HTTPException(status_code=400, detail="Outfit has no garments to try on.")
 
+    styling_note = snapshot.get("inspiration") if isinstance(snapshot, dict) else None
+    model_reference_url = snapshot.get("modelReferenceUrl") if isinstance(snapshot, dict) else None
+
     profile = db.get(Profile, 1)
     body_photo = profile.body_photo_url if profile else None
     if not body_photo:
@@ -45,6 +48,8 @@ async def create_try_on(payload: TryOnRequest, db: Session = Depends(get_db)) ->
             body_photo_url=body_photo,
             face_photo_url=profile.face_photo_url if profile else None,
             garments=items,
+            styling_note=styling_note,
+            model_reference_url=model_reference_url,
             gender=profile.gender if profile else None,
             skin_tone=profile.skin_tone if profile else None,
             height_cm=profile.height_cm if profile else None,

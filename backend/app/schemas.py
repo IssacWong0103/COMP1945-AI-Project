@@ -169,6 +169,7 @@ class OutfitOut(CamelModel):
     rationale: str
     rationale_items: list[RationaleItemOut] = []
     inspiration: str | None = None
+    model_reference_url: str | None = None
     try_on_url: str | None = None
 
 

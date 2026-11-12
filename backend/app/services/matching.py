@@ -688,6 +688,7 @@ def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
         rationale=candidate.rationale,
         rationale_items=_rationale_items(candidate.items, venue, candidate.cohesion),
         inspiration=_inspiration_text(best_ref),
+        model_reference_url=fashion_index.model_reference_url(best_ref),
         try_on_url=None,
     )
 

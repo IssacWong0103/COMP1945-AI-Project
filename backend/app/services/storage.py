@@ -13,7 +13,7 @@ MAX_UPLOAD_BYTES = 12 * 1024 * 1024
 MAX_IMAGE_EDGE = 2048
 JPEG_QUALITY = 88
 ALLOWED_FORMATS = {"JPEG": "jpg", "PNG": "jpg", "WEBP": "jpg"}
-UPLOAD_SUBDIRS = ("wardrobe", "profile", "tryon")
+UPLOAD_SUBDIRS = ("wardrobe", "profile", "tryon", "reference")
 
 
 def ensure_upload_dirs() -> None:
@@ -131,3 +131,26 @@ def save_pil_image(image: Image.Image, subdir: str, stem: str | None = None) -> 
     dest = settings.uploads_dir / subdir / name
     image.save(dest, format="JPEG", quality=JPEG_QUALITY, optimize=True)
     return f"/uploads/{subdir}/{name}"
+
+
+def save_reference_copy(src_path: Path, stem: str) -> str | None:
+    """Copy an external image (e.g. a fashion-DB model photo) into uploads.
+
+    Returns the /uploads/... path, or None if the source cannot be read.
+    """
+    try:
+        image = Image.open(src_path)
+        image.load()
+        image = ImageOps.exif_transpose(image) or image
+        if image.mode not in {"RGB", "L"}:
+            image = image.convert("RGB")
+        elif image.mode == "L":
+            image = image.convert("RGB")
+    except Exception:  # noqa: BLE001
+        return None
+    image = _resize(image)
+    ensure_upload_dirs()
+    name = f"{stem}.jpg"
+    dest = settings.uploads_dir / "reference" / name
+    image.save(dest, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+    return f"/uploads/reference/{name}"

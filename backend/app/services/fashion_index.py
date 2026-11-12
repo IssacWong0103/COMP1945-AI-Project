@@ -90,6 +90,19 @@ def image_path_for(caption: dict | None) -> Path | None:
     return root / relative
 
 
+def model_reference_url(caption: dict | None) -> str | None:
+    """Copy the matched model image into uploads and return its public path."""
+    if not caption or not settings.fashion_pass_model_reference:
+        return None
+    image_path = image_path_for(caption)
+    if not image_path or not image_path.is_file():
+        return None
+    from app.services.storage import save_reference_copy
+
+    stem = "ref-" + re.sub(r"[^A-Za-z0-9_.-]+", "_", str(caption.get("assetId") or "model"))[:80]
+    return save_reference_copy(image_path, stem)
+
+
 @lru_cache(maxsize=1)
 def load_captions() -> list[dict]:
     path = settings.fashion_captions_file

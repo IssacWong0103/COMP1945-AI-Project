@@ -297,6 +297,8 @@ async def generate_tryon(
     body_photo_url: str | None,
     face_photo_url: str | None = None,
     garments: list[dict],
+    styling_note: str | None = None,
+    model_reference_url: str | None = None,
     gender: str | None = None,
     skin_tone: str | None = None,
     height_cm: float | None = None,
@@ -321,6 +323,14 @@ async def generate_tryon(
             " A separate close-up face photo is provided as an additional reference; "
             "use it to preserve the exact facial identity."
         )
+    if styling_note:
+        prompt += f" Style guidance from a reference model look: {styling_note.strip()}."
+    if model_reference_url:
+        prompt += (
+            " A reference model photo is provided as a styling-only reference; "
+            "copy only the model's styling, pose, layering, tucks, cuffs and proportions, "
+            "but keep the user's exact garments, colours, and identity unchanged."
+        )
 
     can_call_kie = bool(settings.kie_api_key.strip()) and settings.public_uploads_reachable()
     input_urls: list[str] = []
@@ -336,6 +346,10 @@ async def generate_tryon(
             url = public_url_for(str(item.get("imageUrl") or item.get("image_url") or ""))
             if url:
                 input_urls.append(url)
+        if model_reference_url:
+            ref_public = public_url_for(model_reference_url)
+            if ref_public:
+                input_urls.append(ref_public)
         if len(input_urls) < 2:
             can_call_kie = False
 

@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     fashion_images_root: str = ""
     fashion_visual_rerank: bool = True
     fashion_visual_rerank_max: int = 1
+    fashion_pass_model_reference: bool = True
 
     @property
     def db_path(self) -> Path:
