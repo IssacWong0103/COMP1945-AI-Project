@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import json
 import logging
 import re
@@ -26,6 +27,12 @@ Rules:
 - cut is silhouette such as relaxed, slim, oversized, straight, cropped, tailored.
 - description: under 20 words, factual, never sexual.
 - If unsure, pick the closest allowed enum value.
+"""
+
+STYLING_SYSTEM_PROMPT = """You are a stylist for USTyle, a campus outfit assistant.
+Look at the model photo and describe HOW the outfit is styled: layering, tucks,
+cuffs, socks, accessories, and proportions. Give 1-2 short factual sentences about
+styling technique only. Describe only what is visible; do not list the garments again.
 """
 
 CATEGORY_ALIASES: dict[str, Category] = {
@@ -195,6 +202,29 @@ def _extract_json(text: str) -> dict:
     return json.loads(cleaned[start : end + 1])
 
 
+def _image_to_data_url(raw: bytes) -> str:
+    """Return a base64 data URL in a DeepSeek-supported format.
+
+    DeepSeek vision accepts JPEG/PNG/GIF/WebP. Re-encode anything else
+    (e.g. AVIF, HEIC) to PNG so mislabeled files still work.
+    """
+    import io
+
+    try:
+        with Image.open(io.BytesIO(raw)) as img:
+            fmt = (img.format or "").upper()
+        mime = {"JPEG": "jpeg", "PNG": "png", "GIF": "gif", "WEBP": "webp"}.get(fmt)
+        if mime:
+            return f"data:image/{mime};base64," + base64.b64encode(raw).decode("ascii")
+        with Image.open(io.BytesIO(raw)) as img:
+            img = img.convert("RGB")
+            buffer = io.BytesIO()
+            img.save(buffer, format="PNG")
+            return "data:image/png;base64," + base64.b64encode(buffer.getvalue()).decode("ascii")
+    except Exception:
+        return "data:image/jpeg;base64," + base64.b64encode(raw).decode("ascii")
+
+
 def _dominant_color_name(image_path: Path) -> str:
     try:
         with Image.open(image_path) as img:
@@ -332,11 +362,8 @@ async def describe_garment(
         logger.info("DEEPSEEK_API_KEY missing; using local garment heuristics")
         return fallback
 
-    import base64
-
     raw = image_path.read_bytes()
-    b64 = base64.b64encode(raw).decode("ascii")
-    data_url = f"data:image/jpeg;base64,{b64}"
+    data_url = _image_to_data_url(raw)
     user_text = "Describe this clothing item as strict JSON."
     if notes:
         user_text += f" User notes: {notes.strip()[:300]}"
@@ -374,3 +401,47 @@ async def describe_garment(
     except Exception as exc:  # noqa: BLE001
         logger.warning("DeepSeek Flash tagging failed (%s); using heuristics", exc)
         return fallback
+
+
+def describe_styling_sync(image_path: Path, venue: str, context: str) -> str | None:
+    """One-shot read of how a model styled an outfit (blocking).
+
+    Returns a short styling note, or None when the key/image is unavailable or
+    the call fails. Used for the top matched model image during recommendation.
+    """
+    api_key = settings.deepseek_api_key.strip()
+    if not api_key or not image_path.is_file():
+        return None
+    raw = image_path.read_bytes()
+    data_url = _image_to_data_url(raw)
+    user_text = (
+        f"Venue: {venue}. User's outfit pieces: {context}.\n"
+        "Describe how the model styled this look."
+    )
+    body = {
+        "model": DEEPSEEK_MODEL,
+        "temperature": 0.2,
+        "messages": [
+            {"role": "system", "content": STYLING_SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": user_text},
+                    {"type": "image_url", "image_url": {"url": data_url}},
+                ],
+            },
+        ],
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    try:
+        response = httpx.post(DEEPSEEK_URL, headers=headers, json=body, timeout=45.0)
+        response.raise_for_status()
+        content = response.json()["choices"][0]["message"]["content"]
+        note = (content or "").strip()
+        return note[:300] or None
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Styling re-read failed (%s)", exc)
+        return None

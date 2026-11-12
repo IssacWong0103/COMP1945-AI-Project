@@ -23,6 +23,10 @@ class Settings(BaseSettings):
     deepseek_api_key: str = ""
     kie_api_key: str = ""
     public_base_url: str = ""
+    fashion_captions_path: str = ""
+    fashion_images_root: str = ""
+    fashion_visual_rerank: bool = True
+    fashion_visual_rerank_max: int = 1
 
     @property
     def db_path(self) -> Path:
@@ -41,6 +45,19 @@ class Settings(BaseSettings):
     @property
     def reference_outfits_path(self) -> Path:
         return Path(__file__).resolve().parent / "data" / "reference_outfits.json"
+
+    @property
+    def fashion_captions_file(self) -> Path:
+        if self.fashion_captions_path.strip():
+            return Path(self.fashion_captions_path.strip()).expanduser()
+        return Path(__file__).resolve().parent / "data" / "captions.jsonl"
+
+    @property
+    def fashion_images_root_dir(self) -> Path | None:
+        if self.fashion_images_root.strip():
+            return Path(self.fashion_images_root.strip()).expanduser()
+        default = Path.home() / "Desktop/COMP1945/Project/Fashion DB - Sorted"
+        return default if default.is_dir() else None
 
     def normalized_public_base_url(self) -> str:
         return self.public_base_url.strip().rstrip("/")

@@ -14,6 +14,8 @@ from pathlib import Path
 from app.config import settings
 from app.models import WardrobeItem
 from app.schemas import PREFERRED_STYLES, OutfitItemRef, OutfitOut, RationaleItemOut
+from app.services import fashion_index
+from app.services import vlm
 
 logger = logging.getLogger(__name__)
 
@@ -357,6 +359,13 @@ def _outfit_tokens(items: Sequence[WardrobeItem]) -> set[str]:
     return tokens
 
 
+def _outfit_text(items: Sequence[WardrobeItem]) -> str:
+    return " ".join(
+        " ".join((item.category, item.color, item.cut, item.style, item.description))
+        for item in items
+    )
+
+
 def reference_similarity(items: Sequence[WardrobeItem], venue: str) -> float:
     return _best_reference(items, venue)[1]
 
@@ -364,11 +373,14 @@ def reference_similarity(items: Sequence[WardrobeItem], venue: str) -> float:
 def _best_reference(
     items: Sequence[WardrobeItem], venue: str
 ) -> tuple[dict | None, float]:
+    caption, score = fashion_index.best_caption(_outfit_text(items), venue)
+    if caption is not None and score > 0:
+        return caption, score
+
+    # Fallback: hand-seeded reference outfits (used when captions are missing).
     refs = load_reference_outfits()
-    if not refs:
-        return None, 0.0
     outfit_tokens = _outfit_tokens(items)
-    if not outfit_tokens:
+    if not refs or not outfit_tokens:
         return None, 0.0
     best_ref: dict | None = None
     best = 0.0
@@ -600,6 +612,11 @@ def _attach_optionals(
 def _inspiration_text(ref: dict | None) -> str | None:
     if not ref:
         return None
+    if "searchTextObserved" in ref or "descriptionObserved" in ref:
+        desc = str(ref.get("descriptionObserved") or "").strip()
+        if desc:
+            return desc[:240]
+        return str(ref.get("searchTextObserved") or "").strip()[:240]
     category = str(ref.get("fashionDbCategory") or "").replace("_", " ")
     style = str(ref.get("style") or "")
     pieces: list[str] = []
@@ -698,6 +715,34 @@ def _select_diverse(ranked: list[Candidate], count: int) -> list[Candidate]:
     return picked
 
 
+def _apply_visual_styling(
+    outfits: list[OutfitOut],
+    candidates: list[Candidate],
+    venue: str,
+) -> None:
+    """Re-read the top matched model images and append a styling note.
+
+    Steps 5/6 of the pipeline: after text retrieval shortlists a model outfit,
+    read its image to learn how the model actually styled it. Capped to
+    settings.fashion_visual_rerank_max outfits; skips silently when images or
+    the VLM key are unavailable.
+    """
+    max_count = max(0, min(int(settings.fashion_visual_rerank_max), len(outfits)))
+    for index in range(max_count):
+        outfit = outfits[index]
+        candidate = candidates[index]
+        best_ref, _ = _best_reference(candidate.items, venue)
+        image_path = fashion_index.image_path_for(best_ref)
+        if not image_path or not image_path.is_file():
+            continue
+        note = vlm.describe_styling_sync(
+            image_path, venue, _outfit_text(candidate.items)
+        )
+        if note:
+            prefix = outfit.inspiration or ""
+            outfit.inspiration = f"{prefix} Model styling: {note}".strip()
+
+
 def recommend_outfits(
     items: Sequence[WardrobeItem],
     venue: str,
@@ -775,6 +820,9 @@ def recommend_outfits(
         target = min(MAX_RETURN, max(MIN_RETURN, target))
     selected = _select_diverse(candidates, target)
     outfits = [_to_outfit(c, venue) for c in selected]
+
+    if settings.fashion_visual_rerank:
+        _apply_visual_styling(outfits, selected, venue)
 
     if len(outfits) < MIN_RETURN:
         warning = warning or "Not enough distinct combinations yet — add more wardrobe items for 2–3 looks."

@@ -38,6 +38,9 @@ backend/data/*.db-journal
 backend/data/*.db-wal
 backend/data/*.db-shm
 
+# Fashion DB captions (generated offline; keep out of VCS)
+backend/app/data/captions.jsonl
+
 # Frontend
 node_modules/
 dist/
