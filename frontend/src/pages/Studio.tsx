@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   friendlyError,
@@ -17,7 +17,6 @@ import { SwapDrawer } from '../components/SwapDrawer'
 import { TryOnDrawer, type TryOnDrawerStatus } from '../components/TryOnDrawer'
 import { Button } from '../components/Button'
 import {
-  DRESS_CODE_OPTIONS,
   FALLBACK_VENUES,
   FEEDBACK_SUGGESTIONS,
   STYLE_OPTIONS,
@@ -29,6 +28,7 @@ import {
   listLocalSavedLooks,
   pushActivity,
   pushAlert,
+  removeLocalLook,
   saveLocalLook,
 } from '../lib/activityStore'
 import { primaryCtaLabel } from '../studio/actionLayout'
@@ -37,21 +37,33 @@ import {
   INITIAL_STUDIO_STATE,
   reduceStudioState,
   type StudioEvent,
+  type StudioMachineState,
 } from '../studio/stateMachine'
+import { loadStudioSession, saveStudioSession, type StudioSessionSnapshot } from '../studio/sessionStore'
 import type { Outfit, VenueInfo, WardrobeItem } from '../types'
+
+const SELECT_CLASS =
+  'w-full appearance-none rounded-lg border border-line bg-surface px-3 py-2 pr-9 text-sm text-ink outline-none transition focus:border-navy disabled:opacity-50'
+
+const TEXTAREA_CLASS =
+  'mt-1.5 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink outline-none transition focus:border-navy disabled:opacity-50'
 
 export function Studio() {
   const [params, setParams] = useSearchParams()
   const venueFromUrl = params.get('venue') ?? ''
+  const [restored] = useState<StudioSessionSnapshot | null>(() => loadStudioSession())
 
-  const [machine, dispatch] = useReducer(reduceStudioState, INITIAL_STUDIO_STATE)
+  const [machine, dispatch] = useReducer(
+    reduceStudioState,
+    restored?.machine ?? INITIAL_STUDIO_STATE,
+  )
   const [venues, setVenues] = useState<VenueInfo[]>(FALLBACK_VENUES)
-  const [venue, setVenue] = useState(venueFromUrl)
-  const [styleOverride, setStyleOverride] = useState('')
-  const [fineTuneOpen, setFineTuneOpen] = useState(false)
-  const [outfits, setOutfits] = useState<Outfit[] | null>(null)
+  const [venue, setVenue] = useState(venueFromUrl || restored?.venue || '')
+  const [styleOverride, setStyleOverride] = useState(restored?.styleOverride ?? '')
+  const [fineTune, setFineTune] = useState(restored?.fineTune ?? '')
+  const [outfits, setOutfits] = useState<Outfit[] | null>(restored?.outfits ?? null)
   const [tick, setTick] = useState(0)
-  const [elapsedMs, setElapsedMs] = useState<number | null>(null)
+  const [elapsedMs, setElapsedMs] = useState<number | null>(restored?.elapsedMs ?? null)
   const [hasBodyPhoto, setHasBodyPhoto] = useState<boolean | null>(null)
   const [bodyPhotoUrl, setBodyPhotoUrl] = useState<string | null>(null)
   const [closetItems, setClosetItems] = useState<WardrobeItem[]>([])
@@ -60,18 +72,45 @@ export function Studio() {
   const [tryOnUrl, setTryOnUrl] = useState<string | null>(null)
   const [tryOnError, setTryOnError] = useState<string | null>(null)
   const [tryOnElapsed, setTryOnElapsed] = useState(0)
-  const [feedbackText, setFeedbackText] = useState('')
-  const [feedbackHistory, setFeedbackHistory] = useState<{ id: string; text: string }[]>([])
-  const [weather, setWeather] = useState('')
-  const [timeOfDay, setTimeOfDay] = useState('')
-  const [dressCode, setDressCode] = useState('')
-  const [occasionNotes, setOccasionNotes] = useState('')
+  const [feedbackText, setFeedbackText] = useState(restored?.feedbackText ?? '')
+  const [feedbackHistory, setFeedbackHistory] = useState<{ id: string; text: string }[]>(
+    restored?.feedbackHistory ?? [],
+  )
+  const [weather, setWeather] = useState(restored?.weather ?? '')
+  const [timeOfDay, setTimeOfDay] = useState(restored?.timeOfDay ?? '')
+  const fineTuneRef = useRef<HTMLTextAreaElement | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const lastFeedbackRef = useRef<string | null>(null)
 
   useEffect(() => {
     document.title = 'Studio — USTyle'
   }, [])
+
+  useEffect(() => {
+    saveStudioSession({
+      venue,
+      styleOverride,
+      weather,
+      timeOfDay,
+      fineTune,
+      outfits,
+      machine,
+      elapsedMs,
+      feedbackText,
+      feedbackHistory,
+    })
+  }, [
+    venue,
+    styleOverride,
+    weather,
+    timeOfDay,
+    fineTune,
+    outfits,
+    machine,
+    elapsedMs,
+    feedbackText,
+    feedbackHistory,
+  ])
 
   useEffect(() => {
     if (venueFromUrl && venueFromUrl !== venue) setVenue(venueFromUrl)
@@ -189,7 +228,6 @@ export function Studio() {
         feedback?: string
         weather?: string
         timeOfDay?: string
-        dressCode?: string
         notes?: string
       } = { venue }
       if (styleOverride) payload.preferredStyle = styleOverride
@@ -197,11 +235,20 @@ export function Studio() {
       if (feedback) payload.feedback = feedback
       if (weather) payload.weather = weather
       if (timeOfDay) payload.timeOfDay = timeOfDay
-      if (dressCode && dressCode !== 'none') payload.dressCode = dressCode
-      if (occasionNotes.trim()) payload.notes = occasionNotes.trim()
+      if (fineTune.trim()) payload.notes = fineTune.trim()
       const result = await recommend(payload)
       setOutfits(result.outfits)
       setElapsedMs(result.elapsedMs)
+      const persistBase = {
+        venue,
+        styleOverride,
+        weather,
+        timeOfDay,
+        fineTune,
+        elapsedMs: result.elapsedMs,
+        feedbackText,
+        feedbackHistory,
+      }
       if (result.warning && result.outfits.length > 0) {
         emit({ type: 'RUN_PARTIAL', outfitCount: result.outfits.length, warning: result.warning })
         track('studio_run_partial', { count: result.outfits.length })
@@ -211,6 +258,16 @@ export function Studio() {
           detail: result.warning,
           href: '/studio',
         })
+        const nextMachine: StudioMachineState = {
+          phase: 'partial',
+          overlay: 'none',
+          activeOutfitId: null,
+          activeSlot: null,
+          lastError: null,
+          lastWarning: result.warning,
+          outfitCount: result.outfits.length,
+        }
+        saveStudioSession({ ...persistBase, outfits: result.outfits, machine: nextMachine })
       } else if (result.outfits.length === 0) {
         emit({
           type: 'RUN_FAILURE',
@@ -224,6 +281,16 @@ export function Studio() {
           detail: 'Your closet may be too small for a full look.',
           href: '/wardrobe',
         })
+        const nextMachine: StudioMachineState = {
+          phase: 'failure',
+          overlay: 'none',
+          activeOutfitId: null,
+          activeSlot: null,
+          lastError: 'No outfits returned. Add more wardrobe items and retry.',
+          lastWarning: null,
+          outfitCount: 0,
+        }
+        saveStudioSession({ ...persistBase, outfits: null, machine: nextMachine })
       } else {
         emit({ type: 'RUN_SUCCESS', outfitCount: result.outfits.length })
         track('studio_run_completed', {
@@ -236,6 +303,16 @@ export function Studio() {
           detail: `${(result.elapsedMs / 1000).toFixed(1)}s`,
           href: '/studio',
         })
+        const nextMachine: StudioMachineState = {
+          phase: 'results',
+          overlay: 'none',
+          activeOutfitId: null,
+          activeSlot: null,
+          lastError: null,
+          lastWarning: null,
+          outfitCount: result.outfits.length,
+        }
+        saveStudioSession({ ...persistBase, outfits: result.outfits, machine: nextMachine })
       }
     } catch (err) {
       const message = friendlyError(err)
@@ -247,6 +324,27 @@ export function Studio() {
         title: 'Studio generation failed',
         detail: message,
         href: '/studio',
+      })
+      const nextMachine: StudioMachineState = {
+        phase: 'failure',
+        overlay: 'none',
+        activeOutfitId: null,
+        activeSlot: null,
+        lastError: message,
+        lastWarning: null,
+        outfitCount: 0,
+      }
+      saveStudioSession({
+        venue,
+        styleOverride,
+        weather,
+        timeOfDay,
+        fineTune,
+        outfits: null,
+        elapsedMs: null,
+        feedbackText,
+        feedbackHistory,
+        machine: nextMachine,
       })
     }
   }
@@ -288,6 +386,22 @@ export function Studio() {
     pushActivity({
       kind: 'look_saved',
       title: 'Look saved',
+      detail: selectedVenue?.label ?? venue,
+      href: '/looks',
+    })
+  }
+
+  function onUnsave(outfit: Outfit) {
+    removeLocalLook(outfit.id)
+    setSavedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(outfit.id)
+      return next
+    })
+    track('studio_look_unsaved', { outfitId: outfit.id, venue })
+    pushActivity({
+      kind: 'look_removed',
+      title: 'Look unsaved',
       detail: selectedVenue?.label ?? venue,
       href: '/looks',
     })
@@ -403,7 +517,7 @@ export function Studio() {
             onRetry={onRetry}
             onAdjust={() => {
               emit({ type: 'EDIT_INPUTS' })
-              setFineTuneOpen(true)
+              fineTuneRef.current?.focus()
             }}
           />
         </div>
@@ -475,81 +589,81 @@ export function Studio() {
           </div>
 
           <div className="mt-5">
-            <p className="text-xs font-medium text-muted">Occasion details (optional)</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {WEATHER_OPTIONS.map((option) => (
-                <ContextChip
-                  key={option.value}
-                  selected={weather === option.value}
-                  disabled={busy}
-                  onClick={() => {
-                    setWeather(weather === option.value ? '' : option.value)
-                    emit({ type: 'EDIT_INPUTS' })
-                  }}
-                >
-                  <span aria-hidden>{option.icon}</span> {option.label}
-                </ContextChip>
-              ))}
+            <label htmlFor="weather" className="text-xs font-medium text-muted">
+              Weather (optional)
+            </label>
+            <div className="relative mt-1.5">
+              <select
+                id="weather"
+                name="weather"
+                value={weather}
+                disabled={busy}
+                onChange={(event) => {
+                  setWeather(event.target.value)
+                  emit({ type: 'EDIT_INPUTS' })
+                }}
+                className={SELECT_CLASS}
+              >
+                <option value="">Select weather</option>
+                {WEATHER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.icon} {option.label}
+                  </option>
+                ))}
+              </select>
+              <SelectChevron />
             </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {TIME_OF_DAY_OPTIONS.map((option) => (
-                <ContextChip
-                  key={option.value}
-                  selected={timeOfDay === option.value}
-                  disabled={busy}
-                  onClick={() => {
-                    setTimeOfDay(timeOfDay === option.value ? '' : option.value)
-                    emit({ type: 'EDIT_INPUTS' })
-                  }}
-                >
-                  {option.label}
-                </ContextChip>
-              ))}
-            </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {DRESS_CODE_OPTIONS.map((option) => (
-                <ContextChip
-                  key={option.value}
-                  selected={dressCode === option.value}
-                  disabled={busy}
-                  onClick={() => {
-                    setDressCode(dressCode === option.value ? '' : option.value)
-                    emit({ type: 'EDIT_INPUTS' })
-                  }}
-                >
-                  {option.label}
-                </ContextChip>
-              ))}
-            </div>
-            <input
-              value={occasionNotes}
-              onChange={(event) => {
-                setOccasionNotes(event.target.value)
-                emit({ type: 'EDIT_INPUTS' })
-              }}
-              disabled={busy}
-              placeholder="Anything else? e.g. standing all day, indoor event"
-              className="mt-2 w-full rounded-lg border border-line bg-canvas px-3 py-2 text-sm text-ink outline-none transition focus:border-navy disabled:opacity-50"
-            />
           </div>
 
           <div className="mt-5">
-            <button
-              type="button"
-              className="text-xs font-semibold text-navy"
-              onClick={() => {
-                setFineTuneOpen((open) => !open)
-                emit({ type: 'OPEN_FINE_TUNE' })
+            <label htmlFor="timeOfDay" className="text-xs font-medium text-muted">
+              Time of day (optional)
+            </label>
+            <div className="relative mt-1.5">
+              <select
+                id="timeOfDay"
+                name="timeOfDay"
+                value={timeOfDay}
+                disabled={busy}
+                onChange={(event) => {
+                  setTimeOfDay(event.target.value)
+                  emit({ type: 'EDIT_INPUTS' })
+                }}
+                className={SELECT_CLASS}
+              >
+                <option value="">Select time of day</option>
+                {TIME_OF_DAY_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+              <SelectChevron />
+            </div>
+          </div>
+
+          <div className="mt-5">
+            <label htmlFor="fineTune" className="text-xs font-medium text-muted">
+              Fine-tune (optional)
+            </label>
+            <textarea
+              ref={fineTuneRef}
+              id="fineTune"
+              name="fineTune"
+              rows={3}
+              value={fineTune}
+              disabled={busy}
+              placeholder="Anything else? e.g. standing all day, prefer breathable fabrics"
+              onChange={(event) => {
+                setFineTune(event.target.value)
+                emit({ type: 'EDIT_INPUTS' })
               }}
-            >
-              {fineTuneOpen ? 'Hide fine-tune' : 'Fine-tune (optional)'}
-            </button>
-            {fineTuneOpen ? (
-              <p className="mt-2 rounded-lg bg-canvas px-3 py-2 text-xs text-muted">
-                Using {closetItems.length} closet pieces. Occasion details and style steer matching;
-                after results appear you can refine with free-form feedback.
-              </p>
-            ) : null}
+              className={TEXTAREA_CLASS}
+            />
+            <p className="mt-1.5 text-xs text-muted">
+              Using {closetItems.length} closet pieces. After results appear you can refine with
+              free-form feedback.
+            </p>
           </div>
 
           <div className="mt-6">
@@ -589,7 +703,7 @@ export function Studio() {
                 secondary: { id: 'openCloset', label: 'Open closet', to: '/wardrobe' },
               }}
               onRetry={onRetry}
-              onAdjust={() => setFineTuneOpen(true)}
+              onAdjust={() => fineTuneRef.current?.focus()}
             />
           ) : null}
 
@@ -631,6 +745,7 @@ export function Studio() {
                     onTryOn={() => openTryOn(outfit)}
                     onSwap={() => onOpenSwap(outfit)}
                     onSave={() => onSave(outfit)}
+                    onUnsave={() => onUnsave(outfit)}
                   />
                 ))}
               </div>
@@ -720,9 +835,11 @@ export function Studio() {
           error={tryOnError}
           beforeUrl={bodyPhotoUrl}
           hasBodyPhoto={hasBodyPhoto === true}
+          saved={savedIds.has(activeOutfit.id)}
           onStart={() => void startTryOn()}
           onRetry={() => void startTryOn()}
           onSave={() => onSave(activeOutfit)}
+          onUnsave={() => onUnsave(activeOutfit)}
           onClose={() => {
             abortRef.current?.abort()
             emit({ type: 'CLOSE_OVERLAY' })
@@ -733,30 +850,21 @@ export function Studio() {
   )
 }
 
-function ContextChip({
-  children,
-  selected,
-  disabled,
-  onClick,
-}: {
-  children: ReactNode
-  selected: boolean
-  disabled?: boolean
-  onClick: () => void
-}) {
+function SelectChevron() {
   return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      disabled={disabled}
-      onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
-        selected
-          ? 'border-navy bg-navy text-white'
-          : 'border-line bg-canvas text-ink hover:border-navy/40'
-      }`}
+    <svg
+      viewBox="0 0 20 20"
+      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+      fill="none"
+      aria-hidden
     >
-      {children}
-    </button>
+      <path
+        d="M5.5 7.5 10 12l4.5-4.5"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   )
 }

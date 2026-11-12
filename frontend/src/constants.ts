@@ -16,13 +16,19 @@ export const GENDER_OPTIONS = [
   { value: 'preferNot', label: 'Prefer not to say' },
 ] as const
 
-export const SKIN_TONE_OPTIONS = [
-  { value: 'fair', label: 'Fair' },
-  { value: 'light', label: 'Light' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'tan', label: 'Tan' },
-  { value: 'deep', label: 'Deep' },
-] as const
+export const SKIN_TONE_SWATCHES: Record<string, string> = {
+  fair: '#f5d2b8',
+  light: '#e8b98a',
+  medium: '#c68a5b',
+  tan: '#a9703f',
+  deep: '#6b4226',
+}
+
+export function skinToneHex(value: string | null | undefined): string {
+  const key = (value || '').trim()
+  if (/^#[0-9a-fA-F]{6}$/.test(key)) return key.toLowerCase()
+  return SKIN_TONE_SWATCHES[key] ?? '#c68a5b'
+}
 
 export const STYLE_OPTIONS = [
   { value: 'casual', label: 'Casual' },
@@ -88,13 +94,6 @@ export const WEATHER_OPTIONS = [
 export const TIME_OF_DAY_OPTIONS = [
   { value: 'day', label: 'Daytime' },
   { value: 'evening', label: 'Evening' },
-] as const
-
-export const DRESS_CODE_OPTIONS = [
-  { value: 'casual', label: 'Casual' },
-  { value: 'smartCasual', label: 'Smart casual' },
-  { value: 'formal', label: 'Formal' },
-  { value: 'none', label: 'No dress code' },
 ] as const
 
 export const FALLBACK_VENUES: VenueInfo[] = [

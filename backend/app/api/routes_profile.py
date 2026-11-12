@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Profile
-from app.schemas import GENDERS, ProfileOut
+from app.schemas import GENDERS, ProfileOut, ProfilePhotoAnalysis
 from app.services.storage import save_upload
+from app.services.vlm import analyze_profile_photo as analyze_profile_photo_service
 from app.services.vlm import verify_full_body_photo
 
 router = APIRouter(prefix="/profile", tags=["profile"])
@@ -64,6 +65,22 @@ def _parse_note(raw: str | None, field: str, *, max_len: int = 80) -> str | None
 def read_profile(db: Session = Depends(get_db)) -> ProfileOut:
     profile = db.scalars(select(Profile).limit(1)).first()
     return _to_out(profile)
+
+
+@router.post("/analyze-photo", response_model=ProfilePhotoAnalysis)
+async def analyze_photo(file: UploadFile = File(...)) -> ProfilePhotoAnalysis:
+    """Analyze a chosen photo without saving it so the UI can pre-fill gender and skin tone."""
+    if file is None or not file.filename:
+        raise HTTPException(status_code=400, detail="Please choose a photo.")
+    dest, _ = await save_upload(file, "profile")
+    try:
+        result = await analyze_profile_photo_service(dest)
+        return ProfilePhotoAnalysis(
+            gender=result.get("gender"),
+            skin_tone=result.get("skinTone"),
+        )
+    finally:
+        dest.unlink(missing_ok=True)
 
 
 @router.put("", response_model=ProfileOut)

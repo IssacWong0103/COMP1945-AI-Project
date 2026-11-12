@@ -1,6 +1,7 @@
 import type {
   HealthResponse,
   Profile,
+  ProfilePhotoAnalysis,
   RecommendRequest,
   RecommendResponse,
   SavedLook,
@@ -133,6 +134,13 @@ export async function deleteWardrobeItem(id: string): Promise<void> {
 export async function getProfile(): Promise<Profile> {
   const res = await fetch('/api/profile')
   return parseJson<Profile>(res)
+}
+
+export async function analyzePhoto(file: File): Promise<ProfilePhotoAnalysis> {
+  const body = new FormData()
+  body.append('file', file)
+  const res = await fetch('/api/profile/analyze-photo', { method: 'POST', body })
+  return parseJson<ProfilePhotoAnalysis>(res)
 }
 
 export async function updateProfile(input: {

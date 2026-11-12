@@ -1,10 +1,26 @@
-import { useEffect, useId, useMemo, useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
-import { apiUrl, friendlyError, getProfile, updateProfile } from '../api/client'
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type DragEvent,
+  type FormEvent,
+  type MouseEvent as ReactMouseEvent,
+  type ReactNode,
+} from 'react'
+import { analyzePhoto, apiUrl, friendlyError, getProfile, updateProfile } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
 import { ErrorNote } from '../components/ErrorNote'
 import { Spinner } from '../components/Spinner'
 import { SuggestSelect } from '../components/SuggestSelect'
-import { GENDER_OPTIONS, IMAGE_ACCEPT, SKIN_TONE_OPTIONS, STYLE_OPTIONS, isAllowedImage } from '../constants'
+import {
+  GENDER_OPTIONS,
+  IMAGE_ACCEPT,
+  STYLE_OPTIONS,
+  isAllowedImage,
+  skinToneHex,
+} from '../constants'
 import type { Profile as ProfileData } from '../types'
 
 const EMPTY: ProfileData = {
@@ -24,6 +40,10 @@ const BADGE =
 
 export function Profile() {
   const photoInputId = useId()
+  const photoImgRef = useRef<HTMLImageElement | null>(null)
+  const analysisRequestRef = useRef(0)
+  const [pickingTone, setPickingTone] = useState(false)
+  const [autoDetected, setAutoDetected] = useState(false)
   const [profile, setProfile] = useState<ProfileData>(EMPTY)
   const [heightCm, setHeightCm] = useState('')
   const [weightKg, setWeightKg] = useState('')
@@ -75,6 +95,8 @@ export function Profile() {
     setSkinTone(data.skinTone ?? '')
     setPreferredStyle(data.preferredStyle ?? '')
     setPhoto(null)
+    setPickingTone(false)
+    setAutoDetected(false)
     setPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev)
       return null
@@ -90,16 +112,41 @@ export function Profile() {
     setError(null)
     setPhoto(file)
     setSaved(false)
+    setPickingTone(false)
+    setAutoDetected(false)
     setPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev)
       return URL.createObjectURL(file)
     })
+
+    const requestId = analysisRequestRef.current + 1
+    analysisRequestRef.current = requestId
+    void analyzePhoto(file)
+      .then((result) => {
+        if (requestId !== analysisRequestRef.current) return
+        if (result.gender) setGender(result.gender)
+        if (result.skinTone) setSkinTone(result.skinTone)
+        setAutoDetected(Boolean(result.gender || result.skinTone))
+      })
+      .catch(() => {
+        // Auto-fill is best effort; the user can still choose attributes manually.
+      })
   }
 
   function onDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault()
     const file = event.dataTransfer.files[0]
     if (file) takeFile(file)
+  }
+
+  function onPhotoClick(event: ReactMouseEvent<HTMLImageElement>) {
+    const image = photoImgRef.current
+    if (!image) return
+    const color = sampleImagePixel(image, event.clientX, event.clientY)
+    if (!color) return
+    setSkinTone(color)
+    setSaved(false)
+    setPickingTone(false)
   }
 
   function discard() {
@@ -196,9 +243,13 @@ export function Profile() {
               >
                 {shownPhoto ? (
                   <img
+                    ref={photoImgRef}
                     src={shownPhoto}
                     alt="Full-body photo for virtual try-on"
-                    className="aspect-[3/4] w-full rounded-lg object-cover"
+                    onClick={pickingTone ? onPhotoClick : undefined}
+                    className={`aspect-[3/4] w-full rounded-lg ${
+                      pickingTone ? 'cursor-crosshair object-contain' : 'object-cover'
+                    }`}
                   />
                 ) : (
                   <div className="flex aspect-[3/4] flex-col items-center justify-center px-6 text-center">
@@ -344,21 +395,66 @@ export function Profile() {
                   </div>
                 </Field>
 
-                <Field label="Skin tone" htmlFor="skinTone" hint="Helps suggest flattering colours.">
-                  <SuggestSelect
-                    key={`skin-${formEpoch}`}
-                    id="skinTone"
-                    name="skinTone"
-                    value={skinTone}
-                    options={SKIN_TONE_OPTIONS}
-                    placeholder="Select skin tone"
-                    customPlaceholder="e.g. olive with warm undertone"
-                    onChange={(next) => {
-                      setSkinTone(next)
-                      setSaved(false)
-                    }}
-                    disabled={saving}
-                  />
+                <Field
+                  label="Skin tone"
+                  htmlFor="skinTone"
+                  hint="Pick the color closest to your skin, or sample it straight from your photo."
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface px-3 py-2">
+                      <input
+                        id="skinTone"
+                        name="skinTone"
+                        type="color"
+                        value={skinToneHex(skinTone)}
+                        onChange={(event) => {
+                          setSkinTone(event.target.value)
+                          setSaved(false)
+                        }}
+                        disabled={saving}
+                        className="h-9 w-12 cursor-pointer rounded border-0 bg-transparent p-0 disabled:cursor-not-allowed disabled:opacity-50"
+                      />
+                      <span className="text-sm font-medium tabular-nums text-ink">
+                        {skinTone || 'Select color'}
+                      </span>
+                    </label>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="rounded-xl"
+                      disabled={saving || !shownPhoto}
+                      onClick={() => {
+                        setPickingTone((active) => !active)
+                        setSaved(false)
+                      }}
+                    >
+                      <DropperIcon />
+                      {pickingTone ? 'Click your skin in the photo' : 'Pick from photo'}
+                    </Button>
+                    {skinTone ? (
+                      <button
+                        type="button"
+                        disabled={saving}
+                        onClick={() => {
+                          setSkinTone('')
+                          setSaved(false)
+                        }}
+                        className="text-xs font-semibold text-muted underline hover:text-ink disabled:opacity-50"
+                      >
+                        Clear
+                      </button>
+                    ) : null}
+                  </div>
+                  {pickingTone ? (
+                    <p className="mt-2 rounded-lg bg-canvas px-3 py-2 text-xs text-muted">
+                      Click directly on your skin in the photo above to set the color.
+                    </p>
+                  ) : null}
+                  {autoDetected ? (
+                    <p className="mt-2 text-xs text-success">
+                      We pre-filled gender and skin tone from your photo — adjust if needed.
+                    </p>
+                  ) : null}
                 </Field>
 
                 <Field label="Preferred style" htmlFor="preferredStyle" hint="Your default on Studio.">
@@ -379,8 +475,8 @@ export function Profile() {
                 </Field>
               </div>
               <p className="mt-4 text-xs text-muted">
-                Gender: Male / Female / Non-binary / Prefer not to say Skin tone: Fair / Light / Medium / Tan / Deep
-                Style: Casual / Smart casual / Streetwear / Sporty / Minimal / Formal
+                Gender: Male / Female / Non-binary / Prefer not to say Skin tone: a color you pick from the photo or
+                color picker Style: Casual / Smart casual / Streetwear / Sporty / Minimal / Formal
               </p>
             </section>
           </div>
@@ -487,6 +583,20 @@ function ReplaceIcon() {
   )
 }
 
+function DropperIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <path
+        d="M13.2 3.6a2 2 0 0 1 2.8 2.8l-6.4 6.4-3.4.6.6-3.4 6.4-6.4Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
+      <path d="M4.5 15.5c-.8.8-.8 2 0 2.8s2 .8 2.8 0" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function ShieldIcon() {
   return (
     <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
@@ -510,6 +620,45 @@ function WarningDotIcon() {
       •
     </span>
   )
+}
+
+function sampleImagePixel(
+  image: HTMLImageElement,
+  clientX: number,
+  clientY: number,
+): string | null {
+  const rect = image.getBoundingClientRect()
+  const naturalWidth = image.naturalWidth
+  const naturalHeight = image.naturalHeight
+  if (!naturalWidth || !naturalHeight || rect.width === 0 || rect.height === 0) return null
+
+  const pointX = clientX - rect.left
+  const pointY = clientY - rect.top
+  if (pointX < 0 || pointY < 0 || pointX > rect.width || pointY > rect.height) return null
+
+  const objectFit = getComputedStyle(image).objectFit
+  const scale =
+    objectFit === 'cover'
+      ? Math.max(rect.width / naturalWidth, rect.height / naturalHeight)
+      : Math.min(rect.width / naturalWidth, rect.height / naturalHeight)
+  const drawnWidth = naturalWidth * scale
+  const drawnHeight = naturalHeight * scale
+  const offsetX = (rect.width - drawnWidth) / 2
+  const offsetY = (rect.height - drawnHeight) / 2
+  const sourceX = Math.floor((pointX - offsetX) / scale)
+  const sourceY = Math.floor((pointY - offsetY) / scale)
+  if (sourceX < 0 || sourceY < 0 || sourceX >= naturalWidth || sourceY >= naturalHeight) {
+    return null
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = naturalWidth
+  canvas.height = naturalHeight
+  const context = canvas.getContext('2d')
+  if (!context) return null
+  context.drawImage(image, 0, 0)
+  const [red, green, blue] = context.getImageData(sourceX, sourceY, 1, 1).data
+  return `#${[red, green, blue].map((value) => value.toString(16).padStart(2, '0')).join('')}`
 }
 
 function photoMeta(file: File | null, url: string | null): { name: string; kind: string } | null {

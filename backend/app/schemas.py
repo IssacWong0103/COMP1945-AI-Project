@@ -126,6 +126,11 @@ class ProfileOut(CamelModel):
     preferred_style: str | None = None
 
 
+class ProfilePhotoAnalysis(CamelModel):
+    gender: str | None = None
+    skin_tone: str | None = None
+
+
 class VenueInfo(CamelModel):
     id: str
     label: str

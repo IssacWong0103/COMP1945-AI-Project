@@ -137,7 +137,10 @@ Error shape:
 ```
 
 `kiePublicUrlReady` is true only when `PUBLIC_BASE_URL` is set to a non-loopback
-origin so kie.ai can fetch uploaded images for virtual try-on.
+origin so kie.ai can fetch uploaded images for virtual try-on directly. When it
+is false, the backend uploads local images to kie.ai's File Upload API first,
+so virtual try-on still works without a public tunnel as long as `KIE_API_KEY`
+is configured.
 
 ### `GET /api/venues`
 
@@ -196,6 +199,24 @@ Response `200`: `Profile`
 ### `GET /api/profile`
 
 Response `200`: `Profile` (defaults all null / empty if never set)
+
+### `POST /api/profile/analyze-photo`
+
+`multipart/form-data`:
+
+- `file` full-body photo to analyze (not saved to the profile)
+
+Response `200`: `ProfilePhotoAnalysis`
+
+```json
+{
+  "gender": "female",
+  "skinTone": "#c68a5b"
+}
+```
+
+Both fields are nullable. The UI uses this to pre-fill gender and skin tone when
+a user chooses a photo, before they save their profile.
 
 ### `POST /api/recommend`
 

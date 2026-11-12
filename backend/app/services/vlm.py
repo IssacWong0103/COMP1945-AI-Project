@@ -8,7 +8,7 @@ from colorsys import rgb_to_hsv
 from pathlib import Path
 
 import httpx
-from PIL import Image
+from PIL import Image, ImageOps
 
 from app.config import settings
 from app.schemas import CATEGORIES, ITEM_GENDERS, PREFERRED_STYLES, Category, ItemGender, PreferredStyle
@@ -42,6 +42,14 @@ Rules:
 - fullBody is true ONLY when the whole person from head to feet is visible in one frame.
   Half-body photos, portraits cropped at the waist/chest/knees, or any cut-off pose are NOT full body.
 - faceVisible is true when the person's face is clear enough to identify (not blurry, turned away, or covered).
+"""
+
+PROFILE_ANALYSIS_SYSTEM_PROMPT = """You analyze a user's full-body photo for USTyle, a campus outfit assistant.
+Return STRICT JSON only — no markdown, no commentary:
+{"gender":"male|female|nonBinary|preferNot","skinTone":"#RRGGBB"}
+Rules:
+- gender is the person's apparent gender presentation. Use "preferNot" when it is unclear, the face is covered, or you cannot tell.
+- skinTone is a single hex color (for example "#C68A5B") that best represents the person's exposed skin tone (face, arms, or legs). Ignore clothing, shadows, and background.
 """
 
 CATEGORY_ALIASES: dict[str, Category] = {
@@ -463,6 +471,128 @@ async def verify_full_body_photo(image_path: Path) -> dict:
         }
     except Exception as exc:  # noqa: BLE001
         logger.warning("Full-body photo check failed (%s); allowing upload", exc)
+        return fallback
+
+
+def _is_skin_pixel(pixel: tuple[int, int, int]) -> bool:
+    red, green, blue = pixel
+    if min(red, green, blue) <= 0:
+        return False
+    if max(red, green, blue) - min(red, green, blue) < 15:
+        return False
+    if red < 95 or green < 40 or blue < 20:
+        return False
+    if red <= green or red <= blue:
+        return False
+    if abs(red - green) < 15:
+        return False
+    if red > 250 and green > 230 and blue > 220:
+        return False
+    return True
+
+
+def _heuristic_skin_tone_hex(image_path: Path) -> str | None:
+    """Sample exposed-skin pixels from the upper body and return a hex color."""
+    try:
+        with Image.open(image_path) as image:
+            image = ImageOps.exif_transpose(image) or image
+            rgb = image.convert("RGB")
+            width, height = rgb.size
+            box = (
+                int(width * 0.22),
+                int(height * 0.10),
+                int(width * 0.78),
+                int(height * 0.42),
+            )
+            region = rgb.crop(box).resize((64, 64), Image.Resampling.BILINEAR)
+            pixels = list(region.getdata())
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Skin tone heuristic failed (%s)", exc)
+        return None
+
+    skin = [pixel for pixel in pixels if _is_skin_pixel(pixel)]
+    pool = skin or pixels
+    if not pool:
+        return None
+
+    ordered = sorted(pool, key=lambda pixel: (pixel[0] + pixel[1] + pixel[2]))
+    trim = max(1, len(ordered) // 10)
+    if len(ordered) > trim * 2:
+        ordered = ordered[trim:-trim]
+    red = sum(pixel[0] for pixel in ordered) / len(ordered)
+    green = sum(pixel[1] for pixel in ordered) / len(ordered)
+    blue = sum(pixel[2] for pixel in ordered) / len(ordered)
+    return f"#{round(red):02x}{round(green):02x}{round(blue):02x}"
+
+
+def _normalize_hex_color(value: object) -> str | None:
+    raw = str(value or "").strip()
+    raw = raw.lstrip("#")
+    if len(raw) == 6 and all(char in "0123456789abcdefABCDEF" for char in raw):
+        return f"#{raw.lower()}"
+    return None
+
+
+def _normalize_profile_gender(value: object) -> str | None:
+    raw = str(value or "").strip().lower()
+    if "prefer" in raw:
+        return "preferNot"
+    if "non" in raw and "binary" in raw:
+        return "nonBinary"
+    if "female" in raw or "woman" in raw or "women" in raw:
+        return "female"
+    if "male" in raw or "man" in raw or "men" in raw:
+        return "male"
+    return None
+
+
+async def analyze_profile_photo(image_path: Path) -> dict:
+    """Return ``{"gender": str | None, "skinTone": "#rrggbb" | None}``.
+
+    Uses DeepSeek vision when configured and falls back to a local skin-tone
+    heuristic so the feature still works without an API key.
+    """
+    fallback = {"gender": None, "skinTone": _heuristic_skin_tone_hex(image_path)}
+    api_key = settings.deepseek_api_key.strip()
+    if not api_key:
+        return fallback
+
+    raw = image_path.read_bytes()
+    data_url = _image_to_data_url(raw)
+    body = {
+        "model": DEEPSEEK_MODEL,
+        "temperature": 0.0,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {"role": "system", "content": PROFILE_ANALYSIS_SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Analyze this photo and return gender plus skin tone."},
+                    {"type": "image_url", "image_url": {"url": data_url}},
+                ],
+            },
+        ],
+    }
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(DEEPSEEK_URL, headers=headers, json=body)
+            response.raise_for_status()
+            data = response.json()
+        content = data["choices"][0]["message"]["content"]
+        parsed = _extract_json(content if isinstance(content, str) else json.dumps(content))
+        skin_tone = _normalize_hex_color(parsed.get("skinTone")) or fallback["skinTone"]
+        return {
+            "gender": _normalize_profile_gender(parsed.get("gender")),
+            "skinTone": skin_tone,
+        }
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Profile photo analysis failed (%s); using heuristic", exc)
         return fallback
 
 

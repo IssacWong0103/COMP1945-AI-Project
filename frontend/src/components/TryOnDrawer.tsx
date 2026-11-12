@@ -14,9 +14,11 @@ type Props = {
   error: string | null
   beforeUrl?: string | null
   hasBodyPhoto: boolean
+  saved?: boolean
   onStart: () => void
   onRetry: () => void
   onSave: () => void
+  onUnsave?: () => void
   onClose: () => void
 }
 
@@ -28,9 +30,11 @@ export function TryOnDrawer({
   error,
   beforeUrl,
   hasBodyPhoto,
+  saved,
   onStart,
   onRetry,
   onSave,
+  onUnsave,
   onClose,
 }: Props) {
   return (
@@ -123,9 +127,15 @@ export function TryOnDrawer({
                   Download image
                 </a>
               ) : null}
-              <Button type="button" variant="secondary" onClick={onSave}>
-                Save look
-              </Button>
+              {saved && onUnsave ? (
+                <Button type="button" variant="secondary" onClick={onUnsave}>
+                  Unsave
+                </Button>
+              ) : (
+                <Button type="button" variant="secondary" onClick={onSave}>
+                  Save look
+                </Button>
+              )}
               <Button type="button" variant="ghost" onClick={onClose}>
                 Close
               </Button>

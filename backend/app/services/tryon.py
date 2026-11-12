@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import logging
+import uuid
 from io import BytesIO
 from pathlib import Path
 
@@ -16,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 KIE_CREATE_URL = "https://api.kie.ai/api/v1/jobs/createTask"
 KIE_STATUS_URL = "https://api.kie.ai/api/v1/jobs/recordInfo"
+KIE_UPLOAD_URL = "https://kieai.redpandaai.co/api/file-base64-upload"
 KIE_MODEL = "gpt-image-2-image-to-image"
 POLL_TIMEOUT_S = 90.0
 INITIAL_BACKOFF_S = 2.0
@@ -291,6 +294,55 @@ async def _download_result(url: str, stem: str) -> str:
         return save_jpeg_bytes(data, "tryon", stem=stem)
 
 
+async def _kie_hosted_url(
+    client: httpx.AsyncClient,
+    image_url: str,
+    *,
+    stem: str,
+    index: int,
+) -> str | None:
+    """Upload a local upload image to kie.ai and return its hosted URL.
+
+    Already-absolute http(s) URLs are returned unchanged so callers can pass
+    them straight through. Local /uploads/... paths are uploaded with the
+    kie.ai File Upload API so try-on works without a public tunnel.
+    """
+    image_url = (image_url or "").strip()
+    if not image_url:
+        return None
+    if image_url.startswith(("http://", "https://")):
+        return image_url
+    path = local_path_for(image_url)
+    if not path or not path.is_file():
+        return None
+
+    suffix = path.suffix.lstrip(".").lower() or "jpg"
+    mime = {
+        "jpg": "image/jpeg",
+        "jpeg": "image/jpeg",
+        "png": "image/png",
+        "webp": "image/webp",
+    }.get(suffix, "image/jpeg")
+    encoded = base64.b64encode(path.read_bytes()).decode("ascii")
+    payload = {
+        "base64Data": f"data:{mime};base64,{encoded}",
+        "uploadPath": "images",
+        "fileName": f"{stem}-{uuid.uuid4().hex[:8]}-{index}.{suffix}",
+    }
+    headers = {
+        "Authorization": f"Bearer {settings.kie_api_key}",
+        "Content-Type": "application/json",
+    }
+    response = await client.post(KIE_UPLOAD_URL, headers=headers, json=payload)
+    response.raise_for_status()
+    body = response.json()
+    data = body.get("data") if isinstance(body.get("data"), dict) else {}
+    url = data.get("downloadUrl") or data.get("url") or data.get("filePath")
+    if not url:
+        logger.warning("kie.ai upload returned no downloadUrl: %s", str(body)[:300])
+    return str(url) if url else None
+
+
 async def generate_tryon(
     *,
     outfit_id: str,
@@ -326,25 +378,39 @@ async def generate_tryon(
             "but keep the user's exact garments, colours, and identity unchanged."
         )
 
-    can_call_kie = bool(settings.kie_api_key.strip()) and settings.public_uploads_reachable()
+    can_call_kie = bool(settings.kie_api_key.strip())
     input_urls: list[str] = []
-    if can_call_kie:
-        body_public = public_url_for(body_photo_url or "")
-        if body_public:
-            input_urls.append(body_public)
-        for item in garments:
-            url = public_url_for(str(item.get("imageUrl") or item.get("image_url") or ""))
-            if url:
-                input_urls.append(url)
+    if can_call_kie and not existing_task_id:
+        candidates: list[tuple[str, int]] = [(body_photo_url or "", 0)]
+        candidates.extend(
+            (str(item.get("imageUrl") or item.get("image_url") or ""), index)
+            for index, item in enumerate(garments, start=1)
+        )
         if model_reference_url:
-            ref_public = public_url_for(model_reference_url)
-            if ref_public:
-                input_urls.append(ref_public)
+            candidates.append((model_reference_url, len(candidates)))
+
+        # Prefer already-public URLs; upload local files to kie.ai otherwise.
+        async with httpx.AsyncClient(timeout=60.0) as upload_client:
+            for image_url, index in candidates:
+                public = public_url_for(image_url)
+                if public:
+                    input_urls.append(public)
+                    continue
+                try:
+                    hosted = await _kie_hosted_url(
+                        upload_client, image_url, stem=stem, index=index
+                    )
+                except Exception as exc:  # noqa: BLE001
+                    logger.warning("kie.ai image upload failed for %s: %s", image_url, exc)
+                    hosted = None
+                if hosted:
+                    input_urls.append(hosted)
+
         if len(input_urls) < 2:
             can_call_kie = False
 
     if not can_call_kie:
-        logger.info("Using PIL try-on collage (missing KIE key or public image URLs)")
+        logger.info("Using PIL try-on collage (missing KIE key or usable image URLs)")
         url = save_fallback_collage(body_path, garments, stem=stem)
         return "ready", url, None
 

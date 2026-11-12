@@ -49,6 +49,11 @@ export type Profile = {
   preferredStyle: string | null
 }
 
+export type ProfilePhotoAnalysis = {
+  gender: string | null
+  skinTone: string | null
+}
+
 export type OutfitItemRef = {
   id: string
   category: string

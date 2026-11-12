@@ -12,6 +12,7 @@ type Props = {
   onTryOn?: () => void
   onSwap?: () => void
   onSave?: () => void
+  onUnsave?: () => void
   saved?: boolean
 }
 
@@ -22,6 +23,7 @@ export function OutfitCard({
   onTryOn,
   onSwap,
   onSave,
+  onUnsave,
   saved,
 }: Props) {
   const look = index + 1
@@ -120,9 +122,13 @@ export function OutfitCard({
               Swap a piece
             </Button>
           ) : null}
-          {onSave ? (
-            <Button type="button" variant="secondary" onClick={onSave} disabled={saved}>
-              {saved ? 'Saved' : 'Save look'}
+          {saved && onUnsave ? (
+            <Button type="button" variant="secondary" onClick={onUnsave}>
+              Unsave
+            </Button>
+          ) : onSave ? (
+            <Button type="button" variant="secondary" onClick={onSave}>
+              Save look
             </Button>
           ) : null}
         </div>
