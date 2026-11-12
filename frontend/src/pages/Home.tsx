@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { apiUrl, friendlyError, getProfile, listSavedLooks, listWardrobeItems } from '../api/client'
+import { apiUrl, friendlyError, getProfile, listWardrobeItems } from '../api/client'
 import { ButtonLink } from '../components/Button'
 import { ErrorNote } from '../components/ErrorNote'
 import { Spinner } from '../components/Spinner'
 import { FALLBACK_VENUES, humanize, itemTitle } from '../constants'
-import type { Profile, SavedLook, WardrobeItem } from '../types'
+import { listLocalSavedLooks } from '../lib/activityStore'
+import type { Profile, WardrobeItem } from '../types'
 
 const HERO_SAMPLES = [
   { src: '/home/shirt.jpg', alt: 'Folded white shirt' },
@@ -24,7 +25,7 @@ const VENUE_ICONS: Record<string, () => ReactNode> = {
 export function Home() {
   const [items, setItems] = useState<WardrobeItem[]>([])
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [looks, setLooks] = useState<SavedLook[]>([])
+  const looks = useMemo(() => listLocalSavedLooks(), [])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -40,12 +41,6 @@ export function Home() {
         if (cancelled) return
         setItems(wardrobe)
         setProfile(nextProfile)
-        try {
-          const saved = await listSavedLooks()
-          if (!cancelled) setLooks(saved)
-        } catch {
-          if (!cancelled) setLooks([])
-        }
       } catch (err) {
         if (!cancelled) setError(friendlyError(err))
       } finally {

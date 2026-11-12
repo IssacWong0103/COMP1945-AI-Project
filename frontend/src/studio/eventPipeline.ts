@@ -37,8 +37,8 @@ export const STUDIO_EVENT_PIPELINE: PipelineStep[] = [
     trigger: 'Result card primary',
     service: 'POST /api/try-on + poll',
     request: '{ outfitId }',
-    onSuccess: 'overlay ready; show before/after image',
-    onFailure: 'drawer failed state + Retry',
+    onSuccess: 'navigate /try-on; show before/after image',
+    onFailure: 'Try-on page failed state + Retry',
     analytics: 'studio_tryon_started → ready|failed',
   },
   {
@@ -53,7 +53,7 @@ export const STUDIO_EVENT_PIPELINE: PipelineStep[] = [
   {
     uiEvent: 'Save look',
     trigger: 'Result card / try-on ready',
-    service: 'Local save + GET /api/outfits gallery',
+    service: 'Local save → Looks gallery',
     request: '{ outfitId, venue, scores, items }',
     onSuccess: 'Toast + Activity entry; available in Looks',
     onFailure: 'Inline error',
@@ -62,7 +62,7 @@ export const STUDIO_EVENT_PIPELINE: PipelineStep[] = [
   {
     uiEvent: 'Saved looks tab',
     trigger: 'Top global',
-    service: 'GET /api/outfits + local saved looks',
+    service: 'Local saved looks',
     request: 'none',
     onSuccess: 'Navigate /looks',
     onFailure: 'Empty/error state on Looks page',

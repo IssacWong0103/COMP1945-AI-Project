@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { apiUrl, friendlyError, listSavedLooks } from '../api/client'
+import { apiUrl } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
-import { ErrorNote } from '../components/ErrorNote'
-import { Spinner } from '../components/Spinner'
 import { StudioShell } from '../components/StudioShell'
 import { humanize } from '../constants'
 import { track } from '../lib/analytics'
@@ -13,74 +11,22 @@ import {
   removeLocalLook,
   type LocalSavedLook,
 } from '../lib/activityStore'
-import type { SavedLook } from '../types'
-
-type LookCard = {
-  id: string
-  venue: string
-  overallScore: number
-  createdAt: string
-  thumbnailUrl: string | null
-  source: 'local' | 'api'
-}
 
 export function Looks() {
-  const [apiLooks, setApiLooks] = useState<SavedLook[]>([])
-  const [localLooks, setLocalLooks] = useState<LocalSavedLook[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [localLooks, setLocalLooks] = useState<LocalSavedLook[]>(() => listLocalSavedLooks())
 
   useEffect(() => {
     document.title = 'Looks — USTyle'
     track('nav_tab_opened', { tab: 'looks' })
   }, [])
 
-  useEffect(() => {
-    let cancelled = false
-    async function load() {
-      setLocalLooks(listLocalSavedLooks())
-      try {
-        const looks = await listSavedLooks()
-        if (!cancelled) setApiLooks(looks)
-      } catch (err) {
-        if (!cancelled) setError(friendlyError(err))
-      } finally {
-        if (!cancelled) setLoading(false)
-      }
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const cards = useMemo(() => {
-    const map = new Map<string, LookCard>()
-    for (const look of localLooks) {
-      map.set(look.id, {
-        id: look.id,
-        venue: look.venue,
-        overallScore: look.overallScore,
-        createdAt: look.createdAt,
-        thumbnailUrl: look.thumbnailUrl,
-        source: 'local',
-      })
-    }
-    for (const look of apiLooks) {
-      if (map.has(look.id)) continue
-      map.set(look.id, {
-        id: look.id,
-        venue: look.venue,
-        overallScore: look.overallScore,
-        createdAt: look.createdAt,
-        thumbnailUrl: look.thumbnailUrl,
-        source: 'api',
-      })
-    }
-    return [...map.values()].sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-  }, [apiLooks, localLooks])
+  const cards = useMemo(
+    () =>
+      [...localLooks].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      ),
+    [localLooks],
+  )
 
   function onRemove(id: string) {
     if (!window.confirm('Remove this saved look?')) return
@@ -99,10 +45,7 @@ export function Looks() {
         <ButtonLink to="/studio">+ Create a new look</ButtonLink>
       </div>
 
-      {loading ? <Spinner label="Loading saved looks…" /> : null}
-      {error ? <ErrorNote title="Could not load server looks" message={error} /> : null}
-
-      {!loading && cards.length === 0 ? (
+      {cards.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line bg-surface px-5 py-14 text-center">
           <p className="text-sm font-semibold text-ink">No saved looks yet</p>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted">
@@ -134,7 +77,7 @@ export function Looks() {
               <div>
                 <p className="text-sm font-semibold text-ink">{humanize(look.venue)}</p>
                 <p className="text-xs text-muted">
-                  {new Date(look.createdAt).toLocaleDateString()} · {look.source}
+                  {new Date(look.createdAt).toLocaleDateString()} · local
                 </p>
               </div>
               <p className="rounded-full bg-canvas px-2 py-0.5 text-xs font-semibold text-navy">
@@ -148,11 +91,9 @@ export function Looks() {
               >
                 Open
               </Link>
-              {look.source === 'local' ? (
-                <Button type="button" variant="danger" onClick={() => onRemove(look.id)}>
-                  Remove
-                </Button>
-              ) : null}
+              <Button type="button" variant="danger" onClick={() => onRemove(look.id)}>
+                Remove
+              </Button>
             </div>
           </article>
         ))}

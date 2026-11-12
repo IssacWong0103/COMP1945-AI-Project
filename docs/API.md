@@ -272,7 +272,7 @@ If failed: HTTP 502 with `{ "detail": "..." }`
 
 ### `GET /api/outfits`
 
-Recent generated/saved looks gallery (camelCase).
+Recent generated looks gallery (camelCase). The Looks UI uses the client-side saved-looks store instead.
 
 Response `200`:
 
@@ -342,7 +342,7 @@ Until this endpoint ships, the frontend applies swaps client-side from `GET /api
 ### Save look (current hybrid)
 
 - Generation already persists outfits via recommend.
-- Explicit “Save look” also stores a local gallery entry for Looks tab reliability.
+- Explicit “Save look”/“Save photo” stores a local gallery entry for the Looks tab.
 - Future: `POST /api/looks` with `{ "outfitId": "..." }`.
 
 ### Try-on (current)

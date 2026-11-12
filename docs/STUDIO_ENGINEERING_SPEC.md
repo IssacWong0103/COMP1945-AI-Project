@@ -60,9 +60,9 @@ Source: `frontend/src/studio/eventPipeline.ts`
 |----------|---------|------------|------------|
 | Create outfits | `POST /api/recommend` | Result cards | RecoveryPanel failure |
 | Retry | same | results/partial | failure |
-| Try on | `POST /api/try-on` + poll | TryOnDrawer ready | TryOnDrawer failed |
+| Try on | `POST /api/try-on` + poll | `/try-on` page ready | `/try-on` page failed |
 | Swap a piece | wardrobe candidates (+ optional future `/api/studio/swaps`) | Outfit card updates | Drawer inline error |
-| Save look | local save + `/api/outfits` gallery | Saved badge + Looks | Inline error |
+| Save look | local save → Looks gallery | Saved badge + Looks | Inline error |
 | Saved looks tab | navigate `/looks` | Gallery | Empty/error |
 
 ## 5. Recovery patterns
@@ -96,9 +96,9 @@ Never trap users in a dead-end modal. Always expose one progressive action.
 - Header shows count + elapsed.
 - Cards expose Try on / Swap / Save only.
 
-### Try-on drawer (`12`)
+### Try-on page (`12`)
 - States: idle → rendering → ready | failed.
-- Ready: Download, Save look, Close.
+- Ready: Download, Save photo, Retry.
 - Failed: Retry.
 
 ### Swap drawer (`13`)
@@ -110,7 +110,7 @@ Never trap users in a dead-end modal. Always expose one progressive action.
 - Partial and failure use RecoveryPanel, not silent empty screens.
 
 ### Saved looks (`15`)
-- Grid of local + API looks; Open returns to Studio with venue; Remove confirms for local.
+- Grid of saved looks; Open returns to Studio with venue; Remove confirms.
 
 ## 7. Telemetry
 

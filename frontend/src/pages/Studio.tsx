@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useReducer, useRef, useState, type FormEvent } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   friendlyError,
   getProfile,
   getVenues,
   listWardrobeItems,
-  pollTryOn,
   recommend,
 } from '../api/client'
 import { RecoveryPanel } from '../components/RecoveryPanel'
@@ -14,7 +13,6 @@ import { Spinner } from '../components/Spinner'
 import { StudioShell } from '../components/StudioShell'
 import { SuggestSelect } from '../components/SuggestSelect'
 import { SwapDrawer } from '../components/SwapDrawer'
-import { TryOnDrawer, type TryOnDrawerStatus } from '../components/TryOnDrawer'
 import { Button } from '../components/Button'
 import {
   FALLBACK_VENUES,
@@ -51,6 +49,7 @@ const TEXTAREA_CLASS =
 export function Studio() {
   const [params, setParams] = useSearchParams()
   const venueFromUrl = params.get('venue') ?? ''
+  const navigate = useNavigate()
   const [restored] = useState<StudioSessionSnapshot | null>(() => loadStudioSession())
 
   const [machine, dispatch] = useReducer(
@@ -65,13 +64,8 @@ export function Studio() {
   const [tick, setTick] = useState(0)
   const [elapsedMs, setElapsedMs] = useState<number | null>(restored?.elapsedMs ?? null)
   const [hasBodyPhoto, setHasBodyPhoto] = useState<boolean | null>(null)
-  const [bodyPhotoUrl, setBodyPhotoUrl] = useState<string | null>(null)
   const [closetItems, setClosetItems] = useState<WardrobeItem[]>([])
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set())
-  const [tryOnStatus, setTryOnStatus] = useState<TryOnDrawerStatus>('idle')
-  const [tryOnUrl, setTryOnUrl] = useState<string | null>(null)
-  const [tryOnError, setTryOnError] = useState<string | null>(null)
-  const [tryOnElapsed, setTryOnElapsed] = useState(0)
   const [feedbackText, setFeedbackText] = useState(restored?.feedbackText ?? '')
   const [feedbackHistory, setFeedbackHistory] = useState<{ id: string; text: string }[]>(
     restored?.feedbackHistory ?? [],
@@ -79,7 +73,6 @@ export function Studio() {
   const [weather, setWeather] = useState(restored?.weather ?? '')
   const [timeOfDay, setTimeOfDay] = useState(restored?.timeOfDay ?? '')
   const fineTuneRef = useRef<HTMLTextAreaElement | null>(null)
-  const abortRef = useRef<AbortController | null>(null)
   const lastFeedbackRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -129,7 +122,6 @@ export function Studio() {
         const [profile, items] = await Promise.all([getProfile(), listWardrobeItems()])
         if (cancelled) return
         setHasBodyPhoto(Boolean(profile.bodyPhotoUrl))
-        setBodyPhotoUrl(profile.bodyPhotoUrl)
         setClosetItems(items)
       } catch {
         if (!cancelled) {
@@ -153,17 +145,6 @@ export function Studio() {
     const id = window.setInterval(() => setTick((Date.now() - started) / 1000), 150)
     return () => window.clearInterval(id)
   }, [machine.phase])
-
-  useEffect(() => {
-    if (tryOnStatus !== 'rendering') return
-    const started = Date.now()
-    const id = window.setInterval(() => setTryOnElapsed((Date.now() - started) / 1000), 200)
-    return () => window.clearInterval(id)
-  }, [tryOnStatus])
-
-  useEffect(() => {
-    return () => abortRef.current?.abort()
-  }, [])
 
   const selectedVenue = useMemo(
     () => venues.find((entry) => entry.id === venue),
@@ -377,7 +358,7 @@ export function Studio() {
       venue,
       overallScore: outfit.overallScore,
       createdAt: new Date().toISOString(),
-      thumbnailUrl: outfit.items[0]?.imageUrl ?? outfit.tryOnUrl,
+      thumbnailUrl: outfit.tryOnUrl ?? outfit.items[0]?.imageUrl ?? null,
       items: outfit.items,
     })
     setSavedIds((prev) => new Set(prev).add(outfit.id))
@@ -447,63 +428,8 @@ export function Studio() {
     emit({ type: 'CLOSE_OVERLAY' })
   }
 
-  async function startTryOn() {
-    if (!activeOutfit) return
-    abortRef.current?.abort()
-    const ctrl = new AbortController()
-    abortRef.current = ctrl
-    setTryOnStatus('rendering')
-    setTryOnError(null)
-    setTryOnUrl(null)
-    setTryOnElapsed(0)
-    track('studio_tryon_started', { outfitId: activeOutfit.id })
-    pushActivity({
-      kind: 'tryon_started',
-      title: 'Try-on started',
-      detail: selectedVenue?.label ?? venue,
-      href: '/try-on',
-    })
-    try {
-      const result = await pollTryOn(activeOutfit.id, { signal: ctrl.signal })
-      setTryOnUrl(result.tryOnUrl)
-      setTryOnStatus('ready')
-      setOutfits((prev) =>
-        (prev ?? []).map((outfit) =>
-          outfit.id === activeOutfit.id ? { ...outfit, tryOnUrl: result.tryOnUrl } : outfit,
-        ),
-      )
-      track('studio_tryon_ready', { outfitId: activeOutfit.id })
-      pushActivity({
-        kind: 'tryon_ready',
-        title: 'Try-on ready',
-        href: '/try-on',
-      })
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return
-      const message = friendlyError(err)
-      setTryOnError(message)
-      setTryOnStatus('failed')
-      track('studio_tryon_failed', { outfitId: activeOutfit.id, reason: message })
-      pushActivity({
-        kind: 'tryon_failed',
-        title: 'Try-on failed',
-        detail: message,
-        href: '/try-on',
-      })
-      pushAlert({
-        severity: 'error',
-        title: 'Try-on failed',
-        detail: message,
-        href: '/try-on',
-      })
-    }
-  }
-
-  function openTryOn(outfit: Outfit) {
-    emit({ type: 'OPEN_TRY_ON', outfitId: outfit.id })
-    setTryOnStatus(outfit.tryOnUrl ? 'ready' : 'idle')
-    setTryOnUrl(outfit.tryOnUrl)
-    setTryOnError(null)
+  function openTryOnPage(outfit: Outfit) {
+    navigate(`/try-on?outfitId=${encodeURIComponent(outfit.id)}&venue=${encodeURIComponent(venue)}`)
   }
 
   const busy = machine.phase === 'creating'
@@ -742,7 +668,7 @@ export function Studio() {
                     index={index}
                     tryOnUrl={outfit.tryOnUrl}
                     saved={savedIds.has(outfit.id)}
-                    onTryOn={() => openTryOn(outfit)}
+                    onTryOn={() => openTryOnPage(outfit)}
                     onSwap={() => onOpenSwap(outfit)}
                     onSave={() => onSave(outfit)}
                     onUnsave={() => onUnsave(outfit)}
@@ -826,26 +752,6 @@ export function Studio() {
         />
       ) : null}
 
-      {machine.overlay === 'tryOn' && activeOutfit ? (
-        <TryOnDrawer
-          outfit={activeOutfit}
-          status={tryOnStatus}
-          elapsedSec={tryOnElapsed}
-          tryOnUrl={tryOnUrl}
-          error={tryOnError}
-          beforeUrl={bodyPhotoUrl}
-          hasBodyPhoto={hasBodyPhoto === true}
-          saved={savedIds.has(activeOutfit.id)}
-          onStart={() => void startTryOn()}
-          onRetry={() => void startTryOn()}
-          onSave={() => onSave(activeOutfit)}
-          onUnsave={() => onUnsave(activeOutfit)}
-          onClose={() => {
-            abortRef.current?.abort()
-            emit({ type: 'CLOSE_OVERLAY' })
-          }}
-        />
-      ) : null}
     </StudioShell>
   )
 }
