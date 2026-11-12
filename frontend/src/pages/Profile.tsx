@@ -9,7 +9,6 @@ import type { Profile as ProfileData } from '../types'
 
 const EMPTY: ProfileData = {
   bodyPhotoUrl: null,
-  facePhotoUrl: null,
   heightCm: null,
   weightKg: null,
   gender: null,
@@ -25,7 +24,6 @@ const BADGE =
 
 export function Profile() {
   const photoInputId = useId()
-  const facePhotoInputId = useId()
   const [profile, setProfile] = useState<ProfileData>(EMPTY)
   const [heightCm, setHeightCm] = useState('')
   const [weightKg, setWeightKg] = useState('')
@@ -34,8 +32,6 @@ export function Profile() {
   const [preferredStyle, setPreferredStyle] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
-  const [facePhoto, setFacePhoto] = useState<File | null>(null)
-  const [facePreview, setFacePreview] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -68,9 +64,8 @@ export function Profile() {
   useEffect(() => {
     return () => {
       if (preview) URL.revokeObjectURL(preview)
-      if (facePreview) URL.revokeObjectURL(facePreview)
     }
-  }, [preview, facePreview])
+  }, [preview])
 
   function applyProfile(data: ProfileData) {
     setProfile(data)
@@ -80,12 +75,7 @@ export function Profile() {
     setSkinTone(data.skinTone ?? '')
     setPreferredStyle(data.preferredStyle ?? '')
     setPhoto(null)
-    setFacePhoto(null)
     setPreview((prev) => {
-      if (prev) URL.revokeObjectURL(prev)
-      return null
-    })
-    setFacePreview((prev) => {
       if (prev) URL.revokeObjectURL(prev)
       return null
     })
@@ -101,20 +91,6 @@ export function Profile() {
     setPhoto(file)
     setSaved(false)
     setPreview((prev) => {
-      if (prev) URL.revokeObjectURL(prev)
-      return URL.createObjectURL(file)
-    })
-  }
-
-  function takeFaceFile(file: File) {
-    if (!isAllowedImage(file)) {
-      setError('Only JPEG, PNG, or WebP for the face photo.')
-      return
-    }
-    setError(null)
-    setFacePhoto(file)
-    setSaved(false)
-    setFacePreview((prev) => {
       if (prev) URL.revokeObjectURL(prev)
       return URL.createObjectURL(file)
     })
@@ -140,7 +116,6 @@ export function Profile() {
     try {
       const data = await updateProfile({
         file: photo,
-        faceFile: facePhoto,
         heightCm: heightCm ? Number(heightCm) : null,
         weightKg: weightKg ? Number(weightKg) : null,
         gender: gender.trim() || null,
@@ -161,19 +136,16 @@ export function Profile() {
     const savedWeight = profile.weightKg != null ? String(profile.weightKg) : ''
     return (
       photo !== null ||
-      facePhoto !== null ||
       heightCm !== savedHeight ||
       weightKg !== savedWeight ||
       gender !== (profile.gender ?? '') ||
       skinTone !== (profile.skinTone ?? '') ||
       preferredStyle !== (profile.preferredStyle ?? '')
     )
-  }, [photo, facePhoto, heightCm, weightKg, gender, skinTone, preferredStyle, profile])
+  }, [photo, heightCm, weightKg, gender, skinTone, preferredStyle, profile])
 
   const shownPhoto = preview || (profile.bodyPhotoUrl ? apiUrl(profile.bodyPhotoUrl) : null)
   const meta = photoMeta(photo, profile.bodyPhotoUrl)
-  const shownFacePhoto = facePreview || (profile.facePhotoUrl ? apiUrl(profile.facePhotoUrl) : null)
-  const faceMeta = photoMeta(facePhoto, profile.facePhotoUrl)
   const filled = [heightCm, weightKg, gender, skinTone, preferredStyle].filter((value) => value.trim()).length
 
   return (
@@ -245,7 +217,8 @@ export function Profile() {
                     </label>
                     <p className="mt-2 text-xs text-muted">JPEG, PNG or WebP</p>
                     <p className="mt-3 max-w-[250px] text-xs text-muted">
-                      Stand straight - Use even light. Show your full figure - Keep shoes in frame.
+                      One full-body photo is all you need - make sure your face is clearly visible. We check
+                      automatically that it's a full-body shot, not a half-body one.
                     </p>
                   </div>
                 )}
@@ -287,84 +260,6 @@ export function Profile() {
                   </span>
                   Your photo is only used for virtual try-on. It is not shared or shown as a public profile.
                 </p>
-              </div>
-
-              <div className="mt-6 border-t border-line pt-5">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="text-[20px] font-semibold tracking-tight text-navy">Your face close-up</h3>
-                  <span
-                    className={`${BADGE} ${
-                      shownFacePhoto ? 'border-emerald-200 bg-emerald-50 text-success' : 'border-line bg-canvas text-muted'
-                    }`}
-                  >
-                    {shownFacePhoto ? (
-                      <>
-                        <CheckMiniIcon />
-                        Added
-                      </>
-                    ) : (
-                      'Recommended'
-                    )}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted">
-                  A clear, front-facing close-up helps try-on keep your face looking like you.
-                </p>
-                <div className="mt-3 overflow-hidden rounded-xl border-2 border-dashed border-line bg-canvas p-3">
-                  {shownFacePhoto ? (
-                    <img
-                      src={shownFacePhoto}
-                      alt="Face close-up for virtual try-on"
-                      className="aspect-square w-full rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="flex aspect-square flex-col items-center justify-center px-6 text-center">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-navy shadow-sm">
-                        <PersonIcon />
-                      </span>
-                      <p className="mt-3 text-lg font-semibold text-navy">No face photo yet</p>
-                      <label
-                        htmlFor={facePhotoInputId}
-                        className={`mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-navy px-4 py-2 text-sm font-semibold text-white transition hover:bg-navy-deep ${
-                          saving ? 'pointer-events-none opacity-60' : ''
-                        }`}
-                      >
-                        <UploadIcon />
-                        Upload face photo
-                      </label>
-                      <p className="mt-2 text-xs text-muted">JPEG, PNG or WebP</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  id={facePhotoInputId}
-                  type="file"
-                  className="sr-only"
-                  accept={IMAGE_ACCEPT}
-                  disabled={saving}
-                  onChange={(event) => {
-                    const file = event.target.files?.[0]
-                    if (file) takeFaceFile(file)
-                    event.target.value = ''
-                  }}
-                />
-                {shownFacePhoto && faceMeta ? (
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-ink">{faceMeta.name}</p>
-                      <p className="text-xs text-muted">{faceMeta.kind} · Face close-up</p>
-                    </div>
-                    <label
-                      htmlFor={facePhotoInputId}
-                      className={`inline-flex cursor-pointer items-center gap-2 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-semibold text-navy transition hover:bg-canvas ${
-                        saving ? 'pointer-events-none opacity-60' : ''
-                      }`}
-                    >
-                      <ReplaceIcon />
-                      Replace
-                    </label>
-                  </div>
-                ) : null}
               </div>
             </section>
 

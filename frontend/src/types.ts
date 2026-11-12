@@ -42,7 +42,6 @@ export type WardrobeItem = {
 
 export type Profile = {
   bodyPhotoUrl: string | null
-  facePhotoUrl: string | null
   heightCm: number | null
   weightKg: number | null
   gender: string | null

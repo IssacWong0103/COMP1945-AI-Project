@@ -29,15 +29,13 @@ def get_db() -> Generator[Session, None, None]:
 
 def _migrate(engine) -> None:
     """Apply additive SQLite column migrations for pre-existing databases."""
-    from sqlalchemy import inspect, text
+    from sqlalchemy import inspect
 
     inspector = inspect(engine)
     if "profiles" not in inspector.get_table_names():
         return
-    with engine.begin() as conn:
-        columns = {row[1] for row in conn.execute(text("PRAGMA table_info(profiles)"))}
-        if "face_photo_url" not in columns:
-            conn.execute(text("ALTER TABLE profiles ADD COLUMN face_photo_url VARCHAR(512)"))
+    # No additive profile migrations are currently required.
+    # The legacy face_photo_url column (if present) is left in place but unused.
 
 
 def init_db() -> None:

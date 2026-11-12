@@ -14,7 +14,6 @@ type Props = {
   error: string | null
   beforeUrl?: string | null
   hasBodyPhoto: boolean
-  hasFacePhoto: boolean
   onStart: () => void
   onRetry: () => void
   onSave: () => void
@@ -29,7 +28,6 @@ export function TryOnDrawer({
   error,
   beforeUrl,
   hasBodyPhoto,
-  hasFacePhoto,
   onStart,
   onRetry,
   onSave,
@@ -90,7 +88,6 @@ export function TryOnDrawer({
             <>
               <ul className="space-y-1.5 text-xs text-muted">
                 <CheckRow ok={hasBodyPhoto} label="Full-body photo" />
-                <CheckRow ok={hasFacePhoto} label="Face close-up (recommended)" />
                 <CheckRow ok={outfit.items.length >= 2} label="Outfit pieces ready" />
               </ul>
               {hasBodyPhoto ? (

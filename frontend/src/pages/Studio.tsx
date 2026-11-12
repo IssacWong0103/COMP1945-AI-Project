@@ -54,7 +54,6 @@ export function Studio() {
   const [elapsedMs, setElapsedMs] = useState<number | null>(null)
   const [hasBodyPhoto, setHasBodyPhoto] = useState<boolean | null>(null)
   const [bodyPhotoUrl, setBodyPhotoUrl] = useState<string | null>(null)
-  const [hasFacePhoto, setHasFacePhoto] = useState<boolean | null>(null)
   const [closetItems, setClosetItems] = useState<WardrobeItem[]>([])
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set())
   const [tryOnStatus, setTryOnStatus] = useState<TryOnDrawerStatus>('idle')
@@ -92,12 +91,10 @@ export function Studio() {
         if (cancelled) return
         setHasBodyPhoto(Boolean(profile.bodyPhotoUrl))
         setBodyPhotoUrl(profile.bodyPhotoUrl)
-        setHasFacePhoto(Boolean(profile.facePhotoUrl))
         setClosetItems(items)
       } catch {
         if (!cancelled) {
           setHasBodyPhoto(null)
-          setHasFacePhoto(null)
           setClosetItems([])
         }
       }
@@ -422,16 +419,6 @@ export function Studio() {
         </p>
       ) : null}
 
-      {hasBodyPhoto !== false && hasFacePhoto === false && machine.phase === 'results' ? (
-        <p className="mb-4 rounded-lg border border-line bg-surface px-4 py-3 text-sm text-muted">
-          Add a face close-up in{' '}
-          <Link to="/settings" className="font-semibold underline">
-            Settings
-          </Link>{' '}
-          for a more accurate try-on.
-        </p>
-      ) : null}
-
       <div className="grid gap-4 lg:grid-cols-12">
         <form
           onSubmit={(event) => void onSubmit(event)}
@@ -733,7 +720,6 @@ export function Studio() {
           error={tryOnError}
           beforeUrl={bodyPhotoUrl}
           hasBodyPhoto={hasBodyPhoto === true}
-          hasFacePhoto={hasFacePhoto === true}
           onStart={() => void startTryOn()}
           onRetry={() => void startTryOn()}
           onSave={() => onSave(activeOutfit)}

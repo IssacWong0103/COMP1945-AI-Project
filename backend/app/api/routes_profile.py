@@ -8,6 +8,7 @@ from app.db import get_db
 from app.models import Profile
 from app.schemas import GENDERS, ProfileOut
 from app.services.storage import save_upload
+from app.services.vlm import verify_full_body_photo
 
 router = APIRouter(prefix="/profile", tags=["profile"])
 
@@ -68,7 +69,6 @@ def read_profile(db: Session = Depends(get_db)) -> ProfileOut:
 @router.put("", response_model=ProfileOut)
 async def update_profile(
     file: UploadFile | None = File(None),
-    faceFile: UploadFile | None = File(None),
     heightCm: str | None = Form(None),
     weightKg: str | None = Form(None),
     gender: str | None = Form(None),
@@ -79,12 +79,23 @@ async def update_profile(
     profile = get_or_create_profile(db)
 
     if file is not None and file.filename:
-        _, image_url = await save_upload(file, "profile")
+        dest, image_url = await save_upload(file, "profile")
+        verdict = await verify_full_body_photo(dest)
+        if not verdict.get("fullBody", True):
+            dest.unlink(missing_ok=True)
+            detail = verdict.get("reason") or "The photo does not show your full body."
+            raise HTTPException(
+                status_code=400,
+                detail=f"Please upload a full-body photo. {detail}",
+            )
+        if not verdict.get("faceVisible", True):
+            dest.unlink(missing_ok=True)
+            detail = verdict.get("reason") or "Your face is not clearly visible."
+            raise HTTPException(
+                status_code=400,
+                detail=f"Make sure your face is clearly visible in the photo. {detail}",
+            )
         profile.body_photo_url = image_url
-
-    if faceFile is not None and faceFile.filename:
-        _, image_url = await save_upload(faceFile, "profile")
-        profile.face_photo_url = image_url
 
     if heightCm is not None:
         profile.height_cm = _parse_number(heightCm, "heightCm", minimum=100, maximum=250)

@@ -29,7 +29,6 @@ class Profile(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     body_photo_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
-    face_photo_url: Mapped[Optional[str]] = mapped_column(String(512), nullable=True)
     height_cm: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     weight_kg: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     gender: Mapped[Optional[str]] = mapped_column(String(32), nullable=True)

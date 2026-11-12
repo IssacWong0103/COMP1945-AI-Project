@@ -295,7 +295,6 @@ async def generate_tryon(
     *,
     outfit_id: str,
     body_photo_url: str | None,
-    face_photo_url: str | None = None,
     garments: list[dict],
     styling_note: str | None = None,
     model_reference_url: str | None = None,
@@ -318,11 +317,6 @@ async def generate_tryon(
         height_cm=height_cm,
         weight_kg=weight_kg,
     )
-    if face_photo_url:
-        prompt += (
-            " A separate close-up face photo is provided as an additional reference; "
-            "use it to preserve the exact facial identity."
-        )
     if styling_note:
         prompt += f" Style guidance from a reference model look: {styling_note.strip()}."
     if model_reference_url:
@@ -338,10 +332,6 @@ async def generate_tryon(
         body_public = public_url_for(body_photo_url or "")
         if body_public:
             input_urls.append(body_public)
-        if face_photo_url:
-            face_public = public_url_for(face_photo_url)
-            if face_public:
-                input_urls.append(face_public)
         for item in garments:
             url = public_url_for(str(item.get("imageUrl") or item.get("image_url") or ""))
             if url:

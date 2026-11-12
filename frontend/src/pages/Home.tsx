@@ -8,9 +8,9 @@ import { FALLBACK_VENUES, humanize, itemTitle } from '../constants'
 import type { Profile, SavedLook, WardrobeItem } from '../types'
 
 const HERO_SAMPLES = [
-  { src: '/home/shirt.svg', alt: 'White shirt' },
-  { src: '/home/pants.svg', alt: 'Beige trousers' },
-  { src: '/home/shoes.svg', alt: 'White sneakers' },
+  { src: '/home/shirt.jpg', alt: 'Folded white shirt' },
+  { src: '/home/pants.jpg', alt: 'Folded tan trousers' },
+  { src: '/home/shoes.jpg', alt: 'White low-top sneaker' },
 ] as const
 
 const VENUE_ICONS: Record<string, () => ReactNode> = {
@@ -60,7 +60,6 @@ export function Home() {
 
   const hasWardrobe = items.length >= 2
   const hasPhoto = Boolean(profile?.bodyPhotoUrl)
-  const hasFacePhoto = Boolean(profile?.facePhotoUrl)
   const hasAttrs = Boolean(profile?.heightCm && profile?.preferredStyle)
   const setupComplete = hasWardrobe && hasPhoto && hasAttrs
   const filledCount = [profile?.heightCm, profile?.weightKg, profile?.gender, profile?.skinTone, profile?.preferredStyle].filter(
@@ -118,8 +117,7 @@ export function Home() {
               <span className="pointer-events-none absolute top-3.5 right-[12%] left-[12%] hidden h-px bg-line sm:block" aria-hidden />
               <SetupStep n={1} label="At least 2 wardrobe items" done={hasWardrobe} />
               <SetupStep n={2} label="Full-body photo" done={hasPhoto} />
-              <SetupStep n={3} label="Face close-up (recommended)" done={hasFacePhoto} optional />
-              <SetupStep n={4} label="Height + preferred style" done={hasAttrs} />
+              <SetupStep n={3} label="Height + preferred style" done={hasAttrs} />
             </ol>
           )}
 
@@ -129,7 +127,7 @@ export function Home() {
               to="/settings"
               icon={<ScanIcon />}
               label="Try-on photos"
-              value={hasPhoto && hasFacePhoto ? 'Body + face ready' : hasPhoto ? 'Body only' : 'Not added'}
+              value={hasPhoto ? 'Full-body photo added' : 'Not added'}
             />
             <StatusCard to="/settings" icon={<PersonIcon />} label="Settings" value={`${filledCount} of 5 filled`} />
             <StatusCard

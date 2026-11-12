@@ -35,6 +35,15 @@ cuffs, socks, accessories, and proportions. Give 1-2 short factual sentences abo
 styling technique only. Describe only what is visible; do not list the garments again.
 """
 
+BODY_PHOTO_SYSTEM_PROMPT = """You are a photo checker for USTyle, a virtual try-on app for HKUST students.
+Look at the user's uploaded photo and return STRICT JSON only — no markdown, no commentary:
+{"fullBody":true|false,"faceVisible":true|false,"reason":"<short factual explanation>"}
+Rules:
+- fullBody is true ONLY when the whole person from head to feet is visible in one frame.
+  Half-body photos, portraits cropped at the waist/chest/knees, or any cut-off pose are NOT full body.
+- faceVisible is true when the person's face is clear enough to identify (not blurry, turned away, or covered).
+"""
+
 CATEGORY_ALIASES: dict[str, Category] = {
     "top": "top",
     "tops": "top",
@@ -400,6 +409,60 @@ async def describe_garment(
         return _validated(parsed, fallback)
     except Exception as exc:  # noqa: BLE001
         logger.warning("DeepSeek Flash tagging failed (%s); using heuristics", exc)
+        return fallback
+
+
+async def verify_full_body_photo(image_path: Path) -> dict:
+    """Check that a profile photo shows a full body with a visible face.
+
+    Returns ``{"fullBody": bool, "faceVisible": bool, "reason": str}``. The check
+    is skipped (and the upload allowed) when DeepSeek is not configured or the
+    vision call fails, so a missing API key never blocks profile setup.
+    """
+    fallback = {"fullBody": True, "faceVisible": True, "reason": ""}
+    api_key = settings.deepseek_api_key.strip()
+    if not api_key:
+        logger.info("DEEPSEEK_API_KEY missing; skipping full-body photo check")
+        return fallback
+
+    raw = image_path.read_bytes()
+    data_url = _image_to_data_url(raw)
+    body = {
+        "model": DEEPSEEK_MODEL,
+        "temperature": 0.0,
+        "response_format": {"type": "json_object"},
+        "messages": [
+            {"role": "system", "content": BODY_PHOTO_SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Is this photo a full-body shot with a clearly visible face?"},
+                    {"type": "image_url", "image_url": {"url": data_url}},
+                ],
+            },
+        ],
+    }
+    headers = {
+        "Authorization": f"Bearer {settings.deepseek_api_key}",
+        "Content-Type": "application/json",
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=45.0) as client:
+            response = await client.post(DEEPSEEK_URL, headers=headers, json=body)
+            response.raise_for_status()
+            data = response.json()
+        content = data["choices"][0]["message"]["content"]
+        parsed = _extract_json(content if isinstance(content, str) else json.dumps(content))
+        full_body = str(parsed.get("fullBody", "true")).strip().lower() == "true"
+        face_visible = str(parsed.get("faceVisible", "true")).strip().lower() == "true"
+        return {
+            "fullBody": full_body,
+            "faceVisible": face_visible,
+            "reason": str(parsed.get("reason") or "").strip()[:240],
+        }
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("Full-body photo check failed (%s); allowing upload", exc)
         return fallback
 
 

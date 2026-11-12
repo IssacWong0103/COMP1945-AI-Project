@@ -119,7 +119,6 @@ class WardrobeItemUpdate(CamelModel):
 
 class ProfileOut(CamelModel):
     body_photo_url: str | None = None
-    face_photo_url: str | None = None
     height_cm: float | None = None
     weight_kg: float | None = None
     gender: str | None = None

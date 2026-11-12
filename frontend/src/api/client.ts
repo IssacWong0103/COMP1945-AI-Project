@@ -137,7 +137,6 @@ export async function getProfile(): Promise<Profile> {
 
 export async function updateProfile(input: {
   file?: File | null
-  faceFile?: File | null
   heightCm?: number | null
   weightKg?: number | null
   gender?: string | null
@@ -146,7 +145,6 @@ export async function updateProfile(input: {
 }): Promise<Profile> {
   const body = new FormData()
   if (input.file) body.append('file', input.file)
-  if (input.faceFile) body.append('faceFile', input.faceFile)
   body.append(
     'heightCm',
     input.heightCm != null && !Number.isNaN(input.heightCm) ? String(input.heightCm) : '',

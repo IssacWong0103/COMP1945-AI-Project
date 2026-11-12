@@ -80,7 +80,6 @@ type WardrobeItem = {
 
 type Profile = {
   bodyPhotoUrl: string | null;
-  facePhotoUrl: string | null;
   heightCm: number | null;
   weightKg: number | null;
   gender: string | null;
@@ -185,8 +184,7 @@ Response `200`: `WardrobeItem`
 
 `multipart/form-data`:
 
-- `file` optional body photo (full-body)
-- `faceFile` optional face close-up photo
+- `file` optional full-body photo (head-to-toe, face clearly visible; the photo is AI-checked before it is accepted)
 - `heightCm` optional
 - `weightKg` optional
 - `gender` optional
