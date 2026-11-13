@@ -14,6 +14,7 @@ import {
 export function Looks() {
   const [localLooks, setLocalLooks] = useState<LocalSavedLook[]>(() => listLocalSavedLooks())
   const [openLook, setOpenLook] = useState<LocalSavedLook | null>(null)
+  const [downloading, setDownloading] = useState(false)
 
   useEffect(() => {
     document.title = 'Looks — USTyle'
@@ -42,6 +43,27 @@ export function Looks() {
     removeLocalLook(id)
     setLocalLooks(listLocalSavedLooks())
     pushActivity({ kind: 'look_removed', title: 'Look removed', href: '/looks' })
+  }
+
+  async function onDownload(look: LocalSavedLook) {
+    if (!look.thumbnailUrl || downloading) return
+    setDownloading(true)
+    try {
+      const response = await fetch(apiUrl(look.thumbnailUrl))
+      if (!response.ok) throw new Error(`Download failed (${response.status})`)
+      const blob = await response.blob()
+      const extension = blob.type.split('/')[1] || 'png'
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `${humanize(look.venue)}-look.${extension}`
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      window.alert('Could not download this image. Please try again.')
+    } finally {
+      setDownloading(false)
+    }
   }
 
   return (
@@ -140,9 +162,19 @@ export function Looks() {
                   {(openLook.overallScore * 100).toFixed(0)}% match
                 </p>
               </div>
-              <Button type="button" variant="secondary" onClick={() => setOpenLook(null)}>
-                Close
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => onDownload(openLook)}
+                  disabled={!openLook.thumbnailUrl || downloading}
+                >
+                  {downloading ? 'Downloading…' : 'Download'}
+                </Button>
+                <Button type="button" variant="secondary" onClick={() => setOpenLook(null)}>
+                  Close
+                </Button>
+              </div>
             </div>
           </div>
         </div>
