@@ -18,8 +18,8 @@ const PRIMARY_LINKS: NavItem[] = [
   { to: '/', label: 'Home', end: true, icon: HomeIcon, section: 'primary' },
   { to: '/wardrobe', label: 'Closet', icon: ClosetIcon, section: 'primary' },
   { to: '/studio', label: 'Studio', icon: StudioIcon, section: 'primary' },
-  { to: '/looks', label: 'Looks', icon: LooksIcon, section: 'primary' },
   { to: '/try-on', label: 'Try-On', icon: TryOnIcon, section: 'primary' },
+  { to: '/looks', label: 'Looks', icon: LooksIcon, section: 'primary' },
 ]
 
 const SYSTEM_LINKS: NavItem[] = [

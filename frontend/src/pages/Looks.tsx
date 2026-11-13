@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { apiUrl } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
 import { StudioShell } from '../components/StudioShell'
@@ -14,11 +13,21 @@ import {
 
 export function Looks() {
   const [localLooks, setLocalLooks] = useState<LocalSavedLook[]>(() => listLocalSavedLooks())
+  const [openLook, setOpenLook] = useState<LocalSavedLook | null>(null)
 
   useEffect(() => {
     document.title = 'Looks — USTyle'
     track('nav_tab_opened', { tab: 'looks' })
   }, [])
+
+  useEffect(() => {
+    if (!openLook) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpenLook(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [openLook])
 
   const cards = useMemo(
     () =>
@@ -85,12 +94,13 @@ export function Looks() {
               </p>
             </div>
             <div className="mt-3 flex gap-2">
-              <Link
-                to={`/studio?venue=${encodeURIComponent(look.venue)}`}
+              <button
+                type="button"
+                onClick={() => setOpenLook(look)}
                 className="inline-flex flex-1 items-center justify-center rounded-lg bg-navy px-3 py-2 text-sm font-semibold text-white no-underline"
               >
                 Open
-              </Link>
+              </button>
               <Button type="button" variant="danger" onClick={() => onRemove(look.id)}>
                 Remove
               </Button>
@@ -98,6 +108,45 @@ export function Looks() {
           </article>
         ))}
       </div>
+
+      {openLook ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Full size preview of ${humanize(openLook.venue)} look`}
+          onClick={() => setOpenLook(null)}
+        >
+          <div
+            className="relative max-h-full max-w-3xl overflow-hidden rounded-xl bg-surface p-3 shadow-lg"
+            onClick={(event) => event.stopPropagation()}
+          >
+            {openLook.thumbnailUrl ? (
+              <img
+                src={apiUrl(openLook.thumbnailUrl)}
+                alt=""
+                className="max-h-[80vh] w-auto max-w-full rounded-lg object-contain"
+              />
+            ) : (
+              <div className="flex h-64 w-64 items-center justify-center text-sm text-muted">
+                No preview
+              </div>
+            )}
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-ink">{humanize(openLook.venue)}</p>
+                <p className="text-xs text-muted">
+                  {new Date(openLook.createdAt).toLocaleDateString()} ·{' '}
+                  {(openLook.overallScore * 100).toFixed(0)}% match
+                </p>
+              </div>
+              <Button type="button" variant="secondary" onClick={() => setOpenLook(null)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </StudioShell>
   )
 }
