@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { apiUrl, friendlyError, getProfile, pollTryOn } from '../api/client'
+import { apiUrl, friendlyError, getProfile, listTryOns, pollTryOn } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
 import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
@@ -15,7 +15,7 @@ import {
   loadStudioSession,
   updateStudioSession,
 } from '../studio/sessionStore'
-import type { Outfit, Profile } from '../types'
+import type { Outfit, Profile, TryOnHistoryItem } from '../types'
 
 type TryOnStatus = 'idle' | 'rendering' | 'ready' | 'failed'
 
@@ -38,8 +38,36 @@ export function TryOnPage() {
   const [saved, setSaved] = useState(() =>
     listLocalSavedLooks().some((look) => look.id === outfitId),
   )
+  const [history, setHistory] = useState<TryOnHistoryItem[]>([])
+  const [openHistory, setOpenHistory] = useState<TryOnHistoryItem | null>(null)
+  const [historySavedIds, setHistorySavedIds] = useState<Set<string>>(
+    () => new Set(listLocalSavedLooks().map((look) => look.id)),
+  )
   const abortRef = useRef<AbortController | null>(null)
   const hasStartedRef = useRef(false)
+
+  useEffect(() => {
+    if (!openHistory) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpenHistory(null)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [openHistory])
+
+  useEffect(() => {
+    let cancelled = false
+    listTryOns()
+      .then((result) => {
+        if (!cancelled) setHistory(result.results)
+      })
+      .catch(() => {
+        if (!cancelled) setHistory([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [status])
 
   useEffect(() => {
     document.title = 'Try-On — USTyle'
@@ -135,6 +163,26 @@ export function TryOnPage() {
     })
   }
 
+  function onSaveHistory(entry: TryOnHistoryItem) {
+    saveLocalLook({
+      id: entry.outfitId,
+      venue: entry.venue || 'studio',
+      overallScore: entry.overallScore,
+      createdAt: entry.createdAt,
+      thumbnailUrl: entry.tryOnUrl,
+      items: entry.items,
+    })
+    setHistorySavedIds((prev) => new Set(prev).add(entry.outfitId))
+    if (entry.outfitId === outfitId) setSaved(true)
+    track('studio_look_saved', { outfitId: entry.outfitId, venue: entry.venue })
+    pushActivity({
+      kind: 'look_saved',
+      title: 'Look saved',
+      detail: entry.venue || 'Try-on',
+      href: '/looks',
+    })
+  }
+
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
@@ -150,7 +198,6 @@ export function TryOnPage() {
               <h3 className="text-sm font-semibold text-ink">
                 Try-on {venue ? ` · ${humanize(venue)}` : ''}
               </h3>
-              <p className="text-xs text-muted">{(outfit.overallScore * 100).toFixed(0)}% match</p>
             </div>
             <Link to="/studio" className="text-sm font-semibold text-navy no-underline hover:underline">
               Back to Studio
@@ -279,6 +326,94 @@ export function TryOnPage() {
           </div>
         </div>
       )}
+
+      {history.length > 0 ? (
+        <section className="mt-6 rounded-xl border border-line bg-surface p-5 shadow-sm">
+          <p className="text-sm font-semibold text-ink">Past try-ons</p>
+          <p className="mt-1 text-xs text-muted">
+            Your generated photos, kept on the server — they survive browser and app restarts.
+          </p>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {history.map((entry) => (
+              <article
+                key={entry.outfitId}
+                className="overflow-hidden rounded-lg border border-line bg-canvas"
+              >
+                <img
+                  src={apiUrl(entry.tryOnUrl)}
+                  alt={`Past try-on for ${humanize(entry.venue)}`}
+                  className="aspect-[3/4] w-full object-cover"
+                />
+                <div className="flex items-center justify-between gap-2 p-3">
+                  <div>
+                    <p className="text-xs font-semibold text-ink">{humanize(entry.venue)}</p>
+                    <p className="text-xs text-muted">
+                      {new Date(entry.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button type="button" variant="secondary" onClick={() => setOpenHistory(entry)}>
+                    View
+                  </Button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {openHistory ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Full size preview of past ${humanize(openHistory.venue)} try-on`}
+          onClick={() => setOpenHistory(null)}
+        >
+          <div
+            className="relative max-h-full max-w-3xl overflow-hidden rounded-xl bg-surface p-3 shadow-lg"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              src={apiUrl(openHistory.tryOnUrl)}
+              alt={`Past try-on for ${humanize(openHistory.venue)}`}
+              className="max-h-[80vh] w-auto max-w-full rounded-lg object-contain"
+            />
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-ink">{humanize(openHistory.venue)}</p>
+                <p className="text-xs text-muted">
+                  {new Date(openHistory.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <a
+                  href={apiUrl(openHistory.tryOnUrl)}
+                  download
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-line bg-surface px-3.5 py-2 text-sm font-semibold text-ink no-underline hover:bg-canvas"
+                >
+                  Download
+                </a>
+                {historySavedIds.has(openHistory.outfitId) ? (
+                  <Button type="button" variant="secondary" disabled>
+                    Saved
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => onSaveHistory(openHistory)}
+                  >
+                    Save
+                  </Button>
+                )}
+                <Button type="button" variant="secondary" onClick={() => setOpenHistory(null)}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-6 rounded-xl border border-line bg-surface p-5 shadow-sm">
         <p className="text-sm font-semibold text-ink">How it works</p>

@@ -18,20 +18,30 @@ logger = logging.getLogger(__name__)
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 DEEPSEEK_MODEL = "deepseek-flash"
 
-SYSTEM_PROMPT = """You are a clothing cataloguer for USTyle, a campus outfit assistant for HKUST students.
-Analyze the garment photo and return STRICT JSON only — no markdown, no commentary, no extra keys:
-{"isSingleItem":true,"rejectionReason":"","category":"top|bottom|outerwear|dress|shoes|accessory","color":"<dominant color name>","cut":"<silhouette>","style":"casual|smartCasual|streetwear|sporty|minimal|formal","formalityScore":0,"itemGender":"male|female|unisex","description":"<short factual phrase>"}
-Rules:
-- isSingleItem is true ONLY when the photo clearly shows one clothing item on its own. A matching pair of shoes counts as one item.
-- Set isSingleItem to false for a person or model wearing clothes, a full or partial outfit, multiple separate items, a collage, or an image with no clearly identifiable clothing item.
-- rejectionReason is a short factual explanation when isSingleItem is false; otherwise it is an empty string.
+
+class GarmentScreeningUnavailable(RuntimeError):
+    pass
+
+
+SYSTEM_PROMPT = """You are a clothing photo screener and cataloguer for USTyle, a campus outfit assistant for HKUST students.
+Analyze the photo and return STRICT JSON only — no markdown, no commentary, no extra keys:
+{"isClothingItem":true,"isSingleItem":true,"rejectionReason":"","category":"top|bottom|outerwear|dress|shoes|accessory","color":"<dominant color name>","cut":"<silhouette>","style":"casual|smartCasual|streetwear|sporty|minimal|formal","formalityScore":0,"itemGender":"male|female|unisex","description":"<short factual phrase>"}
+Screening rules:
+- isClothingItem is true ONLY when clothing or a fashion accessory is the clear primary subject. It is false for pets, animals, toys, Lego, vehicles, furniture, food, scenery, screenshots, and other non-clothing subjects.
+- isSingleItem is true ONLY when the photo clearly shows one standalone clothing item or fashion accessory. A matching pair of shoes counts as one item.
+- Set isSingleItem to false for a person or model wearing clothes, a full or partial outfit, multiple separate items, or a collage, even when every visible object is clothing.
+- Multiple colour variants, stacked or overlapping garments, and before/after or detail panels count as multiple items or a collage, not one item. Accept only a single physical garment (or one matching pair of shoes), not several examples of the same product.
+- Set both fields to false when no clothing item is clearly identifiable. For a model or outfit, isClothingItem may be true but isSingleItem must be false.
+- rejectionReason is a short factual explanation when either field is false; otherwise it is an empty string.
+- When uncertain whether the photo is an eligible standalone item, reject it by setting isSingleItem to false. Never guess that an ambiguous or non-clothing photo is acceptable.
+Cataloguing rules for accepted photos:
 - category is the garment type, not the photo setting.
 - color is a short English color name (e.g. navy, white, black, beige).
 - cut is silhouette such as relaxed, slim, oversized, straight, cropped, tailored.
 - formalityScore is an integer from 0 to 100 for the garment alone, ignoring background and styling.
 - Formality anchors: 10 athletic or loungewear; 30 graphic tees, hoodies, or joggers; 45 neat everyday casual; 60 polished casual; 75 smart-casual shirts, chinos, or blazers; 95 suits, tuxedos, or evening gowns.
 - description: under 20 words, factual, never sexual.
-- If unsure about the attributes, pick the closest allowed enum value and estimate formality from the anchors. Do not guess that an ambiguous photo is a single item.
+- If unsure about the attributes, pick the closest allowed enum value and estimate formality from the anchors.
 """
 
 STYLING_SYSTEM_PROMPT = """You are a stylist for USTyle, a campus outfit assistant.
@@ -390,6 +400,7 @@ def _heuristic_tags(image_path: Path, notes: str | None, original_name: str | No
         description = f"{description}; {notes.strip()[:80]}"
 
     return {
+        "isClothingItem": True,
         "isSingleItem": True,
         "rejectionReason": "",
         "category": category,
@@ -402,15 +413,22 @@ def _heuristic_tags(image_path: Path, notes: str | None, original_name: str | No
     }
 
 
+def _screening_flag(payload: dict, key: str) -> bool:
+    value = payload.get(key)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.strip().lower() in {"true", "yes", "1"}
+    return False
+
+
 def _validated(payload: dict, fallback: dict) -> dict:
     formality = payload.get("formalityScore")
     if formality is None:
         formality = payload.get("formality")
-    is_single_item = payload.get("isSingleItem", True)
-    if not isinstance(is_single_item, bool):
-        is_single_item = str(is_single_item).strip().lower() not in {"false", "no", "0"}
     return {
-        "isSingleItem": is_single_item,
+        "isClothingItem": _screening_flag(payload, "isClothingItem"),
+        "isSingleItem": _screening_flag(payload, "isSingleItem"),
         "rejectionReason": str(payload.get("rejectionReason") or "").strip()[:240],
         "category": normalize_category(payload.get("category") or fallback["category"]),
         "color": str(payload.get("color") or fallback["color"]).strip()[:64] or fallback["color"],
@@ -431,12 +449,17 @@ async def describe_garment(
     fallback = _heuristic_tags(image_path, notes, original_name)
     api_key = settings.deepseek_api_key.strip()
     if not api_key:
-        logger.info("DEEPSEEK_API_KEY missing; using local garment heuristics")
-        return fallback
+        logger.warning("DEEPSEEK_API_KEY missing; rejecting unverified wardrobe upload")
+        raise GarmentScreeningUnavailable(
+            "Photo screening is not configured on the server, so this photo was not added."
+        )
 
     raw = image_path.read_bytes()
     data_url = _image_to_data_url(raw)
-    user_text = "Check that this photo shows exactly one clothing item on its own, then describe it as strict JSON."
+    user_text = (
+        "Screen this photo for exactly one standalone clothing item or fashion accessory. "
+        "Reject non-clothing subjects, people, outfits, multiple items, and collages, then describe an accepted item as strict JSON."
+    )
     if notes:
         user_text += f" User notes: {notes.strip()[:300]}"
     if original_name:
@@ -444,7 +467,7 @@ async def describe_garment(
 
     body = {
         "model": DEEPSEEK_MODEL,
-        "temperature": 0.2,
+        "temperature": 0.0,
         "response_format": {"type": "json_object"},
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -471,8 +494,10 @@ async def describe_garment(
         parsed = _extract_json(content if isinstance(content, str) else json.dumps(content))
         return _validated(parsed, fallback)
     except Exception as exc:  # noqa: BLE001
-        logger.warning("DeepSeek Flash tagging failed (%s); using heuristics", exc)
-        return fallback
+        logger.warning("DeepSeek Flash garment screening failed (%s); rejecting upload", exc)
+        raise GarmentScreeningUnavailable(
+            "We couldn’t verify this photo right now. Try again shortly; it has not been added to your closet."
+        ) from exc
 
 
 async def verify_full_body_photo(image_path: Path) -> dict:

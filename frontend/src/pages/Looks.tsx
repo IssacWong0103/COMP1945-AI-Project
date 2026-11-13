@@ -111,9 +111,6 @@ export function Looks() {
                   {new Date(look.createdAt).toLocaleDateString()} · local
                 </p>
               </div>
-              <p className="rounded-full bg-canvas px-2 py-0.5 text-xs font-semibold text-navy">
-                {(look.overallScore * 100).toFixed(0)}% match
-              </p>
             </div>
             <div className="mt-3 flex gap-2">
               <button
@@ -158,8 +155,7 @@ export function Looks() {
               <div>
                 <p className="text-sm font-semibold text-ink">{humanize(openLook.venue)}</p>
                 <p className="text-xs text-muted">
-                  {new Date(openLook.createdAt).toLocaleDateString()} ·{' '}
-                  {(openLook.overallScore * 100).toFixed(0)}% match
+                  {new Date(openLook.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div className="flex gap-2">

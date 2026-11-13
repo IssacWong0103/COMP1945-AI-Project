@@ -19,7 +19,7 @@ from app.schemas import (
     WardrobeListResponse,
 )
 from app.services.storage import local_path_for, save_upload
-from app.services.vlm import describe_garment
+from app.services.vlm import GarmentScreeningUnavailable, describe_garment
 
 router = APIRouter(prefix="/wardrobe", tags=["wardrobe"])
 
@@ -35,11 +35,29 @@ async def create_item(
     db: Session = Depends(get_db),
 ) -> WardrobeItemOut:
     dest, image_url = await save_upload(file, "wardrobe")
-    tags = await describe_garment(dest, notes=notes, original_name=file.filename)
-    if not tags.get("isSingleItem", True):
+    try:
+        tags = await describe_garment(dest, notes=notes, original_name=file.filename)
+    except GarmentScreeningUnavailable as exc:
         dest.unlink(missing_ok=True)
-        reason = str(tags.get("rejectionReason") or "").strip()
-        detail = "Upload one clothing item on its own (a pair of shoes is fine), not a model, outfit, or multiple items."
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception:
+        dest.unlink(missing_ok=True)
+        raise
+
+    reason = str(tags.get("rejectionReason") or "").strip()
+    if not tags.get("isClothingItem", False):
+        dest.unlink(missing_ok=True)
+        detail = (
+            "This photo does not show a clothing item or fashion accessory. "
+            "Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added."
+        )
+        raise HTTPException(status_code=400, detail=f"{detail} {reason}".strip())
+    if not tags.get("isSingleItem", False):
+        dest.unlink(missing_ok=True)
+        detail = (
+            "Upload exactly one clothing item on its own (a pair of shoes is fine), "
+            "not a person, model, full or partial outfit, collage, or multiple items."
+        )
         raise HTTPException(status_code=400, detail=f"{detail} {reason}".strip())
     item = WardrobeItem(
         id=str(uuid4()),

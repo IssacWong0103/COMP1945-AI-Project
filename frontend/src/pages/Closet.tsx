@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  ApiError,
   apiUrl,
   deleteWardrobeItem,
   friendlyError,
@@ -50,7 +51,7 @@ type UploadJob = {
   key: string
   name: string
   file: File
-  status: 'queued' | 'uploading' | 'done' | 'error'
+  status: 'queued' | 'uploading' | 'done' | 'rejected' | 'error'
   progress: number
   elapsedMs: number
   item?: WardrobeItem
@@ -155,6 +156,16 @@ export function Closet() {
     activeIndex >= 0
       ? activeIndex + 1
       : jobs.length - jobs.filter((job) => job.status === 'queued').length
+  const acceptedCount = jobs.filter((job) => job.status === 'done').length
+  const rejectedCount = jobs.filter((job) => job.status === 'rejected').length
+  const failedCount = jobs.filter((job) => job.status === 'error').length
+  const uploadSummary = [
+    acceptedCount ? `${acceptedCount} added` : '',
+    rejectedCount ? `${rejectedCount} rejected` : '',
+    failedCount ? `${failedCount} failed` : '',
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   useEffect(() => {
     if (!toast) return
@@ -200,10 +211,11 @@ export function Closet() {
     } catch (err) {
       const elapsed = Date.now() - startedAt
       const message = friendlyError(err)
+      const status = err instanceof ApiError && err.status === 400 ? 'rejected' : 'error'
       setJobs((prev) =>
         prev.map((entry) =>
           entry.key === job.key
-            ? { ...entry, status: 'error', progress: 100, elapsedMs: elapsed, error: message }
+            ? { ...entry, status, progress: 100, elapsedMs: elapsed, error: message }
             : entry,
         ),
       )
@@ -323,11 +335,17 @@ export function Closet() {
           {jobs.length > 0 ? (
             <div className="rounded-xl border border-line bg-surface px-4 py-3">
               <div className="flex items-center gap-2 text-sm text-ink">
-                {uploadingCount > 0 ? <Spinner label="" /> : <SuccessIcon />}
+                {uploadingCount > 0 ? (
+                  <Spinner label="" />
+                ) : rejectedCount + failedCount > 0 ? (
+                  <WarningIcon />
+                ) : (
+                  <SuccessIcon />
+                )}
                 <span className="font-semibold">
-                  {uploadingCount > 0 ? `Uploading ${uploadStep} of ${jobs.length}...` : `Uploaded ${jobs.length} file${jobs.length === 1 ? '' : 's'}.`}
+                  {uploadingCount > 0 ? `Checking ${uploadStep} of ${jobs.length}...` : uploadSummary}
                 </span>
-                <span className="text-muted">JPEG, PNG or WebP</span>
+                <span className="text-muted">One standalone item per photo</span>
               </div>
             </div>
           ) : null}
@@ -371,7 +389,7 @@ export function Closet() {
                         <p className="truncate text-sm font-semibold text-ink">{job.name}</p>
                         {job.status === 'uploading' ? (
                           <p className="text-xs text-muted">
-                            AI is reading this garment... {(job.elapsedMs / 1000).toFixed(1)}s elapsed
+                            Checking for one standalone clothing item... {(job.elapsedMs / 1000).toFixed(1)}s elapsed
                           </p>
                         ) : null}
                         {job.status === 'queued' ? <p className="text-xs text-muted">Queued</p> : null}
@@ -382,14 +400,19 @@ export function Closet() {
                             {job.item ? ` · Formality ${job.item.formalityScore}/100` : ''}
                           </p>
                         ) : null}
+                        {job.status === 'rejected' ? (
+                          <p className="text-xs text-danger">
+                            Not added · {job.error || 'Upload one clothing item on its own.'}
+                          </p>
+                        ) : null}
                         {job.status === 'error' ? (
                           <p className="text-xs text-danger">
-                            {job.error || 'We could not read this image. Try a clearer photo.'}
+                            {job.error || 'We could not verify this image. Please try again.'}
                           </p>
                         ) : null}
                       </div>
 
-                      {job.status === 'done' ? (
+                      {job.status !== 'queued' && job.status !== 'uploading' ? (
                         <button
                           type="button"
                           className="rounded-md p-1 text-muted hover:bg-surface hover:text-ink"
@@ -406,7 +429,7 @@ export function Closet() {
                         <div className="h-1.5 overflow-hidden rounded-full bg-line">
                           <div className="h-full rounded-full bg-navy transition-all" style={{ width: `${job.progress}%` }} />
                         </div>
-                        <p className="mt-1 text-xs text-muted">Uploading · {Math.round(job.progress)}%</p>
+                        <p className="mt-1 text-xs text-muted">Screening · {Math.round(job.progress)}%</p>
                       </div>
                     ) : null}
 
@@ -967,6 +990,16 @@ function SuccessIcon() {
     <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-success">
       <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" aria-hidden>
         <path d="m4 8 2.2 2.2L12 4.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      </svg>
+    </span>
+  )
+}
+
+function WarningIcon() {
+  return (
+    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+      <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" aria-hidden>
+        <path d="M8 4.2v4.3M8 11.5v.1" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
       </svg>
     </span>
   )

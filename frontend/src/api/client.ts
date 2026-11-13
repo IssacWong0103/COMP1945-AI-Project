@@ -5,6 +5,7 @@ import type {
   RecommendRequest,
   RecommendResponse,
   SavedLook,
+  TryOnHistoryResponse,
   TryOnResponse,
   VenueInfo,
   WardrobeItem,
@@ -196,6 +197,11 @@ export async function tryOn(
     signal,
   })
   return parseJson<TryOnResponse>(res)
+}
+
+export async function listTryOns(signal?: AbortSignal): Promise<TryOnHistoryResponse> {
+  const res = await fetch('/api/try-ons', { signal })
+  return parseJson<TryOnHistoryResponse>(res)
 }
 
 function delay(ms: number, signal?: AbortSignal): Promise<void> {

@@ -228,3 +228,17 @@ class TryOnResponse(CamelModel):
     outfit_id: str
     try_on_url: str | None
     status: str
+
+
+class TryOnHistoryItem(CamelModel):
+    outfit_id: str
+    venue: str
+    overall_score: float
+    try_on_url: str
+    status: str
+    created_at: datetime
+    items: list[OutfitItemRef] = []
+
+
+class TryOnHistoryResponse(CamelModel):
+    results: list[TryOnHistoryItem]

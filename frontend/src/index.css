@@ -18,7 +18,6 @@
 
 body {
   margin: 0;
-  zoom: 1.25;
   min-height: 100svh;
   background: var(--color-canvas);
   color: var(--color-ink);

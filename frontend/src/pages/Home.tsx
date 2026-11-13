@@ -208,7 +208,7 @@ export function Home() {
                         {profile?.preferredStyle ? ` · ${humanize(profile.preferredStyle)}` : ''}
                       </span>
                       <span className="mt-0.5 block text-xs text-muted">
-                        {Math.round(look.overallScore * 100)}% match · {formatLookDate(look.createdAt)}
+                        {formatLookDate(look.createdAt)}
                       </span>
                     </span>
                   </Link>

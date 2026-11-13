@@ -129,6 +129,20 @@ export type TryOnResponse = {
   status: 'ready' | 'processing' | string
 }
 
+export type TryOnHistoryItem = {
+  outfitId: string
+  venue: string
+  overallScore: number
+  tryOnUrl: string
+  status: string
+  createdAt: string
+  items: OutfitItemRef[]
+}
+
+export type TryOnHistoryResponse = {
+  results: TryOnHistoryItem[]
+}
+
 export type ApiErrorBody = {
   detail: string
 }

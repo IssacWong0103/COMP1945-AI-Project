@@ -20,9 +20,6 @@ export function OutfitCard({ outfit, index, alternative = false, onTryOn, onSwap
     <article className="flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-sm">
       <header className="mb-4 flex items-center justify-between gap-3">
         <p className="text-sm font-semibold text-ink">{alternative ? 'Alternative' : 'Outfit'} {look}</p>
-        <p className="rounded-full bg-canvas px-2.5 py-0.5 text-xs font-semibold tabular-nums text-navy">
-          {(outfit.overallScore * 100).toFixed(0)}% match
-        </p>
       </header>
 
       <div className="mb-3 grid grid-cols-3 gap-2">

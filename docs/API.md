@@ -157,11 +157,13 @@ is configured.
 
 `multipart/form-data` field `file` (jpeg/png/webp). Optional field `notes` (string).
 
-Backend: save file, call DeepSeek Flash VLM, validate that the photo contains one clothing item on its own, and persist attributes. A matching pair of shoes counts as one item. Photos of models, full or partial outfits, multiple items, collages, or non-clothing subjects are rejected.
+Backend: save a temporary file, call DeepSeek Flash VLM, validate that the photo contains one standalone clothing item, and persist its attributes only after validation passes. A matching pair of shoes counts as one item. Photos of models, full or partial outfits, multiple items, collages, or non-clothing subjects are rejected.
 
 Response `201`: `WardrobeItem`
 
-Response `400`: `{ "detail": "Upload one clothing item on its own ..." }` when the image is invalid or fails the single-item check. Rejected uploads are not stored.
+Response `400`: `{ "detail": "Upload exactly one clothing item on its own ..." }` when the image fails the single-item check, or a non-clothing-specific message for irrelevant images. Rejected uploads are deleted and never added to the wardrobe.
+
+Response `503`: screening is not configured or temporarily unavailable. The photo is deleted and not added; uploads never bypass screening with filename/color heuristics.
 
 ### `GET /api/wardrobe/items`
 
@@ -281,6 +283,31 @@ Response `200`:
 If generation is still running: `{ "outfitId", "tryOnUrl": null, "status": "processing" }`
 
 If failed: HTTP 502 with `{ "detail": "..." }`
+
+### `GET /api/try-ons`
+
+Server-side history of generated try-on photos (camelCase), newest first, up to 24.
+Rows whose image file no longer exists under `uploads/tryon/` are skipped. The
+Try-On UI renders this as the "Past try-ons" gallery so photos survive browser
+and app restarts.
+
+Response `200`:
+
+```json
+{ "results": TryOnHistoryItem[] }
+```
+
+```ts
+type TryOnHistoryItem = {
+  outfitId: string;
+  venue: string;
+  overallScore: number;
+  tryOnUrl: string;        // "/uploads/tryon/<outfitId>.jpg"
+  status: string;
+  createdAt: string;       // ISO-8601
+  items: OutfitItemRef[];
+};
+```
 
 ### `GET /api/outfits`
 

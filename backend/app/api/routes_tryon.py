@@ -3,14 +3,76 @@ from __future__ import annotations
 import json
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import get_db
 from app.models import Outfit, Profile
-from app.schemas import TryOnRequest, TryOnResponse
+from app.schemas import (
+    OutfitItemRef,
+    TryOnHistoryItem,
+    TryOnHistoryResponse,
+    TryOnRequest,
+    TryOnResponse,
+)
+from app.services.storage import local_path_for
 from app.services.tryon import generate_tryon
 
 router = APIRouter(tags=["try-on"])
+
+
+def _snapshot_items(items_json: str) -> list[OutfitItemRef]:
+    try:
+        snapshot = json.loads(items_json)
+    except json.JSONDecodeError:
+        return []
+    items = snapshot.get("items") if isinstance(snapshot, dict) else snapshot
+    if not isinstance(items, list):
+        return []
+    refs = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        refs.append(
+            OutfitItemRef(
+                id=str(item.get("id") or ""),
+                category=str(item.get("category") or ""),
+                color=str(item.get("color") or ""),
+                description=str(item.get("description") or ""),
+                image_url=str(item.get("imageUrl") or item.get("image_url") or ""),
+                formality_score=int(
+                    item.get("formalityScore") or item.get("formality_score") or 50
+                ),
+            )
+        )
+    return refs
+
+
+@router.get("/try-ons", response_model=TryOnHistoryResponse)
+def list_try_ons(db: Session = Depends(get_db)) -> TryOnHistoryResponse:
+    rows = db.scalars(
+        select(Outfit)
+        .where(Outfit.try_on_url.is_not(None))
+        .order_by(Outfit.created_at.desc())
+        .limit(24)
+    ).all()
+    results = []
+    for row in rows:
+        url = row.try_on_url or ""
+        if url.startswith("/uploads/") and local_path_for(url) is None:
+            continue
+        results.append(
+            TryOnHistoryItem(
+                outfit_id=row.id,
+                venue=row.venue,
+                overall_score=row.overall_score,
+                try_on_url=url,
+                status=row.try_on_status or "ready",
+                created_at=row.created_at,
+                items=_snapshot_items(row.items_json),
+            )
+        )
+    return TryOnHistoryResponse(results=results)
 
 
 @router.post("/try-on", response_model=TryOnResponse)

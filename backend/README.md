@@ -23,7 +23,7 @@ KIE_API_KEY=               # kie.ai GPT Image-2 virtual try-on
 PUBLIC_BASE_URL=           # public HTTPS origin so kie can fetch /uploads/... (e.g. ngrok)
 ```
 
-The app runs without keys: wardrobe tagging uses filename/color heuristics, AI single-item validation is skipped, and try-on falls back to a labeled collage.
+Wardrobe uploads require `DEEPSEEK_API_KEY`: every photo must pass AI screening for one standalone clothing item before it is saved. If the key is missing or screening fails, the upload is rejected rather than accepted unchecked. Other features still run without keys, and try-on falls back to a labeled collage.
 
 ## Run
 
