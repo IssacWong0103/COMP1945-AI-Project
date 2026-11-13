@@ -100,6 +100,7 @@ Never trap users in a dead-end modal. Always expose one progressive action.
 - States: idle → rendering → ready | failed.
 - Ready: Download, Save photo, Retry.
 - Failed: Retry.
+- Restores the last selected outfit and venue from the Studio session when returning to the tab, until a new try-on or Studio run replaces them.
 
 ### Swap drawer (`13`)
 - Slot chips from outfit categories.

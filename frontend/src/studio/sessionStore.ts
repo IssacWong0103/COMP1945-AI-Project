@@ -14,6 +14,8 @@ export type StudioSessionSnapshot = {
   elapsedMs: number | null
   feedbackText: string
   feedbackHistory: { id: string; text: string }[]
+  tryOnOutfitId: string
+  tryOnVenue: string
 }
 
 function sanitizeSnapshot(raw: Partial<StudioSessionSnapshot> | null): StudioSessionSnapshot | null {
@@ -55,6 +57,8 @@ function sanitizeSnapshot(raw: Partial<StudioSessionSnapshot> | null): StudioSes
             Boolean(entry) && typeof entry.id === 'string' && typeof entry.text === 'string',
         )
       : [],
+    tryOnOutfitId: typeof raw.tryOnOutfitId === 'string' ? raw.tryOnOutfitId : '',
+    tryOnVenue: typeof raw.tryOnVenue === 'string' ? raw.tryOnVenue : '',
   }
 }
 
@@ -74,6 +78,12 @@ export function saveStudioSession(snapshot: StudioSessionSnapshot) {
   } catch {
     // Storage can be unavailable in private browsing; persistence is best effort.
   }
+}
+
+export function updateStudioSession(patch: Partial<StudioSessionSnapshot>) {
+  const snapshot = loadStudioSession()
+  if (!snapshot) return
+  saveStudioSession({ ...snapshot, ...patch })
 }
 
 export function clearStudioSession() {

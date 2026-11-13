@@ -22,13 +22,7 @@ import {
   WEATHER_OPTIONS,
 } from '../constants'
 import { track } from '../lib/analytics'
-import {
-  listLocalSavedLooks,
-  pushActivity,
-  pushAlert,
-  removeLocalLook,
-  saveLocalLook,
-} from '../lib/activityStore'
+import { pushActivity, pushAlert } from '../lib/activityStore'
 import { primaryCtaLabel } from '../studio/actionLayout'
 import { resolveRecovery } from '../studio/recovery'
 import {
@@ -51,6 +45,8 @@ export function Studio() {
   const venueFromUrl = params.get('venue') ?? ''
   const navigate = useNavigate()
   const [restored] = useState<StudioSessionSnapshot | null>(() => loadStudioSession())
+  const tryOnOutfitId = restored?.tryOnOutfitId ?? ''
+  const tryOnVenue = restored?.tryOnVenue ?? ''
 
   const [machine, dispatch] = useReducer(
     reduceStudioState,
@@ -65,7 +61,6 @@ export function Studio() {
   const [elapsedMs, setElapsedMs] = useState<number | null>(restored?.elapsedMs ?? null)
   const [hasBodyPhoto, setHasBodyPhoto] = useState<boolean | null>(null)
   const [closetItems, setClosetItems] = useState<WardrobeItem[]>([])
-  const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set())
   const [feedbackText, setFeedbackText] = useState(restored?.feedbackText ?? '')
   const [feedbackHistory, setFeedbackHistory] = useState<{ id: string; text: string }[]>(
     restored?.feedbackHistory ?? [],
@@ -91,6 +86,8 @@ export function Studio() {
       elapsedMs,
       feedbackText,
       feedbackHistory,
+      tryOnOutfitId,
+      tryOnVenue,
     })
   }, [
     venue,
@@ -128,9 +125,6 @@ export function Studio() {
           setHasBodyPhoto(null)
           setClosetItems([])
         }
-      }
-      if (!cancelled) {
-        setSavedIds(new Set(listLocalSavedLooks().map((look) => look.id)))
       }
     }
     void load()
@@ -229,6 +223,8 @@ export function Studio() {
         elapsedMs: result.elapsedMs,
         feedbackText,
         feedbackHistory,
+        tryOnOutfitId,
+        tryOnVenue,
       }
       if (result.warning && result.outfits.length > 0) {
         emit({ type: 'RUN_PARTIAL', outfitCount: result.outfits.length, warning: result.warning })
@@ -326,6 +322,8 @@ export function Studio() {
         feedbackText,
         feedbackHistory,
         machine: nextMachine,
+        tryOnOutfitId,
+        tryOnVenue,
       })
     }
   }
@@ -350,42 +348,6 @@ export function Studio() {
     setFeedbackText('')
     track('studio_refine_submitted', { venue, length: trimmed.length })
     void runCreate(trimmed)
-  }
-
-  function onSave(outfit: Outfit) {
-    saveLocalLook({
-      id: outfit.id,
-      venue,
-      overallScore: outfit.overallScore,
-      createdAt: new Date().toISOString(),
-      thumbnailUrl: outfit.tryOnUrl ?? outfit.items[0]?.imageUrl ?? null,
-      items: outfit.items,
-    })
-    setSavedIds((prev) => new Set(prev).add(outfit.id))
-    emit({ type: 'SAVE_LOOK', outfitId: outfit.id })
-    track('studio_look_saved', { outfitId: outfit.id, venue })
-    pushActivity({
-      kind: 'look_saved',
-      title: 'Look saved',
-      detail: selectedVenue?.label ?? venue,
-      href: '/looks',
-    })
-  }
-
-  function onUnsave(outfit: Outfit) {
-    removeLocalLook(outfit.id)
-    setSavedIds((prev) => {
-      const next = new Set(prev)
-      next.delete(outfit.id)
-      return next
-    })
-    track('studio_look_unsaved', { outfitId: outfit.id, venue })
-    pushActivity({
-      kind: 'look_removed',
-      title: 'Look unsaved',
-      detail: selectedVenue?.label ?? venue,
-      href: '/looks',
-    })
   }
 
   function onOpenSwap(outfit: Outfit) {
@@ -666,12 +628,8 @@ export function Studio() {
                     key={outfit.id}
                     outfit={outfit}
                     index={index}
-                    tryOnUrl={outfit.tryOnUrl}
-                    saved={savedIds.has(outfit.id)}
                     onTryOn={() => openTryOnPage(outfit)}
                     onSwap={() => onOpenSwap(outfit)}
-                    onSave={() => onSave(outfit)}
-                    onUnsave={() => onUnsave(outfit)}
                   />
                 ))}
               </div>

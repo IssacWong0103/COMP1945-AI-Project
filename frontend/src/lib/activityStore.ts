@@ -112,7 +112,10 @@ export type LocalSavedLook = {
 }
 
 export function listLocalSavedLooks(): LocalSavedLook[] {
-  return readJson<LocalSavedLook[]>(SAVED_LOOKS_KEY, [])
+  return readJson<LocalSavedLook[]>(SAVED_LOOKS_KEY, []).filter(
+    (look) =>
+      typeof look.thumbnailUrl === 'string' && look.thumbnailUrl.includes('/uploads/tryon/'),
+  )
 }
 
 export function saveLocalLook(look: LocalSavedLook) {

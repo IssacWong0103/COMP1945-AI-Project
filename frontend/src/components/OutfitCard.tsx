@@ -8,26 +8,12 @@ import { ScoreBar } from './ScoreBar'
 type Props = {
   outfit: Outfit
   index: number
-  tryOnUrl?: string | null
   onTryOn?: () => void
   onSwap?: () => void
-  onSave?: () => void
-  onUnsave?: () => void
-  saved?: boolean
 }
 
-export function OutfitCard({
-  outfit,
-  index,
-  tryOnUrl,
-  onTryOn,
-  onSwap,
-  onSave,
-  onUnsave,
-  saved,
-}: Props) {
+export function OutfitCard({ outfit, index, onTryOn, onSwap }: Props) {
   const look = index + 1
-  const preview = tryOnUrl || outfit.tryOnUrl
 
   return (
     <article className="flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-sm">
@@ -38,37 +24,27 @@ export function OutfitCard({
         </p>
       </header>
 
-      {preview ? (
-        <div className="mb-3 overflow-hidden rounded-lg border border-line">
-          <img
-            src={apiUrl(preview)}
-            alt={`Try-on preview for outfit ${look}`}
-            className="aspect-[3/4] w-full object-cover"
-          />
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          {outfit.items.map((item) => (
-            <figure key={item.id} className="overflow-hidden rounded-lg bg-canvas">
-              {item.imageUrl ? (
-                <img
-                  src={apiUrl(item.imageUrl)}
-                  alt={item.description || humanize(item.category)}
-                  className="aspect-[3/4] w-full object-cover"
-                />
-              ) : (
-                <div className="flex aspect-[3/4] items-end bg-navy p-2 text-[10px] font-medium uppercase tracking-wide text-white">
-                  {humanize(item.category)}
-                </div>
-              )}
-              <figcaption className="truncate px-1.5 py-1.5 text-[11px] text-muted">
+      <div className="mb-3 grid grid-cols-3 gap-2">
+        {outfit.items.map((item) => (
+          <figure key={item.id} className="overflow-hidden rounded-lg bg-canvas">
+            {item.imageUrl ? (
+              <img
+                src={apiUrl(item.imageUrl)}
+                alt={item.description || humanize(item.category)}
+                className="aspect-[3/4] w-full object-cover"
+              />
+            ) : (
+              <div className="flex aspect-[3/4] items-end bg-navy p-2 text-[10px] font-medium uppercase tracking-wide text-white">
                 {humanize(item.category)}
-                {item.color ? ` · ${item.color}` : ''}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-      )}
+              </div>
+            )}
+            <figcaption className="truncate px-1.5 py-1.5 text-[11px] text-muted">
+              {humanize(item.category)}
+              {item.color ? ` · ${item.color}` : ''}
+            </figcaption>
+          </figure>
+        ))}
+      </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
         {outfit.items.map((item) => (
@@ -116,22 +92,11 @@ export function OutfitCard({
             Try on
           </Button>
         ) : null}
-        <div className="grid grid-cols-2 gap-2">
-          {onSwap ? (
-            <Button type="button" variant="secondary" onClick={onSwap}>
-              Swap a piece
-            </Button>
-          ) : null}
-          {saved && onUnsave ? (
-            <Button type="button" variant="secondary" onClick={onUnsave}>
-              Unsave
-            </Button>
-          ) : onSave ? (
-            <Button type="button" variant="secondary" onClick={onSave}>
-              Save look
-            </Button>
-          ) : null}
-        </div>
+        {onSwap ? (
+          <Button type="button" variant="secondary" className="w-full" onClick={onSwap}>
+            Swap a piece
+          </Button>
+        ) : null}
       </div>
     </article>
   )

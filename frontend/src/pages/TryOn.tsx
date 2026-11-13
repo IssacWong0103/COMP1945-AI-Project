@@ -7,31 +7,24 @@ import { Spinner } from '../components/Spinner'
 import { humanize } from '../constants'
 import { track } from '../lib/analytics'
 import {
-  listActivity,
   listLocalSavedLooks,
   pushActivity,
   saveLocalLook,
 } from '../lib/activityStore'
-import { loadStudioSession, saveStudioSession } from '../studio/sessionStore'
+import {
+  loadStudioSession,
+  updateStudioSession,
+} from '../studio/sessionStore'
 import type { Outfit, Profile } from '../types'
 
 type TryOnStatus = 'idle' | 'rendering' | 'ready' | 'failed'
 
-function updateStudioSessionTryOnUrl(outfitId: string, url: string | null) {
-  const snapshot = loadStudioSession()
-  if (!snapshot?.outfits) return
-  const outfits = snapshot.outfits.map((outfit) =>
-    outfit.id === outfitId ? { ...outfit, tryOnUrl: url } : outfit,
-  )
-  saveStudioSession({ ...snapshot, outfits })
-}
-
 export function TryOnPage() {
   const [params] = useSearchParams()
-  const outfitId = params.get('outfitId') ?? ''
-  const venue = params.get('venue') ?? ''
-
   const session = useMemo(() => loadStudioSession(), [])
+  const outfitId = params.get('outfitId') || session?.tryOnOutfitId || ''
+  const venue = params.get('venue') || session?.tryOnVenue || ''
+
   const outfit = useMemo(
     () => session?.outfits?.find((candidate) => candidate.id === outfitId) ?? null,
     [session, outfitId],
@@ -53,6 +46,11 @@ export function TryOnPage() {
     track('nav_tab_opened', { tab: 'try-on' })
     return () => abortRef.current?.abort()
   }, [])
+
+  useEffect(() => {
+    if (!outfitId) return
+    updateStudioSession({ tryOnOutfitId: outfitId, tryOnVenue: venue })
+  }, [outfitId, venue])
 
   useEffect(() => {
     let cancelled = false
@@ -92,7 +90,6 @@ export function TryOnPage() {
       window.clearInterval(timer)
       setTryOnUrl(result.tryOnUrl)
       setStatus('ready')
-      updateStudioSessionTryOnUrl(target.id, result.tryOnUrl)
       track('studio_tryon_ready', { outfitId: target.id })
       pushActivity({ kind: 'tryon_ready', title: 'Try-on ready', href: '/try-on' })
     } catch (err) {
@@ -137,14 +134,6 @@ export function TryOnPage() {
       href: '/looks',
     })
   }
-
-  const sessions = useMemo(
-    () =>
-      listActivity(40).filter((item) =>
-        ['tryon_started', 'tryon_ready', 'tryon_failed'].includes(item.kind),
-      ),
-    [status, tryOnUrl, error],
-  )
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -297,36 +286,9 @@ export function TryOnPage() {
           <li>Create outfits in Studio.</li>
           <li>Press Try on on a result card.</li>
           <li>Wait for rendering on this page.</li>
-          <li>Download, save, or retry if it fails.</li>
+          <li>Download or save the generated photo.</li>
         </ol>
       </div>
-
-      <section className="mt-6">
-        <h3 className="text-sm font-semibold text-ink">Recent sessions</h3>
-        {sessions.length === 0 ? (
-          <p className="mt-3 rounded-xl border border-dashed border-line px-4 py-10 text-sm text-muted">
-            No try-on sessions yet.{' '}
-            <Link to="/studio" className="font-semibold text-navy underline">
-              Create a look
-            </Link>{' '}
-            to start one.
-          </p>
-        ) : (
-          <ul className="mt-3 divide-y divide-line rounded-xl border border-line bg-surface">
-            {sessions.map((item) => (
-              <li key={item.id} className="flex items-start justify-between gap-3 px-4 py-3">
-                <div>
-                  <p className="text-sm font-medium text-ink">{item.title}</p>
-                  {item.detail ? <p className="text-xs text-muted">{item.detail}</p> : null}
-                </div>
-                <time className="shrink-0 text-xs text-muted">
-                  {new Date(item.at).toLocaleString()}
-                </time>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
     </div>
   )
 }
