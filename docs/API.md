@@ -252,11 +252,15 @@ Response `200`:
 ```json
 {
   "outfits": Outfit[],
-  "elapsedMs": 1234
+  "elapsedMs": 1234,
+  "warning": null,
+  "matchStatus": "matched"
 }
 ```
 
-Return **2 or 3** outfits. If wardrobe is too small, still return what is possible and include a `warning` string field (optional).
+Return up to **3** outfits. If wardrobe is too small, still return what is possible and include a `warning` string field (optional).
+
+Core garments (tops, bottoms, dresses, and outerwear) must be inside the selected venue's inclusive formality range for `matchStatus: "matched"`. Shoes and accessories contribute to the weighted outfit score without an independent hard filter. If no complete matched outfit exists, return `matchStatus: "fallback"`, the warning `Currently you don't have the matched style clothes`, and up to three alternatives ranked by core-garment distance from the range, then overall quality.
 
 ### `POST /api/try-on`
 
