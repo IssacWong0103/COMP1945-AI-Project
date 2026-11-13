@@ -58,7 +58,6 @@ type UploadJob = {
 }
 
 export function Closet() {
-  const navigate = useNavigate()
   const [items, setItems] = useState<WardrobeItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -515,7 +514,6 @@ export function Closet() {
                   item={item}
                   onOpen={() => setSelectedId(item.id)}
                   onRequestDelete={() => setPendingDelete(item)}
-                  onBuild={() => navigate('/studio')}
                 />
               ))}
             </div>
@@ -565,12 +563,10 @@ function WardrobeCard({
   item,
   onOpen,
   onRequestDelete,
-  onBuild,
 }: {
   item: WardrobeItem
   onOpen: () => void
   onRequestDelete: () => void
-  onBuild: () => void
 }) {
   const title = itemTitle(item)
   return (
@@ -621,13 +617,6 @@ function WardrobeCard({
                 Delete
               </button>
             </div>
-            <button
-              type="button"
-              className="mt-2 text-sm font-medium text-[#324d74] hover:underline"
-              onClick={onBuild}
-            >
-              Build an outfit around this →
-            </button>
           </div>
         </div>
       </div>
