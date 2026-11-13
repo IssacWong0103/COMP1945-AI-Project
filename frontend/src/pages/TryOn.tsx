@@ -214,7 +214,7 @@ export function TryOnPage() {
                 />
               ) : (
                 <div className="flex aspect-[3/4] items-center justify-center px-6 text-center text-sm text-muted">
-                  Add a full-body photo in Settings to try on outfits.
+                  Add a full-body photo in Profile to try on outfits.
                 </div>
               )}
             </div>
@@ -261,7 +261,7 @@ export function TryOnPage() {
                 to="/settings"
                 className="inline-flex w-full items-center justify-center rounded-lg bg-navy px-3.5 py-2 text-sm font-semibold text-white no-underline"
               >
-                Add a full-body photo in Settings
+                Add a full-body photo in Profile
               </Link>
             ) : null}
             {status === 'rendering' ? (

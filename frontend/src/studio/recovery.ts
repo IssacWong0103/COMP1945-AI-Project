@@ -70,8 +70,8 @@ export function resolveRecovery(input: {
     return {
       kind: 'noBodyPhoto',
       title: 'Try-on needs a full-body photo',
-      message: 'Matching still works. Add a photo in Settings to unlock virtual try-on.',
-      primary: { id: 'openSettings', label: 'Go to Settings', to: '/settings' },
+      message: 'Matching still works. Add a photo in Profile to unlock virtual try-on.',
+      primary: { id: 'openSettings', label: 'Go to Profile', to: '/settings' },
     }
   }
 

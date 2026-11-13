@@ -423,7 +423,7 @@ export function Studio() {
         <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           No body photo yet.{' '}
           <Link to="/settings" className="font-semibold underline">
-            Add one in Settings
+            Add one in Profile
           </Link>{' '}
           to unlock virtual try-on.
         </p>
@@ -477,7 +477,7 @@ export function Studio() {
                 options={STYLE_OPTIONS}
                 placeholder="Use profile default"
                 customPlaceholder="e.g. dark academia, preppy, Y2K"
-                customHint="Leave on default to use Settings. Custom words are a soft hint."
+                customHint="Leave on default to use your Profile. Custom words are a soft hint."
                 onChange={(value) => {
                   setStyleOverride(value)
                   emit({ type: 'EDIT_INPUTS' })

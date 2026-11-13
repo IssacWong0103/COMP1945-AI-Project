@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { getHealth, getProfile, listWardrobeItems } from '../api/client'
-import { listAlerts } from '../lib/activityStore'
 import { track } from '../lib/analytics'
 import { ConnectionBanner } from './ConnectionBanner'
 
@@ -11,7 +10,6 @@ type NavItem = {
   end?: boolean
   icon: () => ReactNode
   section?: 'primary' | 'system'
-  badge?: number
 }
 
 const PRIMARY_LINKS: NavItem[] = [
@@ -23,9 +21,7 @@ const PRIMARY_LINKS: NavItem[] = [
 ]
 
 const SYSTEM_LINKS: NavItem[] = [
-  { to: '/activity', label: 'Activity', icon: ActivityIcon, section: 'system' },
-  { to: '/alerts', label: 'Alerts', icon: AlertsIcon, section: 'system' },
-  { to: '/settings', label: 'Settings', icon: SettingsIcon, section: 'system' },
+  { to: '/settings', label: 'Profile', icon: SettingsIcon, section: 'system' },
 ]
 
 const TITLES: Record<string, string> = {
@@ -37,8 +33,8 @@ const TITLES: Record<string, string> = {
   '/try-on': 'Try-On',
   '/activity': 'Activity',
   '/alerts': 'Alerts',
-  '/settings': 'Settings',
-  '/profile': 'Settings',
+  '/settings': 'Profile',
+  '/profile': 'Profile',
 }
 
 export function Layout() {
@@ -46,7 +42,6 @@ export function Layout() {
   const [backendUp, setBackendUp] = useState<boolean | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [setupDone, setSetupDone] = useState<number | null>(null)
-  const [alertCount, setAlertCount] = useState(0)
   const isHome = location.pathname === '/'
   const flushHeader =
     isHome ||
@@ -56,7 +51,6 @@ export function Layout() {
 
   useEffect(() => {
     setMenuOpen(false)
-    setAlertCount(listAlerts().length)
   }, [location.pathname])
 
   useEffect(() => {
@@ -102,9 +96,6 @@ export function Layout() {
   }, [location.pathname])
 
   const pageTitle = TITLES[location.pathname] ?? 'USTyle'
-  const systemLinks = SYSTEM_LINKS.map((link) =>
-    link.to === '/alerts' ? { ...link, badge: alertCount } : link,
-  )
 
   function renderLink(link: NavItem) {
     return (
@@ -123,15 +114,6 @@ export function Layout() {
           <>
             <link.icon />
             <span className="flex-1">{link.label}</span>
-            {link.badge ? (
-              <span
-                className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
-                  isActive ? 'bg-white/20 text-white' : 'bg-red-100 text-danger'
-                }`}
-              >
-                {link.badge}
-              </span>
-            ) : null}
             {isActive ? <span className="h-4 w-[3px] rounded-full bg-gold" aria-hidden /> : null}
           </>
         )}
@@ -184,7 +166,7 @@ export function Layout() {
           <p className="mt-3 px-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
             System
           </p>
-          {systemLinks.map(renderLink)}
+          {SYSTEM_LINKS.map(renderLink)}
         </nav>
 
         <div className="px-4 pb-4">
@@ -351,28 +333,6 @@ function TryOnIcon() {
         strokeWidth="1.5"
         strokeLinecap="round"
       />
-    </svg>
-  )
-}
-
-function ActivityIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <path d="M3.5 10h3l2-4.5 3 9 2-4.5h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function AlertsIcon() {
-  return (
-    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
-      <path
-        d="M10 3.5 16.5 15H3.5L10 3.5Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-      />
-      <path d="M10 8.2v3.2M10 13.4h.01" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }

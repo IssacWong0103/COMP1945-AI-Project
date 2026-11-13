@@ -124,7 +124,7 @@ export function Home() {
               label="Try-on photos"
               value={hasPhoto ? 'Full-body photo added' : 'Not added'}
             />
-            <StatusCard to="/settings" icon={<PersonIcon />} label="Settings" value={`${filledCount} of 5 filled`} />
+            <StatusCard to="/settings" icon={<PersonIcon />} label="Profile" value={`${filledCount} of 5 filled`} />
             <StatusCard
               to="/settings"
               icon={<SlidersIcon />}

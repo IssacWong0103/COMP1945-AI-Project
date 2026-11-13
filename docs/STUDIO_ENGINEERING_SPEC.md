@@ -11,11 +11,11 @@ This document is the implementable handoff from the Figma Studio redesign. Sourc
 | Studio | `/studio` | Plan → create → results → try-on/swap/save |
 | Looks | `/looks` | Saved outfits gallery |
 | Try-On | `/try-on` | Try-on session history / queue narrative |
-| Activity | `/activity` | Chronological action log |
-| Alerts | `/alerts` | API offline, failed runs, render failures |
-| Settings | `/settings` | Body photo, fit attrs, preferred style (was Me/Profile) |
+| Profile | `/settings` | Body photo, fit attrs, preferred style |
 
 Legacy redirects: `/dress-me` → `/studio`, `/profile` → `/settings`.
+
+Hidden routes: `/activity` and `/alerts` are no longer sidebar tabs; they stay reachable by direct URL (recovery actions still link to `/alerts`).
 
 **Ownership rules**
 - Creation work stays in Studio.

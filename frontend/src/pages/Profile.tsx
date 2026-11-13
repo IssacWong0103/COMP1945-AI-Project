@@ -59,7 +59,7 @@ export function Profile() {
   const [formEpoch, setFormEpoch] = useState(0)
 
   useEffect(() => {
-    document.title = 'Settings — USTyle'
+    document.title = 'Profile — USTyle'
   }, [])
 
   useEffect(() => {
@@ -474,10 +474,6 @@ export function Profile() {
                   />
                 </Field>
               </div>
-              <p className="mt-4 text-xs text-muted">
-                Gender: Male / Female / Non-binary / Prefer not to say Skin tone: a color you pick from the photo or
-                color picker Style: Casual / Smart casual / Streetwear / Sporty / Minimal / Formal
-              </p>
             </section>
           </div>
 
