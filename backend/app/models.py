@@ -18,6 +18,7 @@ class WardrobeItem(Base):
     color: Mapped[str] = mapped_column(String(64), nullable=False)
     cut: Mapped[str] = mapped_column(String(64), nullable=False)
     style: Mapped[str] = mapped_column(String(64), nullable=False)
+    formality_score: Mapped[int] = mapped_column(Integer, nullable=False, default=50)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     item_gender: Mapped[str] = mapped_column(String(16), nullable=False, default="unisex")
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

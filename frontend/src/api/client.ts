@@ -112,6 +112,7 @@ export async function updateWardrobeItem(
     color?: string
     cut?: string
     style?: string
+    formalityScore?: number
     description?: string
     itemGender?: string
   },

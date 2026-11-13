@@ -101,26 +101,36 @@ export const FALLBACK_VENUES: VenueInfo[] = [
     id: 'lecture',
     label: 'Lecture',
     description: 'Everyday class — neat, comfortable, not overly dressy.',
+    formalityMin: 40,
+    formalityMax: 50,
   },
   {
     id: 'careerFair',
     label: 'Career fair',
     description: 'Networking booths — smart casual to interview-ready.',
+    formalityMin: 70,
+    formalityMax: 80,
   },
   {
     id: 'casualDate',
     label: 'Casual date',
     description: 'Put-together casual or streetwear.',
+    formalityMin: 50,
+    formalityMax: 70,
   },
   {
     id: 'hallGathering',
     label: 'Hall gathering',
     description: 'Casual, sporty, or streetwear for hall events.',
+    formalityMin: 20,
+    formalityMax: 40,
   },
   {
     id: 'formal',
     label: 'Formal',
     description: 'Ceremony, banquet, or formal dinner.',
+    formalityMin: 91,
+    formalityMax: 100,
   },
 ]
 

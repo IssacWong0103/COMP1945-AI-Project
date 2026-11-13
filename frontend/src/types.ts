@@ -35,6 +35,7 @@ export type WardrobeItem = {
   color: string
   cut: string
   style: string
+  formalityScore: number
   description: string
   itemGender: string
   createdAt: string
@@ -60,6 +61,7 @@ export type OutfitItemRef = {
   color: string
   description: string
   imageUrl: string
+  formalityScore: number
 }
 
 export type RationaleItem = {
@@ -73,6 +75,7 @@ export type Outfit = {
   venueFitScore: number
   cohesionScore: number
   overallScore: number
+  formalityScore: number
   rationale: string
   rationaleItems?: RationaleItem[]
   inspiration?: string | null
@@ -83,6 +86,8 @@ export type VenueInfo = {
   id: string
   label: string
   description: string
+  formalityMin: number
+  formalityMax: number
 }
 
 export type HealthResponse = {
@@ -107,6 +112,7 @@ export type RecommendResponse = {
   outfits: Outfit[]
   elapsedMs: number
   warning?: string
+  matchStatus: 'matched' | 'fallback'
 }
 
 export type SavedLook = {

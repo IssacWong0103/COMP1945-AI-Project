@@ -73,6 +73,7 @@ type WardrobeItem = {
   color: string;
   cut: string;
   style: string;
+  formalityScore: number;    // integer 0-100, AI-generated and user-editable
   description: string;
   itemGender: string;
   createdAt: string;         // ISO-8601
@@ -93,6 +94,7 @@ type OutfitItemRef = {
   color: string;
   description: string;
   imageUrl: string;
+  formalityScore: number;    // integer 0-100
 };
 
 type Outfit = {
@@ -101,6 +103,7 @@ type Outfit = {
   venueFitScore: number;     // 0-1
   cohesionScore: number;     // 0-1
   overallScore: number;      // 0-1
+  formalityScore: number;    // weighted outfit average, 0-100
   rationale: string;
   rationaleItems: { itemId: string; reason: string }[];  // per-item "why this works"
   inspiration: string | null;                            // best-matching Fashion DB reference
@@ -111,6 +114,8 @@ type VenueInfo = {
   id: string;                // venue enum
   label: string;
   description: string;
+  formalityMin: number;      // inclusive minimum core-garment score
+  formalityMax: number;      // inclusive maximum core-garment score
 };
 ```
 
@@ -152,9 +157,11 @@ is configured.
 
 `multipart/form-data` field `file` (jpeg/png/webp). Optional field `notes` (string).
 
-Backend: save file, call DeepSeek Flash VLM, persist attributes.
+Backend: save file, call DeepSeek Flash VLM, validate that the photo contains one clothing item on its own, and persist attributes. A matching pair of shoes counts as one item. Photos of models, full or partial outfits, multiple items, collages, or non-clothing subjects are rejected.
 
 Response `201`: `WardrobeItem`
+
+Response `400`: `{ "detail": "Upload one clothing item on its own ..." }` when the image is invalid or fails the single-item check. Rejected uploads are not stored.
 
 ### `GET /api/wardrobe/items`
 
@@ -172,6 +179,7 @@ JSON body. All fields optional; omitted fields stay as they are.
   "color": "white",
   "cut": "regular fit",
   "style": "smartCasual",
+  "formalityScore": 75,
   "description": "Crisp white cotton button-up with a pointed collar.",
   "itemGender": "unisex"
 }

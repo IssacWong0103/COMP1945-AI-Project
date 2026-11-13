@@ -23,7 +23,7 @@ KIE_API_KEY=               # kie.ai GPT Image-2 virtual try-on
 PUBLIC_BASE_URL=           # public HTTPS origin so kie can fetch /uploads/... (e.g. ngrok)
 ```
 
-The app runs without keys: wardrobe tagging uses filename/color heuristics, and try-on falls back to a labeled collage.
+The app runs without keys: wardrobe tagging uses filename/color heuristics, AI single-item validation is skipped, and try-on falls back to a labeled collage.
 
 ## Run
 

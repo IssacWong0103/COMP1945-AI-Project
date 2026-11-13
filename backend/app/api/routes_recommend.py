@@ -45,7 +45,7 @@ def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> Recom
     time_of_day = (payload.time_of_day or "").strip() or None
     dress_code = (payload.dress_code or "").strip() or None
     notes = (payload.notes or "").strip() or None
-    outfits, warning = recommend_outfits(
+    outfits, warning, match_status = recommend_outfits(
         items,
         payload.venue,
         preferred,
@@ -59,7 +59,12 @@ def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> Recom
         _persist(db, outfit, payload.venue)
     db.commit()
     elapsed_ms = int((perf_counter() - started) * 1000)
-    return RecommendResponse(outfits=outfits, elapsed_ms=elapsed_ms, warning=warning)
+    return RecommendResponse(
+        outfits=outfits,
+        elapsed_ms=elapsed_ms,
+        warning=warning,
+        match_status=match_status,
+    )
 
 
 def _thumbnail(items_json: str) -> str | None:

@@ -13,7 +13,13 @@ from pathlib import Path
 
 from app.config import settings
 from app.models import WardrobeItem
-from app.schemas import PREFERRED_STYLES, OutfitItemRef, OutfitOut, RationaleItemOut
+from app.schemas import (
+    PREFERRED_STYLES,
+    VENUE_FORMALITY_RANGES,
+    OutfitItemRef,
+    OutfitOut,
+    RationaleItemOut,
+)
 from app.services import fashion_index
 from app.services import vlm
 
@@ -153,6 +159,8 @@ class Candidate:
     venue_fit: float
     cohesion: float
     overall: float
+    formality: float
+    formality_distance: float
     rationale: str
     warning: str | None = None
     item_ids: frozenset[str] = field(init=False)
@@ -200,6 +208,54 @@ def _by_category(items: Sequence[WardrobeItem]) -> dict[str, list[WardrobeItem]]
     for item in items:
         grouped.setdefault(item.category, []).append(item)
     return grouped
+
+
+FORMALITY_CORE_CATEGORIES = {"top", "bottom", "outerwear", "dress"}
+FORMALITY_WEIGHTS = {
+    "top": 1.0,
+    "bottom": 1.0,
+    "outerwear": 1.0,
+    "dress": 1.0,
+    "shoes": 0.5,
+    "accessory": 0.25,
+}
+
+
+def _in_formality_range(item: WardrobeItem, venue: str) -> bool:
+    minimum, maximum = VENUE_FORMALITY_RANGES[venue]
+    return minimum <= item.formality_score <= maximum
+
+
+def _has_complete_look(items: Sequence[WardrobeItem]) -> bool:
+    categories = {item.category for item in items}
+    return ("top" in categories and "bottom" in categories) or "dress" in categories
+
+
+def _outfit_formality(items: Sequence[WardrobeItem]) -> float:
+    weighted_total = 0.0
+    total_weight = 0.0
+    for item in items:
+        weight = FORMALITY_WEIGHTS.get(item.category, 0.5)
+        weighted_total += item.formality_score * weight
+        total_weight += weight
+    return weighted_total / total_weight if total_weight else 0.0
+
+
+def _range_distance(score: float, venue: str) -> float:
+    minimum, maximum = VENUE_FORMALITY_RANGES[venue]
+    if score < minimum:
+        return minimum - score
+    if score > maximum:
+        return score - maximum
+    return 0.0
+
+
+def _formality_distance(items: Sequence[WardrobeItem], venue: str) -> float:
+    core = [item for item in items if item.category in FORMALITY_CORE_CATEGORIES]
+    ranked_items = core or list(items)
+    if not ranked_items:
+        return 100.0
+    return sum(_range_distance(item.formality_score, venue) for item in ranked_items) / len(ranked_items)
 
 
 def _sample(items: list[WardrobeItem], limit: int, rng: random.Random) -> list[WardrobeItem]:
@@ -675,6 +731,7 @@ def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
             color=item.color,
             description=item.description,
             image_url=item.image_url,
+            formality_score=item.formality_score,
         )
         for item in candidate.items
     ]
@@ -685,6 +742,7 @@ def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
         venue_fit_score=round(candidate.venue_fit, 4),
         cohesion_score=round(candidate.cohesion, 4),
         overall_score=round(candidate.overall, 4),
+        formality_score=round(candidate.formality, 1),
         rationale=candidate.rationale,
         rationale_items=_rationale_items(candidate.items, venue, candidate.cohesion),
         inspiration=_inspiration_text(best_ref),
@@ -744,29 +802,22 @@ def _apply_visual_styling(
             outfit.inspiration = f"{prefix} Model styling: {note}".strip()
 
 
-def recommend_outfits(
-    items: Sequence[WardrobeItem],
+def _generate_candidates(
+    wardrobe: Sequence[WardrobeItem],
     venue: str,
-    preferred_style: str | None = None,
-    feedback: str | None = None,
-    *,
-    weather: str | None = None,
-    time_of_day: str | None = None,
-    dress_code: str | None = None,
-    notes: str | None = None,
-) -> tuple[list[OutfitOut], str | None]:
-    wardrobe = list(items)
-    warning: str | None = None
-    if not wardrobe:
-        return [], "Wardrobe is empty. Upload a few garments first."
+    preferred_style: str | None,
+    feedback: str | None,
+    weather: str | None,
+    time_of_day: str | None,
+    dress_code: str | None,
+    notes: str | None,
+    warning: str | None,
+    require_complete: bool,
+) -> list[Candidate]:
+    if require_complete and not _has_complete_look(wardrobe):
+        return []
 
     grouped = _by_category(wardrobe)
-    has_core = (grouped["top"] and grouped["bottom"]) or grouped["dress"]
-    if not has_core:
-        warning = "Need a top+bottom or a dress for a complete look; returning the best available pieces."
-
-    # Feedback changes the sample seed so refinement explores a fresh set of
-    # combinations, not just a re-ranking of the previous candidates.
     seed_text = venue + str(len(wardrobe)) + (feedback or "")
     rng = random.Random(seed_text)
     cores = generate_cores(wardrobe, rng)
@@ -794,13 +845,15 @@ def recommend_outfits(
                     venue_fit=v_fit,
                     cohesion=coh,
                     overall=overall,
+                    formality=_outfit_formality(combo),
+                    formality_distance=_formality_distance(combo, venue),
                     rationale=_rationale(combo, venue, v_fit, coh),
                     warning=warning,
                 )
             )
 
-    if not candidates and wardrobe:
-        combo = wardrobe[:4]
+    if not candidates and wardrobe and not require_complete:
+        combo = list(wardrobe[:4])
         v_fit = venue_fit_score(combo, venue, preferred_style)
         coh = cohesion_score(combo, preferred_style)
         overall = 0.55 * v_fit + 0.45 * coh
@@ -810,21 +863,85 @@ def recommend_outfits(
                 venue_fit=v_fit,
                 cohesion=coh,
                 overall=overall,
+                formality=_outfit_formality(combo),
+                formality_distance=_formality_distance(combo, venue),
                 rationale=_rationale(combo, venue, v_fit, coh),
                 warning=warning,
             )
         )
+    return candidates
 
-    candidates.sort(key=lambda c: c.overall, reverse=True)
+
+def recommend_outfits(
+    items: Sequence[WardrobeItem],
+    venue: str,
+    preferred_style: str | None = None,
+    feedback: str | None = None,
+    *,
+    weather: str | None = None,
+    time_of_day: str | None = None,
+    dress_code: str | None = None,
+    notes: str | None = None,
+) -> tuple[list[OutfitOut], str | None, str]:
+    wardrobe = list(items)
+    if not wardrobe:
+        return [], "Wardrobe is empty. Upload a few garments first.", "matched"
+
+    warning: str | None = None
+    if not _has_complete_look(wardrobe):
+        warning = "Need a top+bottom or a dress for a complete look; returning the best available pieces."
+
+    eligible_pool = [
+        item
+        for item in wardrobe
+        if item.category not in FORMALITY_CORE_CATEGORIES or _in_formality_range(item, venue)
+    ]
+    candidates = _generate_candidates(
+        eligible_pool,
+        venue,
+        preferred_style,
+        feedback,
+        weather,
+        time_of_day,
+        dress_code,
+        notes,
+        warning,
+        require_complete=True,
+    )
+    match_status = "matched"
+    if candidates:
+        minimum, maximum = VENUE_FORMALITY_RANGES[venue]
+        midpoint = (minimum + maximum) / 2
+        candidates.sort(
+            key=lambda candidate: (candidate.overall, -abs(candidate.formality - midpoint)),
+            reverse=True,
+        )
+    else:
+        match_status = "fallback"
+        candidates = _generate_candidates(
+            wardrobe,
+            venue,
+            preferred_style,
+            feedback,
+            weather,
+            time_of_day,
+            dress_code,
+            notes,
+            warning,
+            require_complete=False,
+        )
+        candidates.sort(key=lambda candidate: (candidate.formality_distance, -candidate.overall))
+        warning = "Currently you don't have the matched style clothes"
+
     target = MAX_RETURN if len(candidates) >= MAX_RETURN else max(1, len(candidates))
     if target >= MIN_RETURN:
         target = min(MAX_RETURN, max(MIN_RETURN, target))
     selected = _select_diverse(candidates, target)
-    outfits = [_to_outfit(c, venue) for c in selected]
+    outfits = [_to_outfit(candidate, venue) for candidate in selected]
 
     if settings.fashion_visual_rerank:
         _apply_visual_styling(outfits, selected, venue)
 
-    if len(outfits) < MIN_RETURN:
+    if len(outfits) < MIN_RETURN and match_status == "matched":
         warning = warning or "Not enough distinct combinations yet — add more wardrobe items for 2–3 looks."
-    return outfits, warning
+    return outfits, warning, match_status

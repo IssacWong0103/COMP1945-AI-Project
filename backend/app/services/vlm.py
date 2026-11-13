@@ -20,13 +20,18 @@ DEEPSEEK_MODEL = "deepseek-flash"
 
 SYSTEM_PROMPT = """You are a clothing cataloguer for USTyle, a campus outfit assistant for HKUST students.
 Analyze the garment photo and return STRICT JSON only — no markdown, no commentary, no extra keys:
-{"category":"top|bottom|outerwear|dress|shoes|accessory","color":"<dominant color name>","cut":"<silhouette>","style":"casual|smartCasual|streetwear|sporty|minimal|formal","itemGender":"male|female|unisex","description":"<short factual phrase>"}
+{"isSingleItem":true,"rejectionReason":"","category":"top|bottom|outerwear|dress|shoes|accessory","color":"<dominant color name>","cut":"<silhouette>","style":"casual|smartCasual|streetwear|sporty|minimal|formal","formalityScore":0,"itemGender":"male|female|unisex","description":"<short factual phrase>"}
 Rules:
+- isSingleItem is true ONLY when the photo clearly shows one clothing item on its own. A matching pair of shoes counts as one item.
+- Set isSingleItem to false for a person or model wearing clothes, a full or partial outfit, multiple separate items, a collage, or an image with no clearly identifiable clothing item.
+- rejectionReason is a short factual explanation when isSingleItem is false; otherwise it is an empty string.
 - category is the garment type, not the photo setting.
 - color is a short English color name (e.g. navy, white, black, beige).
 - cut is silhouette such as relaxed, slim, oversized, straight, cropped, tailored.
+- formalityScore is an integer from 0 to 100 for the garment alone, ignoring background and styling.
+- Formality anchors: 10 athletic or loungewear; 30 graphic tees, hoodies, or joggers; 45 neat everyday casual; 60 polished casual; 75 smart-casual shirts, chinos, or blazers; 95 suits, tuxedos, or evening gowns.
 - description: under 20 words, factual, never sexual.
-- If unsure, pick the closest allowed enum value.
+- If unsure about the attributes, pick the closest allowed enum value and estimate formality from the anchors. Do not guess that an ambiguous photo is a single item.
 """
 
 STYLING_SYSTEM_PROMPT = """You are a stylist for USTyle, a campus outfit assistant.
@@ -170,6 +175,7 @@ class GarmentTags(dict):
     color: str
     cut: str
     style: str
+    formality_score: int
     item_gender: ItemGender
     description: str
 
@@ -206,6 +212,43 @@ def normalize_item_gender(value: object) -> ItemGender:
     if token in GENDER_ALIASES:
         return GENDER_ALIASES[token]
     return "unisex"
+
+
+def normalize_formality(value: object, fallback: int) -> int:
+    if isinstance(value, bool):
+        return fallback
+    try:
+        score = round(float(value))
+    except (TypeError, ValueError):
+        return fallback
+    return max(0, min(100, score))
+
+
+def heuristic_formality(style: str, category: str = "", description: str = "") -> int:
+    blob = f"{category} {description}".lower()
+    score = {
+        "sporty": 20,
+        "streetwear": 30,
+        "casual": 40,
+        "minimal": 50,
+        "smartCasual": 72,
+        "formal": 94,
+    }.get(style, 45)
+    if any(word in blob for word in ("tuxedo", "evening gown", "suit")):
+        score = 96
+    elif "blazer" in blob:
+        score = max(score, 80)
+    elif any(word in blob for word in ("trouser", "chino", "button-up", "button up")):
+        score = max(score, 68)
+    elif any(word in blob for word in ("hoodie", "jogger", "jersey")):
+        score = min(score, 30)
+    elif any(word in blob for word in ("graphic tee", "t-shirt", "shorts")):
+        score = min(score, 35)
+    elif "sneaker" in blob:
+        score = min(score, 40)
+    elif any(word in blob for word in ("loafer", "heel", "dress shoe")):
+        score = max(score, 78)
+    return max(0, min(100, score))
 
 
 def _extract_json(text: str) -> dict:
@@ -347,21 +390,33 @@ def _heuristic_tags(image_path: Path, notes: str | None, original_name: str | No
         description = f"{description}; {notes.strip()[:80]}"
 
     return {
+        "isSingleItem": True,
+        "rejectionReason": "",
         "category": category,
         "color": color,
         "cut": cut,
         "style": style,
+        "formalityScore": heuristic_formality(style, category, description),
         "itemGender": gender,
         "description": description,
     }
 
 
 def _validated(payload: dict, fallback: dict) -> dict:
+    formality = payload.get("formalityScore")
+    if formality is None:
+        formality = payload.get("formality")
+    is_single_item = payload.get("isSingleItem", True)
+    if not isinstance(is_single_item, bool):
+        is_single_item = str(is_single_item).strip().lower() not in {"false", "no", "0"}
     return {
+        "isSingleItem": is_single_item,
+        "rejectionReason": str(payload.get("rejectionReason") or "").strip()[:240],
         "category": normalize_category(payload.get("category") or fallback["category"]),
         "color": str(payload.get("color") or fallback["color"]).strip()[:64] or fallback["color"],
         "cut": str(payload.get("cut") or fallback["cut"]).strip()[:64] or fallback["cut"],
         "style": normalize_style(payload.get("style") or fallback["style"]),
+        "formalityScore": normalize_formality(formality, fallback["formalityScore"]),
         "itemGender": normalize_item_gender(payload.get("itemGender") or payload.get("item_gender") or fallback["itemGender"]),
         "description": str(payload.get("description") or fallback["description"]).strip()[:240]
         or fallback["description"],
@@ -381,7 +436,7 @@ async def describe_garment(
 
     raw = image_path.read_bytes()
     data_url = _image_to_data_url(raw)
-    user_text = "Describe this clothing item as strict JSON."
+    user_text = "Check that this photo shows exactly one clothing item on its own, then describe it as strict JSON."
     if notes:
         user_text += f" User notes: {notes.strip()[:300]}"
     if original_name:

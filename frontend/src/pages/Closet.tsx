@@ -303,7 +303,7 @@ export function Closet() {
             id="wardrobe-upload"
             variant={items.length === 0 ? 'hero' : 'bar'}
             label={items.length === 0 ? 'Your closet is empty.' : 'Drop photos here or click to upload'}
-            hint={items.length === 0 ? 'Upload tops, bottoms and shoes you already own.' : 'JPEG, PNG or WebP'}
+            hint={items.length === 0 ? 'One item per photo — no models or outfits.' : 'One item per photo · JPEG, PNG or WebP'}
             cta="+ Upload clothes"
             multiple
             disabled={uploading}
@@ -379,6 +379,7 @@ export function Closet() {
                           <p className="text-xs text-success">
                             Saved · {humanize(job.item?.category || '') || 'Item'}
                             {job.item?.color ? ` · ${humanize(job.item.color)}` : ''}
+                            {job.item ? ` · Formality ${job.item.formalityScore}/100` : ''}
                           </p>
                         ) : null}
                         {job.status === 'error' ? (
@@ -454,7 +455,8 @@ export function Closet() {
             ))}
           </div>
           <p className="mt-4 text-sm text-muted">
-            One garment per photo works best. Lay it flat in even light with the whole piece visible.
+            Upload one garment per photo (a pair of shoes counts as one). Lay it flat in even light with the whole piece
+            visible. Photos of people, outfits, or multiple items will be rejected.
           </p>
         </section>
       ) : null}
@@ -598,6 +600,7 @@ function WardrobeCard({
           <p className="mt-1 text-sm text-muted">
             {humanize(item.style)} · {humanize(item.itemGender) || 'Unisex'}
           </p>
+          <p className="mt-1 text-xs font-medium text-navy">Formality {item.formalityScore}/100</p>
           <p className="mt-2 line-clamp-2 text-sm text-muted">{item.description || 'No description yet.'}</p>
 
           <div className="mt-auto pt-3">
@@ -642,6 +645,7 @@ function ItemDrawer({
   const [color, setColor] = useState(item.color)
   const [cut, setCut] = useState(item.cut)
   const [style, setStyle] = useState(item.style)
+  const [formalityScore, setFormalityScore] = useState(String(item.formalityScore))
   const [itemGender, setItemGender] = useState(item.itemGender || 'unisex')
   const [description, setDescription] = useState(item.description)
   const [saving, setSaving] = useState(false)
@@ -652,6 +656,7 @@ function ItemDrawer({
     setColor(item.color)
     setCut(item.cut)
     setStyle(item.style)
+    setFormalityScore(String(item.formalityScore))
     setItemGender(item.itemGender || 'unisex')
     setDescription(item.description)
     setFormError(null)
@@ -690,6 +695,7 @@ function ItemDrawer({
         color: color.trim(),
         cut: cut.trim(),
         style,
+        formalityScore: Number(formalityScore),
         description: description.trim(),
         itemGender,
       })
@@ -800,6 +806,19 @@ function ItemDrawer({
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="text-xs font-medium text-muted">Formality (0–100)</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                required
+                className={FIELD}
+                value={formalityScore}
+                onChange={(event) => setFormalityScore(event.target.value)}
+              />
             </label>
             <label className="block sm:col-span-2">
               <span className="text-xs font-medium text-muted">Gender</span>

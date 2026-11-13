@@ -8,6 +8,7 @@ type Props = {
   outfit: Outfit
   slot: string | null
   items: WardrobeItem[]
+  formalityRange?: { min: number; max: number }
   busy?: boolean
   onSelectSlot: (slot: string) => void
   onSwap: (item: WardrobeItem) => void
@@ -18,6 +19,7 @@ export function SwapDrawer({
   outfit,
   slot,
   items,
+  formalityRange,
   busy,
   onSelectSlot,
   onSwap,
@@ -34,8 +36,16 @@ export function SwapDrawer({
   const candidates = useMemo(() => {
     if (!activeSlot) return []
     const used = new Set(outfit.items.map((item) => item.id))
-    return items.filter((item) => item.category === activeSlot && !used.has(item.id))
-  }, [activeSlot, items, outfit.items])
+    const needsFormalityFilter = ['top', 'bottom', 'outerwear', 'dress'].includes(activeSlot)
+    return items.filter(
+      (item) =>
+        item.category === activeSlot &&
+        !used.has(item.id) &&
+        (!needsFormalityFilter ||
+          !formalityRange ||
+          (item.formalityScore >= formalityRange.min && item.formalityScore <= formalityRange.max)),
+    )
+  }, [activeSlot, formalityRange, items, outfit.items])
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/40 p-4 sm:items-center">
@@ -78,7 +88,9 @@ export function SwapDrawer({
           {candidates.length === 0 ? (
             <p className="rounded-lg border border-dashed border-line px-3 py-6 text-sm text-muted">
               No other {activeSlot ? humanize(activeSlot).toLowerCase() : 'items'} in your closet for
-              this slot.
+              this slot{formalityRange && activeSlot && ['top', 'bottom', 'outerwear', 'dress'].includes(activeSlot)
+                ? ` within formality ${formalityRange.min}–${formalityRange.max}`
+                : ''}.
             </p>
           ) : (
             candidates.map((item) => (
@@ -100,7 +112,7 @@ export function SwapDrawer({
                   </span>
                   <span className="block text-xs text-muted">
                     {humanize(item.category)}
-                    {item.color ? ` · ${item.color}` : ''}
+                    {item.color ? ` · ${item.color}` : ''} · Formality {item.formalityScore}/100
                   </span>
                 </span>
               </button>

@@ -12,6 +12,7 @@ export type StudioSessionSnapshot = {
   outfits: Outfit[] | null
   machine: StudioMachineState
   elapsedMs: number | null
+  matchStatus: 'matched' | 'fallback' | null
   feedbackText: string
   feedbackHistory: { id: string; text: string }[]
   tryOnOutfitId: string
@@ -50,6 +51,7 @@ function sanitizeSnapshot(raw: Partial<StudioSessionSnapshot> | null): StudioSes
     outfits,
     machine,
     elapsedMs: typeof raw.elapsedMs === 'number' ? raw.elapsedMs : null,
+    matchStatus: raw.matchStatus === 'fallback' || raw.matchStatus === 'matched' ? raw.matchStatus : null,
     feedbackText: raw.feedbackText ?? '',
     feedbackHistory: Array.isArray(raw.feedbackHistory)
       ? raw.feedbackHistory.filter(

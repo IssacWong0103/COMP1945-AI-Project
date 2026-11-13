@@ -29,13 +29,30 @@ def get_db() -> Generator[Session, None, None]:
 
 def _migrate(engine) -> None:
     """Apply additive SQLite column migrations for pre-existing databases."""
-    from sqlalchemy import inspect
+    from sqlalchemy import inspect, text
 
     inspector = inspect(engine)
-    if "profiles" not in inspector.get_table_names():
+    if "wardrobe_items" not in inspector.get_table_names():
         return
-    # No additive profile migrations are currently required.
-    # The legacy face_photo_url column (if present) is left in place but unused.
+    columns = {column["name"] for column in inspector.get_columns("wardrobe_items")}
+    if "formality_score" in columns:
+        return
+
+    from app.services.vlm import heuristic_formality
+
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE wardrobe_items ADD COLUMN formality_score INTEGER"))
+        rows = connection.execute(
+            text("SELECT id, category, style, description FROM wardrobe_items")
+        ).mappings()
+        for row in rows:
+            connection.execute(
+                text("UPDATE wardrobe_items SET formality_score = :score WHERE id = :item_id"),
+                {
+                    "score": heuristic_formality(row["style"], row["category"], row["description"]),
+                    "item_id": row["id"],
+                },
+            )
 
 
 def init_db() -> None:

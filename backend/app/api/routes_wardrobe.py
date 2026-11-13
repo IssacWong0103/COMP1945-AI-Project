@@ -36,6 +36,11 @@ async def create_item(
 ) -> WardrobeItemOut:
     dest, image_url = await save_upload(file, "wardrobe")
     tags = await describe_garment(dest, notes=notes, original_name=file.filename)
+    if not tags.get("isSingleItem", True):
+        dest.unlink(missing_ok=True)
+        reason = str(tags.get("rejectionReason") or "").strip()
+        detail = "Upload one clothing item on its own (a pair of shoes is fine), not a model, outfit, or multiple items."
+        raise HTTPException(status_code=400, detail=f"{detail} {reason}".strip())
     item = WardrobeItem(
         id=str(uuid4()),
         image_url=image_url,
@@ -43,6 +48,7 @@ async def create_item(
         color=tags["color"],
         cut=tags["cut"],
         style=tags["style"],
+        formality_score=tags["formalityScore"],
         description=tags["description"],
         item_gender=tags["itemGender"],
         notes=(notes or "").strip() or None,

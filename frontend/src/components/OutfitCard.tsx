@@ -8,17 +8,18 @@ import { ScoreBar } from './ScoreBar'
 type Props = {
   outfit: Outfit
   index: number
+  alternative?: boolean
   onTryOn?: () => void
   onSwap?: () => void
 }
 
-export function OutfitCard({ outfit, index, onTryOn, onSwap }: Props) {
+export function OutfitCard({ outfit, index, alternative = false, onTryOn, onSwap }: Props) {
   const look = index + 1
 
   return (
     <article className="flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-sm">
       <header className="mb-4 flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-ink">Outfit {look}</p>
+        <p className="text-sm font-semibold text-ink">{alternative ? 'Alternative' : 'Outfit'} {look}</p>
         <p className="rounded-full bg-canvas px-2.5 py-0.5 text-xs font-semibold tabular-nums text-navy">
           {(outfit.overallScore * 100).toFixed(0)}% match
         </p>
@@ -53,6 +54,12 @@ export function OutfitCard({ outfit, index, onTryOn, onSwap }: Props) {
       </div>
 
       <div className="mt-4 space-y-3">
+        <div className="flex items-center justify-between gap-3 text-xs">
+          <span className="font-medium text-muted">Outfit formality</span>
+          <span className="font-semibold tabular-nums text-navy">
+            {Number.isFinite(outfit.formalityScore) ? `${Math.round(outfit.formalityScore)}/100` : '—'}
+          </span>
+        </div>
         <ScoreBar label="Venue fit" value={outfit.venueFitScore} />
         <ScoreBar label="Cohesion" value={outfit.cohesionScore} />
         <ScoreBar label="Overall" value={outfit.overallScore} />

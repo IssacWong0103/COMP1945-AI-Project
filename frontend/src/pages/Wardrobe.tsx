@@ -43,6 +43,10 @@ const TAG_GUIDE = [
     body: 'Casual, smart casual, streetwear…',
   },
   {
+    title: 'Formality',
+    body: 'An editable 0–100 score used for occasion matching',
+  },
+  {
     title: 'Description',
     body: 'One short line from the vision model',
   },
@@ -362,7 +366,7 @@ function WardrobeCard({
           </span>
         </div>
 
-        <dl className="mt-3 grid grid-cols-3 gap-2">
+        <dl className="mt-3 grid grid-cols-4 gap-2">
           <div>
             <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Colour</dt>
             <dd className="mt-1 flex items-center gap-1.5 text-[13px] font-medium text-ink">
@@ -381,6 +385,10 @@ function WardrobeCard({
           <div>
             <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Style</dt>
             <dd className="mt-1 text-[13px] font-medium text-ink">{humanize(item.style) || '—'}</dd>
+          </div>
+          <div>
+            <dt className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Formality</dt>
+            <dd className="mt-1 text-[13px] font-medium text-ink">{item.formalityScore}/100</dd>
           </div>
         </dl>
 
@@ -431,6 +439,7 @@ function ItemDrawer({
   const [color, setColor] = useState(item.color)
   const [cut, setCut] = useState(item.cut)
   const [style, setStyle] = useState(item.style)
+  const [formalityScore, setFormalityScore] = useState(String(item.formalityScore))
   const [itemGender, setItemGender] = useState(item.itemGender || 'unisex')
   const [description, setDescription] = useState(item.description)
   const [saving, setSaving] = useState(false)
@@ -441,6 +450,7 @@ function ItemDrawer({
     setColor(item.color)
     setCut(item.cut)
     setStyle(item.style)
+    setFormalityScore(String(item.formalityScore))
     setItemGender(item.itemGender || 'unisex')
     setDescription(item.description)
     setFormError(null)
@@ -479,6 +489,7 @@ function ItemDrawer({
         color: color.trim(),
         cut: cut.trim(),
         style,
+        formalityScore: Number(formalityScore),
         description: description.trim(),
         itemGender,
       })
@@ -586,6 +597,19 @@ function ItemDrawer({
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="block sm:col-span-2">
+              <span className="text-xs font-medium text-muted">Formality (0–100)</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="1"
+                required
+                className={FIELD}
+                value={formalityScore}
+                onChange={(event) => setFormalityScore(event.target.value)}
+              />
             </label>
             <label className="block sm:col-span-2">
               <span className="text-xs font-medium text-muted">Gender · optional</span>

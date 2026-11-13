@@ -47,31 +47,49 @@ PREFERRED_STYLES: tuple[PreferredStyle, ...] = (
 GENDERS: tuple[Gender, ...] = ("male", "female", "nonBinary", "preferNot")
 SKIN_TONES: tuple[SkinTone, ...] = ("fair", "light", "medium", "tan", "deep")
 
+VENUE_FORMALITY_RANGES: dict[Venue, tuple[int, int]] = {
+    "lecture": (40, 50),
+    "careerFair": (70, 80),
+    "casualDate": (50, 70),
+    "hallGathering": (20, 40),
+    "formal": (91, 100),
+}
+
 VENUE_INFO = [
     {
         "id": "lecture",
         "label": "Lecture",
         "description": "Everyday class on campus — neat, comfortable, not overly dressy.",
+        "formality_min": VENUE_FORMALITY_RANGES["lecture"][0],
+        "formality_max": VENUE_FORMALITY_RANGES["lecture"][1],
     },
     {
         "id": "careerFair",
         "label": "Career Fair",
         "description": "Booths and networking — smart casual to business, look interview-ready.",
+        "formality_min": VENUE_FORMALITY_RANGES["careerFair"][0],
+        "formality_max": VENUE_FORMALITY_RANGES["careerFair"][1],
     },
     {
         "id": "casualDate",
         "label": "Casual Date",
         "description": "A relaxed date — put-together casual or streetwear, not stiff.",
+        "formality_min": VENUE_FORMALITY_RANGES["casualDate"][0],
+        "formality_max": VENUE_FORMALITY_RANGES["casualDate"][1],
     },
     {
         "id": "hallGathering",
         "label": "Hall Gathering",
         "description": "Hallmates hangout — casual, sporty, or streetwear you can sit around in.",
+        "formality_min": VENUE_FORMALITY_RANGES["hallGathering"][0],
+        "formality_max": VENUE_FORMALITY_RANGES["hallGathering"][1],
     },
     {
         "id": "formal",
         "label": "Formal",
         "description": "Ceremony, banquet, or formal dinner — polished dress or tailored looks.",
+        "formality_min": VENUE_FORMALITY_RANGES["formal"][0],
+        "formality_max": VENUE_FORMALITY_RANGES["formal"][1],
     },
 ]
 
@@ -99,6 +117,7 @@ class WardrobeItemOut(CamelModel):
     color: str
     cut: str
     style: str
+    formality_score: int = Field(ge=0, le=100)
     description: str
     item_gender: str
     created_at: datetime
@@ -113,6 +132,7 @@ class WardrobeItemUpdate(CamelModel):
     color: str | None = None
     cut: str | None = None
     style: str | None = None
+    formality_score: int | None = Field(default=None, ge=0, le=100)
     description: str | None = None
     item_gender: str | None = None
 
@@ -135,6 +155,8 @@ class VenueInfo(CamelModel):
     id: str
     label: str
     description: str
+    formality_min: int = Field(ge=0, le=100)
+    formality_max: int = Field(ge=0, le=100)
 
 
 class VenueListResponse(CamelModel):
@@ -157,6 +179,7 @@ class OutfitItemRef(CamelModel):
     color: str
     description: str
     image_url: str
+    formality_score: int = Field(ge=0, le=100)
 
 
 class RationaleItemOut(CamelModel):
@@ -170,6 +193,7 @@ class OutfitOut(CamelModel):
     venue_fit_score: float = Field(ge=0, le=1)
     cohesion_score: float = Field(ge=0, le=1)
     overall_score: float = Field(ge=0, le=1)
+    formality_score: float = Field(ge=0, le=100)
     rationale: str
     rationale_items: list[RationaleItemOut] = []
     inspiration: str | None = None
@@ -181,6 +205,7 @@ class RecommendResponse(CamelModel):
     outfits: list[OutfitOut]
     elapsed_ms: int
     warning: str | None = None
+    match_status: Literal["matched", "fallback"] = "matched"
 
 
 class SavedLookOut(CamelModel):

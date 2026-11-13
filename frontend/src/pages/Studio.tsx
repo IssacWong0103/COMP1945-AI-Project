@@ -59,6 +59,9 @@ export function Studio() {
   const [outfits, setOutfits] = useState<Outfit[] | null>(restored?.outfits ?? null)
   const [tick, setTick] = useState(0)
   const [elapsedMs, setElapsedMs] = useState<number | null>(restored?.elapsedMs ?? null)
+  const [matchStatus, setMatchStatus] = useState<'matched' | 'fallback' | null>(
+    restored?.matchStatus ?? null,
+  )
   const [hasBodyPhoto, setHasBodyPhoto] = useState<boolean | null>(null)
   const [closetItems, setClosetItems] = useState<WardrobeItem[]>([])
   const [feedbackText, setFeedbackText] = useState(restored?.feedbackText ?? '')
@@ -84,6 +87,7 @@ export function Studio() {
       outfits,
       machine,
       elapsedMs,
+      matchStatus,
       feedbackText,
       feedbackHistory,
       tryOnOutfitId,
@@ -98,6 +102,7 @@ export function Studio() {
     outfits,
     machine,
     elapsedMs,
+    matchStatus,
     feedbackText,
     feedbackHistory,
   ])
@@ -188,6 +193,7 @@ export function Studio() {
     emit({ type: 'SUBMIT_VALID' })
     setOutfits(null)
     setElapsedMs(null)
+    setMatchStatus(null)
     setTick(0)
     track('studio_run_started', { venue, style: styleOverride || null })
     pushActivity({
@@ -214,6 +220,7 @@ export function Studio() {
       const result = await recommend(payload)
       setOutfits(result.outfits)
       setElapsedMs(result.elapsedMs)
+      setMatchStatus(result.matchStatus)
       const persistBase = {
         venue,
         styleOverride,
@@ -221,12 +228,13 @@ export function Studio() {
         timeOfDay,
         fineTune,
         elapsedMs: result.elapsedMs,
+        matchStatus: result.matchStatus,
         feedbackText,
         feedbackHistory,
         tryOnOutfitId,
         tryOnVenue,
       }
-      if (result.warning && result.outfits.length > 0) {
+      if (result.matchStatus !== 'fallback' && result.warning && result.outfits.length > 0) {
         emit({ type: 'RUN_PARTIAL', outfitCount: result.outfits.length, warning: result.warning })
         track('studio_run_partial', { count: result.outfits.length })
         pushActivity({
@@ -319,6 +327,7 @@ export function Studio() {
         fineTune,
         outfits: null,
         elapsedMs: null,
+        matchStatus: null,
         feedbackText,
         feedbackHistory,
         machine: nextMachine,
@@ -360,20 +369,19 @@ export function Studio() {
     setOutfits((prev) =>
       (prev ?? []).map((outfit) => {
         if (outfit.id !== activeOutfit.id) return outfit
-        return {
-          ...outfit,
-          items: outfit.items.map((slotItem) =>
-            slotItem.category === machine.activeSlot
-              ? {
-                  id: item.id,
-                  category: item.category,
-                  color: item.color,
-                  description: item.description,
-                  imageUrl: item.imageUrl,
-                }
-              : slotItem,
-          ),
-        }
+        const items = outfit.items.map((slotItem) =>
+          slotItem.category === machine.activeSlot
+            ? {
+                id: item.id,
+                category: item.category,
+                color: item.color,
+                description: item.description,
+                imageUrl: item.imageUrl,
+                formalityScore: item.formalityScore,
+              }
+            : slotItem,
+        )
+        return { ...outfit, items, formalityScore: calculateOutfitFormality(items) }
       }),
     )
     track('studio_swap_applied', {
@@ -447,6 +455,9 @@ export function Studio() {
                     <span className="block text-sm font-semibold">{entry.label}</span>
                     <span className={`mt-0.5 block text-xs ${selected ? 'text-white/75' : 'text-muted'}`}>
                       {entry.description}
+                    </span>
+                    <span className={`mt-1 block text-[11px] font-medium ${selected ? 'text-white/80' : 'text-navy'}`}>
+                      Formality {entry.formalityMin}–{entry.formalityMax}
                     </span>
                   </button>
                 )
@@ -612,9 +623,23 @@ export function Studio() {
 
           {outfits && outfits.length > 0 ? (
             <section>
+              {matchStatus === 'fallback' ? (
+                <div role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-950">
+                  <p className="text-sm font-semibold">Currently you don't have the matched style clothes</p>
+                  <p className="mt-1 text-xs leading-relaxed">
+                    Showing the closest recommended alternatives
+                    {selectedVenue
+                      ? ` for ${selectedVenue.label} (target formality ${selectedVenue.formalityMin}–${selectedVenue.formalityMax})`
+                      : ''}
+                    , ranked by formality distance and overall outfit quality.
+                  </p>
+                </div>
+              ) : null}
               <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-semibold text-ink">
-                  {outfits.length} outfit{outfits.length === 1 ? '' : 's'} ready
+                  {matchStatus === 'fallback'
+                    ? `${outfits.length} recommended alternative${outfits.length === 1 ? '' : 's'}`
+                    : `${outfits.length} outfit${outfits.length === 1 ? '' : 's'} ready`}
                 </h3>
                 {elapsedMs != null ? (
                   <p className="text-xs font-medium text-muted">
@@ -628,6 +653,7 @@ export function Studio() {
                     key={outfit.id}
                     outfit={outfit}
                     index={index}
+                    alternative={matchStatus === 'fallback'}
                     onTryOn={() => openTryOnPage(outfit)}
                     onSwap={() => onOpenSwap(outfit)}
                   />
@@ -704,6 +730,11 @@ export function Studio() {
           outfit={activeOutfit}
           slot={machine.activeSlot}
           items={closetItems}
+          formalityRange={
+            selectedVenue
+              ? { min: selectedVenue.formalityMin, max: selectedVenue.formalityMax }
+              : undefined
+          }
           onSelectSlot={(slot) => emit({ type: 'OPEN_SWAP', outfitId: activeOutfit.id, slot })}
           onSwap={applySwap}
           onClose={() => emit({ type: 'CLOSE_OVERLAY' })}
@@ -712,6 +743,24 @@ export function Studio() {
 
     </StudioShell>
   )
+}
+
+function calculateOutfitFormality(items: Outfit['items']): number {
+  const weights: Record<string, number> = {
+    top: 1,
+    bottom: 1,
+    outerwear: 1,
+    dress: 1,
+    shoes: 0.5,
+    accessory: 0.25,
+  }
+  const totalWeight = items.reduce((sum, item) => sum + (weights[item.category] ?? 0.5), 0)
+  if (!totalWeight) return 0
+  const weightedTotal = items.reduce(
+    (sum, item) => sum + (item.formalityScore ?? 50) * (weights[item.category] ?? 0.5),
+    0,
+  )
+  return weightedTotal / totalWeight
 }
 
 function SelectChevron() {
