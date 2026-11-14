@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UploadLabel",
+  "type": "object",
+  "required": ["case_id", "filename", "expected_class"],
+  "properties": {
+    "case_id": { "type": "string", "minLength": 1 },
+    "filename": { "type": "string", "minLength": 1 },
+    "expected_class": {
+      "enum": ["valid_single", "model_worn", "multi_item", "collage", "irrelevant", "unreadable"]
+    },
+    "expected_category": {
+      "enum": ["top", "bottom", "outerwear", "dress", "shoes", "accessory"]
+    },
+    "expected_color": { "type": "string" },
+    "expected_style": {
+      "enum": ["casual", "smartCasual", "streetwear", "sporty", "minimal", "formal"]
+    },
+    "expected_formality": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "expected_gender": { "enum": ["male", "female", "unisex"] },
+    "notes": { "type": "string" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "expected_class": { "const": "valid_single" } } },
+      "then": {
+        "required": ["expected_category", "expected_color", "expected_style", "expected_formality", "expected_gender"]
+      }
+    }
+  ]
+}

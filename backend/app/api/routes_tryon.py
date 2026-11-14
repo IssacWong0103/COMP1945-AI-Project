@@ -105,7 +105,7 @@ async def create_try_on(payload: TryOnRequest, db: Session = Depends(get_db)) ->
         )
 
     try:
-        status, try_on_url, task_id = await generate_tryon(
+        status, try_on_url, task_id, mode = await generate_tryon(
             outfit_id=outfit.id,
             body_photo_url=body_photo,
             garments=items,
@@ -126,4 +126,4 @@ async def create_try_on(payload: TryOnRequest, db: Session = Depends(get_db)) ->
         outfit.kie_task_id = task_id
     db.commit()
 
-    return TryOnResponse(outfit_id=outfit.id, try_on_url=try_on_url, status=status)
+    return TryOnResponse(outfit_id=outfit.id, try_on_url=try_on_url, status=status, mode=mode)

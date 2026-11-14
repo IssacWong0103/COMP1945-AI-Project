@@ -723,7 +723,7 @@ def _rationale_items(
     return out
 
 
-def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
+def _to_outfit(candidate: Candidate, venue: str, use_reference: bool = True) -> OutfitOut:
     refs = [
         OutfitItemRef(
             id=item.id,
@@ -735,7 +735,9 @@ def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
         )
         for item in candidate.items
     ]
-    best_ref, _ = _best_reference(candidate.items, venue)
+    best_ref: dict | None = None
+    if use_reference:
+        best_ref, _ = _best_reference(candidate.items, venue)
     return OutfitOut(
         id=str(uuid.uuid4()),
         items=refs,
@@ -745,8 +747,8 @@ def _to_outfit(candidate: Candidate, venue: str) -> OutfitOut:
         formality_score=round(candidate.formality, 1),
         rationale=candidate.rationale,
         rationale_items=_rationale_items(candidate.items, venue, candidate.cohesion),
-        inspiration=_inspiration_text(best_ref),
-        model_reference_url=fashion_index.model_reference_url(best_ref),
+        inspiration=_inspiration_text(best_ref) if use_reference else None,
+        model_reference_url=fashion_index.model_reference_url(best_ref) if use_reference else None,
         try_on_url=None,
     )
 
@@ -813,6 +815,7 @@ def _generate_candidates(
     notes: str | None,
     warning: str | None,
     require_complete: bool,
+    use_reference: bool = True,
 ) -> list[Candidate]:
     if require_complete and not _has_complete_look(wardrobe):
         return []
@@ -833,7 +836,8 @@ def _generate_candidates(
             v_fit = venue_fit_score(combo, venue, preferred_style)
             coh = cohesion_score(combo, preferred_style)
             overall = 0.55 * v_fit + 0.45 * coh
-            overall = min(1.0, overall + REFERENCE_BOOST * reference_similarity(combo, venue))
+            if use_reference:
+                overall = min(1.0, overall + REFERENCE_BOOST * reference_similarity(combo, venue))
             overall = max(0.0, min(1.0, overall + _feedback_delta(combo, feedback)))
             overall = max(
                 0.0,
@@ -882,6 +886,7 @@ def recommend_outfits(
     time_of_day: str | None = None,
     dress_code: str | None = None,
     notes: str | None = None,
+    use_reference: bool = True,
 ) -> tuple[list[OutfitOut], str | None, str]:
     wardrobe = list(items)
     if not wardrobe:
@@ -907,6 +912,7 @@ def recommend_outfits(
         notes,
         warning,
         require_complete=True,
+        use_reference=use_reference,
     )
     match_status = "matched"
     if candidates:
@@ -929,6 +935,7 @@ def recommend_outfits(
             notes,
             warning,
             require_complete=False,
+            use_reference=use_reference,
         )
         candidates.sort(key=lambda candidate: (candidate.formality_distance, -candidate.overall))
         warning = "Currently you don't have the matched style clothes"
@@ -937,9 +944,9 @@ def recommend_outfits(
     if target >= MIN_RETURN:
         target = min(MAX_RETURN, max(MIN_RETURN, target))
     selected = _select_diverse(candidates, target)
-    outfits = [_to_outfit(candidate, venue) for candidate in selected]
+    outfits = [_to_outfit(candidate, venue, use_reference) for candidate in selected]
 
-    if settings.fashion_visual_rerank:
+    if settings.fashion_visual_rerank and use_reference:
         _apply_visual_styling(outfits, selected, venue)
 
     if len(outfits) < MIN_RETURN and match_status == "matched":

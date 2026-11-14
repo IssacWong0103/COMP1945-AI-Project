@@ -171,6 +171,7 @@ class RecommendRequest(CamelModel):
     time_of_day: str | None = Field(default=None, max_length=40)
     dress_code: str | None = Field(default=None, max_length=40)
     notes: str | None = Field(default=None, max_length=200)
+    use_reference: bool = True
 
 
 class OutfitItemRef(CamelModel):
@@ -228,6 +229,7 @@ class TryOnResponse(CamelModel):
     outfit_id: str
     try_on_url: str | None
     status: str
+    mode: Literal["kie", "collage"] | None = None
 
 
 class TryOnHistoryItem(CamelModel):

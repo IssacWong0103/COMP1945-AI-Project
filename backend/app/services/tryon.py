@@ -355,10 +355,10 @@ async def generate_tryon(
     height_cm: float | None = None,
     weight_kg: float | None = None,
     existing_task_id: str | None = None,
-) -> tuple[str, str | None, str | None]:
+) -> tuple[str, str | None, str | None, str]:
     """
-    Returns (status, try_on_url, kie_task_id).
-    status is 'ready' or 'processing'.
+    Returns (status, try_on_url, kie_task_id, mode).
+    status is 'ready' or 'processing'; mode is 'kie' or 'collage'.
     """
     body_path = local_path_for(body_photo_url or "")
     stem = f"{outfit_id}"
@@ -412,16 +412,16 @@ async def generate_tryon(
     if not can_call_kie:
         logger.info("Using PIL try-on collage (missing KIE key or usable image URLs)")
         url = save_fallback_collage(body_path, garments, stem=stem)
-        return "ready", url, None
+        return "ready", url, None, "collage"
 
     try:
         task_id = existing_task_id or await _create_kie_task(prompt, input_urls)
         result_url = await _poll_kie_task(task_id)
         local_url = await _download_result(result_url, stem=stem)
-        return "ready", local_url, task_id
+        return "ready", local_url, task_id, "kie"
     except TryOnPending as pending:
-        return "processing", None, pending.task_id
+        return "processing", None, pending.task_id, "kie"
     except Exception as exc:  # noqa: BLE001
         logger.warning("kie.ai try-on failed (%s); using collage fallback", exc)
         url = save_fallback_collage(body_path, garments, stem=stem)
-        return "ready", url, existing_task_id
+        return "ready", url, existing_task_id, "collage"

@@ -86,6 +86,11 @@ export async function getHealth(): Promise<HealthResponse> {
   }
 }
 
+export async function getEvalSummary(): Promise<Record<string, unknown>> {
+  const res = await fetch('/api/eval/summary')
+  return parseJson<Record<string, unknown>>(res)
+}
+
 export async function getVenues(): Promise<VenueInfo[]> {
   const res = await fetch('/api/venues')
   const data = await parseJson<{ venues: VenueInfo[] }>(res)

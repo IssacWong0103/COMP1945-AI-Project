@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { Closet } from './pages/Closet'
+import { EvalPage } from './pages/Eval'
 import { Home } from './pages/Home'
 import { Looks } from './pages/Looks'
 import { Profile } from './pages/Profile'
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/looks" element={<Looks />} />
           <Route path="/try-on" element={<TryOnPage />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/eval" element={<EvalPage />} />
           <Route path="/settings" element={<Navigate to="/profile" replace />} />
           <Route path="/you" element={<Navigate to="/profile" replace />} />
           <Route path="/dress-me" element={<Navigate to="/studio" replace />} />

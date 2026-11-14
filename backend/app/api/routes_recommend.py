@@ -54,6 +54,7 @@ def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> Recom
         time_of_day=time_of_day,
         dress_code=dress_code,
         notes=notes,
+        use_reference=payload.use_reference,
     )
     for outfit in outfits:
         _persist(db, outfit, payload.venue)

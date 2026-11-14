@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WardrobeManifest",
+  "type": "object",
+  "required": ["case_id", "venues", "items"],
+  "properties": {
+    "case_id": { "type": "string", "minLength": 1 },
+    "name": { "type": "string" },
+    "description": { "type": "string" },
+    "venues": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["lecture", "careerFair", "casualDate", "hallGathering", "formal"] }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["filename"],
+        "properties": {
+          "filename": { "type": "string", "minLength": 1 },
+          "expected_category": {
+            "enum": ["top", "bottom", "outerwear", "dress", "shoes", "accessory"]
+          },
+          "expected_color": { "type": "string" },
+          "expected_style": {
+            "enum": ["casual", "smartCasual", "streetwear", "sporty", "minimal", "formal"]
+          },
+          "expected_formality": { "type": "integer", "minimum": 0, "maximum": 100 },
+          "expected_gender": { "enum": ["male", "female", "unisex"] }
+        }
+      }
+    }
+  }
+}

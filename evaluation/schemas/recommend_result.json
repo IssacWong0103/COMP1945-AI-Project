@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RecommendResult",
+  "type": "object",
+  "required": ["case_id", "venue", "condition", "outcome", "recorded_at"],
+  "properties": {
+    "case_id": { "type": "string" },
+    "venue": {
+      "enum": ["lecture", "careerFair", "casualDate", "hallGathering", "formal"]
+    },
+    "condition": { "enum": ["full", "no_reference", "random"] },
+    "seed": { "type": "string" },
+    "outcome": { "enum": ["ok", "empty", "error"] },
+    "match_status": { "enum": ["matched", "fallback"] },
+    "warning": { "type": "string" },
+    "elapsed_ms": { "type": "number" },
+    "outfits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "venue_fit_score": { "type": "number" },
+          "cohesion_score": { "type": "number" },
+          "overall_score": { "type": "number" },
+          "formality_score": { "type": "number" },
+          "model_reference_url": { "type": ["string", "null"] },
+          "inspiration": { "type": ["string", "null"] },
+          "item_ids": { "type": "array", "items": { "type": "string" } },
+          "categories": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "constraint_checks": {
+      "type": "object",
+      "properties": {
+        "complete": { "type": "boolean" },
+        "duplicate_items": { "type": "boolean" },
+        "invalid_combination": { "type": "boolean" },
+        "empty_return": { "type": "boolean" }
+      }
+    }
+  }
+}

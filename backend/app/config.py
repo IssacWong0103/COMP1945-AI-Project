@@ -28,9 +28,13 @@ class Settings(BaseSettings):
     fashion_visual_rerank: bool = True
     fashion_visual_rerank_max: int = 1
     fashion_pass_model_reference: bool = True
+    ustyle_db_path: str = ""
+    ustyle_uploads_dir: str = ""
 
     @property
     def db_path(self) -> Path:
+        if self.ustyle_db_path.strip():
+            return Path(self.ustyle_db_path.strip()).expanduser()
         return BACKEND_ROOT / "data" / "ustyle.db"
 
     @property
@@ -41,6 +45,8 @@ class Settings(BaseSettings):
 
     @property
     def uploads_dir(self) -> Path:
+        if self.ustyle_uploads_dir.strip():
+            return Path(self.ustyle_uploads_dir.strip()).expanduser()
         return BACKEND_ROOT / "uploads"
 
     @property

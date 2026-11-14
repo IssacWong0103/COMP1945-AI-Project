@@ -22,6 +22,7 @@ const PRIMARY_LINKS: NavItem[] = [
 
 const SYSTEM_LINKS: NavItem[] = [
   { to: '/profile', label: 'Profile', icon: SettingsIcon, section: 'system' },
+  { to: '/eval', label: 'Evaluation', icon: EvalIcon, section: 'system' },
 ]
 
 const TITLES: Record<string, string> = {
@@ -32,6 +33,7 @@ const TITLES: Record<string, string> = {
   '/looks': 'Looks',
   '/try-on': 'Try-On',
   '/profile': 'Profile',
+  '/eval': 'Evaluation',
 }
 
 export function Layout() {
@@ -341,6 +343,15 @@ function SettingsIcon() {
         strokeWidth="1.5"
         strokeLinecap="round"
       />
+    </svg>
+  )
+}
+
+function EvalIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-[18px] w-[18px]" fill="none" aria-hidden>
+      <rect x="3" y="4" width="14" height="12" rx="1.4" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M6.2 12.5v-3M10 12.5v-6M13.8 12.5v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   )
 }

@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api import (
+    routes_eval,
     routes_health,
     routes_profile,
     routes_recommend,
@@ -49,6 +50,7 @@ app.include_router(routes_wardrobe.router, prefix="/api")
 app.include_router(routes_profile.router, prefix="/api")
 app.include_router(routes_recommend.router, prefix="/api")
 app.include_router(routes_tryon.router, prefix="/api")
+app.include_router(routes_eval.router, prefix="/api")
 
 ensure_upload_dirs()
 init_db()

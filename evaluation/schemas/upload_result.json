@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "UploadResult",
+  "type": "object",
+  "required": ["case_id", "filename", "expected_class", "outcome", "recorded_at"],
+  "properties": {
+    "case_id": { "type": "string" },
+    "filename": { "type": "string" },
+    "expected_class": {
+      "enum": ["valid_single", "model_worn", "multi_item", "collage", "irrelevant", "unreadable"]
+    },
+    "outcome": { "enum": ["accepted", "rejected", "unavailable"] },
+    "http_status": { "type": "integer" },
+    "error_detail": { "type": "string" },
+    "screening_mode": { "enum": ["vlm", "heuristic"] },
+    "elapsed_ms": { "type": "number" },
+    "tags": {
+      "type": "object",
+      "properties": {
+        "category": { "type": "string" },
+        "color": { "type": "string" },
+        "cut": { "type": "string" },
+        "style": { "type": "string" },
+        "formalityScore": { "type": "integer" },
+        "itemGender": { "type": "string" },
+        "description": { "type": "string" },
+        "rejectionReason": { "type": "string" },
+        "isClothingItem": { "type": "boolean" },
+        "isSingleItem": { "type": "boolean" }
+      }
+    },
+    "recorded_at": { "type": "string", "format": "date-time" },
+    "expected_category": { "type": "string" },
+    "expected_color": { "type": "string" },
+    "expected_style": { "type": "string" },
+    "expected_formality": { "type": "integer" },
+    "expected_gender": { "type": "string" }
+  }
+}
