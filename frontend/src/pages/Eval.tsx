@@ -1,5 +1,13 @@
 import { useEffect, useState } from 'react'
-import { getEvalSummary, getEvalStatus, runEvaluation } from '../api/client'
+import {
+  addEvalDatasetItem,
+  deleteEvalDatasetItem,
+  getEvalDataset,
+  getEvalStatus,
+  getEvalSummary,
+  runEvaluation,
+  updateEvalDatasetItem,
+} from '../api/client'
 
 type UploadMetrics = {
   counts?: Record<string, number>
@@ -98,6 +106,277 @@ function MetricTable({
   )
 }
 
+const CLASS_OPTIONS = [
+  ['valid_single', 'Valid single garment'],
+  ['model_worn', 'Model / person wearing clothes'],
+  ['multi_item', 'Multiple items'],
+  ['collage', 'Collage'],
+  ['irrelevant', 'Irrelevant (not clothing)'],
+  ['unreadable', 'Unreadable / blurry'],
+] as const
+
+function DatasetCard() {
+  const [items, setItems] = useState<Array<Record<string, unknown>>>([])
+  const [counts, setCounts] = useState<Record<string, number>>({})
+  const [loaded, setLoaded] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  const [file, setFile] = useState<File | null>(null)
+  const [expectedClass, setExpectedClass] = useState('valid_single')
+  const [category, setCategory] = useState('top')
+  const [color, setColor] = useState('')
+  const [style, setStyle] = useState('casual')
+  const [formality, setFormality] = useState('50')
+  const [gender, setGender] = useState('unisex')
+  const [notes, setNotes] = useState('')
+
+  const load = () => {
+    getEvalDataset()
+      .then((d) => {
+        setItems(d.items)
+        setCounts(d.counts)
+        setLoaded(true)
+      })
+      .catch((err: unknown) => {
+        setMessage(err instanceof Error ? err.message : String(err))
+        setLoaded(true)
+      })
+  }
+
+  useEffect(() => {
+    load()
+  }, [])
+
+  const resetForm = () => {
+    setEditingId(null)
+    setFile(null)
+    setExpectedClass('valid_single')
+    setCategory('top')
+    setColor('')
+    setStyle('casual')
+    setFormality('50')
+    setGender('unisex')
+    setNotes('')
+  }
+
+  const startEdit = (item: Record<string, unknown>) => {
+    setEditingId(String(item.case_id ?? ''))
+    setFile(null)
+    setExpectedClass(String(item.expected_class ?? 'valid_single'))
+    setCategory(String(item.expected_category ?? 'top'))
+    setColor(String(item.expected_color ?? ''))
+    setStyle(String(item.expected_style ?? 'casual'))
+    setFormality(String(item.expected_formality ?? '50'))
+    setGender(String(item.expected_gender ?? 'unisex'))
+    setNotes(String(item.notes ?? ''))
+  }
+
+  const submit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    setSaving(true)
+    setMessage(null)
+    try {
+      if (editingId) {
+        const patch: Record<string, unknown> = {
+          expected_class: expectedClass,
+          expected_category: expectedClass === 'valid_single' ? category : '',
+          expected_color: color,
+          expected_style: expectedClass === 'valid_single' ? style : '',
+          expected_formality: expectedClass === 'valid_single' ? Number(formality) : null,
+          expected_gender: expectedClass === 'valid_single' ? gender : '',
+          notes,
+        }
+        await updateEvalDatasetItem(editingId, patch)
+        setMessage('Item updated.')
+      } else {
+        if (!file) {
+          setMessage('Choose an image file first.')
+          setSaving(false)
+          return
+        }
+        const body = new FormData()
+        body.append('file', file)
+        body.append('expected_class', expectedClass)
+        body.append('expected_category', expectedClass === 'valid_single' ? category : '')
+        body.append('expected_color', color)
+        body.append('expected_style', expectedClass === 'valid_single' ? style : '')
+        body.append('expected_formality', expectedClass === 'valid_single' ? formality : '')
+        body.append('expected_gender', expectedClass === 'valid_single' ? gender : '')
+        body.append('notes', notes)
+        await addEvalDatasetItem(body)
+        setMessage('Item added.')
+      }
+      resetForm()
+      load()
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const remove = async (item: Record<string, unknown>) => {
+    if (!window.confirm(`Delete ${String(item.filename)} and its labels?`)) return
+    try {
+      await deleteEvalDatasetItem(String(item.case_id ?? ''))
+      load()
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : String(err))
+    }
+  }
+
+  const isGarment = expectedClass === 'valid_single'
+  const inputCls =
+    'w-full rounded-md border border-line bg-white px-2 py-1.5 text-xs text-ink focus:outline-none focus:ring-1 focus:ring-navy'
+
+  return (
+    <Card
+      title="Evaluation dataset"
+      hint="Add the real test images and their ground-truth labels here. Each image is saved to evaluation/data/uploads/ and its label row to upload_labels.csv — the exact inputs the Run evaluation button measures. Valid single-garment images need a category (plus color/style/formality/gender); negative cases only need a class and an optional note."
+    >
+      <div className="mb-3 flex items-center gap-3 text-xs text-muted">
+        <span>{counts.total ?? 0} labeled items</span>
+        <span>· {counts.valid_single ?? 0} valid</span>
+        <span>· {counts.negative ?? 0} negative</span>
+      </div>
+
+      <form onSubmit={submit} className="mb-4 grid gap-2 rounded-lg border border-line bg-canvas p-3 sm:grid-cols-2 lg:grid-cols-3">
+        {!editingId ? (
+          <label className="text-xs text-muted">
+            Image file
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              className="mt-1 block w-full text-xs"
+            />
+          </label>
+        ) : (
+          <p className="text-xs text-muted">Editing {editingId}</p>
+        )}
+
+        <label className="text-xs text-muted">
+          Class
+          <select value={expectedClass} onChange={(e) => setExpectedClass(e.target.value)} className={`mt-1 ${inputCls}`}>
+            {CLASS_OPTIONS.map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </select>
+        </label>
+
+        {isGarment ? (
+          <>
+            <label className="text-xs text-muted">
+              Category
+              <select value={category} onChange={(e) => setCategory(e.target.value)} className={`mt-1 ${inputCls}`}>
+                {['top', 'bottom', 'outerwear', 'dress', 'shoes', 'accessory'].map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs text-muted">
+              Color
+              <input value={color} onChange={(e) => setColor(e.target.value)} placeholder="e.g. navy" className={`mt-1 ${inputCls}`} />
+            </label>
+            <label className="text-xs text-muted">
+              Style
+              <select value={style} onChange={(e) => setStyle(e.target.value)} className={`mt-1 ${inputCls}`}>
+                {['casual', 'smartCasual', 'streetwear', 'sporty', 'minimal', 'formal'].map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </label>
+            <label className="text-xs text-muted">
+              Formality (0–100)
+              <input type="number" min={0} max={100} value={formality} onChange={(e) => setFormality(e.target.value)} className={`mt-1 ${inputCls}`} />
+            </label>
+            <label className="text-xs text-muted">
+              Gender
+              <select value={gender} onChange={(e) => setGender(e.target.value)} className={`mt-1 ${inputCls}`}>
+                {['male', 'female', 'unisex'].map((g) => (
+                  <option key={g} value={g}>{g}</option>
+                ))}
+              </select>
+            </label>
+          </>
+        ) : null}
+
+        <label className="text-xs text-muted sm:col-span-2">
+          Note
+          <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="optional note (e.g. uncertain about color)" className={`mt-1 ${inputCls}`} />
+        </label>
+
+        <div className="flex items-end gap-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-lg bg-navy px-3 py-2 text-xs font-medium text-white disabled:opacity-50"
+          >
+            {saving ? 'Saving…' : editingId ? 'Save changes' : 'Add item'}
+          </button>
+          {editingId ? (
+            <button type="button" onClick={resetForm} className="rounded-lg border border-line px-3 py-2 text-xs text-muted">
+              Cancel
+            </button>
+          ) : null}
+        </div>
+      </form>
+
+      {message ? <p className="mb-2 text-xs text-muted">{message}</p> : null}
+
+      {loaded && items.length === 0 ? (
+        <p className="text-xs text-muted">No labeled images yet. Add your first item above.</p>
+      ) : (
+        <table className="w-full border-collapse text-xs">
+          <thead>
+            <tr>
+              <th className="border border-line bg-canvas px-2 py-1 text-left font-medium text-ink">Image</th>
+              <th className="border border-line bg-canvas px-2 py-1 text-left font-medium text-ink">Class</th>
+              <th className="border border-line bg-canvas px-2 py-1 text-left font-medium text-ink">Labels</th>
+              <th className="border border-line bg-canvas px-2 py-1 text-left font-medium text-ink">Note</th>
+              <th className="border border-line bg-canvas px-2 py-1 text-left font-medium text-ink">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((item) => (
+              <tr key={String(item.case_id)}>
+                <td className="border border-line px-2 py-1">
+                  <img
+                    src={`/api/eval/dataset/image?path=${encodeURIComponent(String(item.filename))}`}
+                    alt=""
+                    className="h-10 w-8 rounded object-cover"
+                  />
+                </td>
+                <td className="border border-line px-2 py-1 text-muted">{fmt(item.expected_class)}</td>
+                <td className="border border-line px-2 py-1 text-muted">
+                  {String(item.expected_class) === 'valid_single'
+                    ? [item.expected_category, item.expected_color, item.expected_style, item.expected_formality, item.expected_gender]
+                        .filter((v) => v !== null && v !== undefined && v !== '')
+                        .join(' · ')
+                    : '—'}
+                </td>
+                <td className="border border-line px-2 py-1 text-muted">{fmt(item.notes) || '—'}</td>
+                <td className="border border-line px-2 py-1">
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => startEdit(item)} className="text-xs font-medium text-navy">
+                      Edit
+                    </button>
+                    <button type="button" onClick={() => void remove(item)} className="text-xs font-medium text-danger">
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </Card>
+  )
+}
+
 export function EvalPage() {
   const [summary, setSummary] = useState<EvalSummary | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -174,11 +453,16 @@ export function EvalPage() {
   if (loading) return <p className="text-sm text-muted">Loading evaluation summary…</p>
   if (error) {
     return (
-      <div className="rounded-xl border border-line bg-white p-5 text-sm text-muted">
-        <p className="font-medium text-ink">No evaluation summary available.</p>
-        <p className="mt-1">{error}</p>
-        <p className="mt-2">Run the evaluation from the button below, or run <code>evaluation/scripts/analyze.py</code> after the pipeline.</p>
-        {runButton}
+      <div className="mx-auto max-w-4xl">
+        <div className="rounded-xl border border-line bg-white p-5 text-sm text-muted">
+          <p className="font-medium text-ink">No evaluation summary available.</p>
+          <p className="mt-1">{error}</p>
+          <p className="mt-2">Run the evaluation from the button below, or run <code>evaluation/scripts/analyze.py</code> after the pipeline.</p>
+          {runButton}
+        </div>
+        <div className="mt-5">
+          <DatasetCard />
+        </div>
       </div>
     )
   }
@@ -339,6 +623,8 @@ export function EvalPage() {
           ]}
         />
       </Card>
+
+      <DatasetCard />
     </div>
   )
 }

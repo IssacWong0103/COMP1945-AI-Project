@@ -10,63 +10,63 @@
       "description": "A valid single-garment image is accepted (201).",
       "expected_status": 201,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Plain blue placeholder ",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is a plain blue p",
       "passed": false,
-      "recorded_at": "2026-11-14T08:24:40.741714+00:00"
+      "recorded_at": "2026-11-14T08:44:57.311994+00:00"
     },
     {
       "case_id": "reject-irrelevant",
       "description": "irrelevant image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image contains only the",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Blank placeholder image",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:42.077616+00:00"
+      "recorded_at": "2026-11-14T08:44:58.421897+00:00"
     },
     {
       "case_id": "reject-multi-item",
       "description": "multi item image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image shows two plain c",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image shows two flat co",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:43.123814+00:00"
+      "recorded_at": "2026-11-14T08:44:59.931586+00:00"
     },
     {
       "case_id": "reject-collage",
       "description": "collage image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is a placeholder ",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is an abstract gr",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:44.373155+00:00"
+      "recorded_at": "2026-11-14T08:45:01.051643+00:00"
     },
     {
       "case_id": "reject-unreadable",
       "description": "unreadable image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image contains only tex",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is blank/unreadab",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:45.713219+00:00"
+      "recorded_at": "2026-11-14T08:45:02.028045+00:00"
     },
     {
       "case_id": "empty-wardrobe",
       "description": "Recommend on an empty wardrobe returns 200 with a warning.",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"outfits\":[],\"elapsedMs\":1,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
+      "actual_detail": "{\"outfits\":[],\"elapsedMs\":0,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:45.728131+00:00"
+      "recorded_at": "2026-11-14T08:45:02.033017+00:00"
     },
     {
       "case_id": "incomplete-wardrobe",
       "description": "Recommend with only a top returns 200 (best available) with a warning.",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"outfits\":[],\"elapsedMs\":10,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
+      "actual_detail": "{\"outfits\":[],\"elapsedMs\":6,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:47.233813+00:00"
+      "recorded_at": "2026-11-14T08:45:03.440147+00:00"
     },
     {
       "case_id": "recommend-retry",
@@ -75,7 +75,7 @@
       "actual_status": 200,
       "actual_detail": "{\"outfits\":[],\"elapsedMs\":1,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:48.358079+00:00"
+      "recorded_at": "2026-11-14T08:45:04.880205+00:00"
     },
     {
       "case_id": "save-restore",
@@ -84,7 +84,7 @@
       "actual_status": 200,
       "actual_detail": "{\"looks\":[]}",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:49.843327+00:00"
+      "recorded_at": "2026-11-14T08:45:06.453259+00:00"
     },
     {
       "case_id": "tryon-no-body-photo",
@@ -93,7 +93,7 @@
       "actual_status": null,
       "actual_detail": "skipped: no saved outfit available",
       "passed": null,
-      "recorded_at": "2026-11-14T08:24:49.846279+00:00"
+      "recorded_at": "2026-11-14T08:45:06.457479+00:00"
     },
     {
       "case_id": "screening-unavailable",
@@ -102,7 +102,7 @@
       "actual_status": null,
       "actual_detail": "skipped: DeepSeek configured",
       "passed": null,
-      "recorded_at": "2026-11-14T08:24:49.847012+00:00"
+      "recorded_at": "2026-11-14T08:45:06.458509+00:00"
     },
     {
       "case_id": "offline-api",
@@ -111,7 +111,7 @@
       "actual_status": null,
       "actual_detail": "connection error",
       "passed": true,
-      "recorded_at": "2026-11-14T08:24:49.853820+00:00"
+      "recorded_at": "2026-11-14T08:45:06.465177+00:00"
     }
   ]
 }

@@ -1,6 +1,6 @@
 # USTyle Evaluation Report
 
-Generated: `2026-11-14T08:24:49.950989+00:00` — git `7a4bb6e05ed138e4a62ad09f39c56d915023486b`
+Generated: `2026-11-14T08:45:06.595824+00:00` — git `4d794cdc80dfad116ab5bb81f33fabc495d73885`
 
 This report is produced by the reproducible `evaluation/` pipeline against an isolated backend instance. All metrics are objective and programmatic; no human user study was performed.
 
@@ -28,16 +28,16 @@ _How to read: acceptance/rejection rates measure the screen (false rejection = v
 Counts: 6 valid, 4 negative, 0 accepted-valid, 0 unavailable.
 
 Rejection-reason distribution:
-- Plain blue placeholder graphic with text label; no clothing item or accessory is: 1
-- Image is a solid navy placeholder with text only; no clothing item or accessory : 1
-- Image is a flat red placeholder swatch with text label, not a photo of a garment: 1
-- Image is a blank placeholder with only faint text; no clothing item or accessory: 1
-- Image is a plain black placeholder frame with a text label; no clothing item or : 1
-- Image is a plain gray placeholder with text, no clothing item visible: 1
-- Abstract image of two colored blocks with text; no clothing or accessory present: 1
-- Image shows two plain colored rectangles with text, not a clothing item or acces: 1
-- Image contains only the placeholder text 'OBJECT' on a blank background; no clot: 1
-- Image is a blank white page with placeholder text, no clothing item visible: 1
+- Image is a plain blue placeholder graphic with text, not a photograph of a cloth: 1
+- Image is a plain navy placeholder swatch with a text label, not a photo of a gar: 1
+- Flat red color swatch with a text label; no actual garment or accessory is visib: 1
+- Image is a near-blank light gray placeholder with only faint filename text; no c: 1
+- Image is a blank dark placeholder with only text, no clothing item or accessory : 1
+- Image is a plain gray placeholder with label text, not an actual garment photo.: 1
+- Abstract image of two colored rectangles with text; no clothing item shown: 1
+- Image shows two flat colored rectangles with text, not a clothing item or access: 1
+- Blank image containing only the text 'OBJECT'; no clothing item or accessory is : 1
+- Image is a blank white placeholder with the text '??? blur'; no clothing item or: 1
 
 ## 2. Recommendation ablation
 
@@ -58,9 +58,9 @@ _How to read: median is the typical wait; p95 is the wait in the slowest 5% of r
 
 | Scenario | Count | Successful | Median | p95 | Max | ≤20 s rate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| upload | 30 | 0 | 1202.200 ms | 1424.400 ms | 1563.600 ms | — |
-| recommend | 30 | 30 | 1.300 ms | 1.900 ms | 44.700 ms | 1.000 |
-| upload_to_recommend | 30 | 0 | 1218.800 ms | 1447.500 ms | 1510.800 ms | — |
+| upload | 30 | 0 | 1234.800 ms | 1498.800 ms | 1635.100 ms | — |
+| recommend | 30 | 30 | 1.200 ms | 2.900 ms | 39.200 ms | 1.000 |
+| upload_to_recommend | 30 | 0 | 1245.400 ms | 1568.600 ms | 1846.900 ms | — |
 | tryon | 5 | 0 | — | — | — | — |
 
 ## 4. Functional reliability
@@ -89,7 +89,7 @@ Pass rate: 0.900 (9 passed, 1 failed, 2 skipped)
 | Metric | Full-system | Baseline | Target | Interpretation |
 | --- | ---: | ---: | ---: | --- |
 | Upload end-to-end tagging success | 0.000 | — (heuristic cat) | ≥ 0.80 | VLM adds screening value over accept-all heuristic |
-| Upload-to-recommend p95 | 1447.500 ms | — | ≤ 20000 ms | Tail-latency health of the real-AI path |
+| Upload-to-recommend p95 | 1568.600 ms | — | ≤ 20000 ms | Tail-latency health of the real-AI path |
 | Functional pass rate | 0.900 | — | ≥ 0.90 | Reliability of core user flows |
 
 ## 6. Limitations
