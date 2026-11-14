@@ -110,6 +110,7 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines.append("This report is produced by the reproducible `evaluation/` pipeline against an isolated backend instance. All metrics are objective and programmatic; no human user study was performed.\n")
 
     lines.append("## 1. Upload screening and tagging\n")
+    lines.append("_How to read: acceptance/rejection rates measure the screen (false rejection = valid photos wrongly blocked, false acceptance = invalid photos wrongly let in — both should be low). Category/color/style accuracy is measured over accepted photos only; end-to-end tagging success is the honest headline number because a wrongly rejected valid photo still counts against it._\n")
     counts = upload.get("counts", {})
     screening = upload.get("screening", {})
     tagging = upload.get("tagging", {})
@@ -142,6 +143,7 @@ def build_report(summary: dict, functional: list[dict]) -> str:
         lines.append("")
 
     lines.append("## 2. Recommendation ablation\n")
+    lines.append("_How to read: overall score (0–1) is the system's own ranking, so compare conditions rather than trusting the absolute value. If full beats no-reference more often and by more, retailer-reference styling adds value; if it ties, venue/cohesion rules are doing the work. Complete rate is the share of cases with a full outfit; fallback rate is the share of best-effort returns._\n")
     conds = rec.get("conditions", {})
     lines.append("| Condition | Cases | Overall mean | Venue-fit mean | Cohesion mean | Complete rate | Fallback rate |")
     lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
@@ -159,6 +161,7 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines.append("")
 
     lines.append("## 3. Latency\n")
+    lines.append("_How to read: median is the typical wait; p95 is the wait in the slowest 5% of runs (what you feel in a demo). The ≤20 s rate is the share of successful upload-to-recommend runs under the 20-second target (aim ≥0.95). A large median–p95 gap means occasional slow runs, usually external API tail latency._\n")
     lines.append("| Scenario | Count | Successful | Median | p95 | Max | ≤20 s rate |")
     lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
     for scenario in ("upload", "recommend", "upload_to_recommend", "tryon"):
@@ -171,6 +174,7 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines.append("")
 
     lines.append("## 4. Functional reliability\n")
+    lines.append("_How to read: pass rate is the share of defined user-flow scenarios that behaved as expected (aim ≥0.9). Each row compares expected vs actual HTTP status; SKIP means the scenario could not be exercised in this environment._\n")
     lines.append(f"Pass rate: {_fmt(func.get('pass_rate'))} ({func.get('passed', 0)} passed, {func.get('failed', 0)} failed, {func.get('skipped', 0)} skipped)\n")
     lines.append("| Case | Expected | Actual | Result |")
     lines.append("| --- | --- | --- | --- |")

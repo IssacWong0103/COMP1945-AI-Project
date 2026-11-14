@@ -91,6 +91,16 @@ export async function getEvalSummary(): Promise<Record<string, unknown>> {
   return parseJson<Record<string, unknown>>(res)
 }
 
+export async function runEvaluation(): Promise<{ state: string }> {
+  const res = await fetch('/api/eval/run', { method: 'POST' })
+  return parseJson<{ state: string }>(res)
+}
+
+export async function getEvalStatus(): Promise<Record<string, unknown>> {
+  const res = await fetch('/api/eval/status')
+  return parseJson<Record<string, unknown>>(res)
+}
+
 export async function getVenues(): Promise<VenueInfo[]> {
   const res = await fetch('/api/venues')
   const data = await parseJson<{ venues: VenueInfo[] }>(res)

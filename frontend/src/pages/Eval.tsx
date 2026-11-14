@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getEvalSummary } from '../api/client'
+import { getEvalSummary, getEvalStatus, runEvaluation } from '../api/client'
 
 type UploadMetrics = {
   counts?: Record<string, number>
@@ -55,10 +55,11 @@ function Bar({ label, value, max }: { label: string; value: number; max: number 
   )
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <section className="mb-5 rounded-xl border border-line bg-white p-4">
-      <h2 className="mb-3 text-sm font-semibold text-navy">{title}</h2>
+      <h2 className="mb-1 text-sm font-semibold text-navy">{title}</h2>
+      {hint ? <p className="mb-3 text-xs leading-relaxed text-muted">{hint}</p> : null}
       {children}
     </section>
   )
@@ -101,23 +102,74 @@ export function EvalPage() {
   const [summary, setSummary] = useState<EvalSummary | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [runStatus, setRunStatus] = useState<Record<string, unknown> | null>(null)
+  const [starting, setStarting] = useState(false)
 
-  useEffect(() => {
-    let cancelled = false
+  const loadSummary = () => {
     getEvalSummary()
       .then((data) => {
-        if (!cancelled) setSummary(data as EvalSummary)
+        setSummary(data as EvalSummary)
+        setError(null)
       })
       .catch((err: unknown) => {
-        if (!cancelled) setError(err instanceof Error ? err.message : String(err))
+        setError(err instanceof Error ? err.message : String(err))
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
+      .finally(() => setLoading(false))
+  }
+
+  const loadStatus = () => {
+    getEvalStatus()
+      .then((data) => setRunStatus(data as Record<string, unknown>))
+      .catch(() => setRunStatus(null))
+  }
+
+  useEffect(() => {
+    loadSummary()
+    loadStatus()
   }, [])
+
+  useEffect(() => {
+    if (runStatus?.state !== 'running') return
+    const id = window.setInterval(() => loadStatus(), 2000)
+    return () => window.clearInterval(id)
+  }, [runStatus?.state])
+
+  useEffect(() => {
+    if (runStatus?.state === 'done') loadSummary()
+  }, [runStatus?.state])
+
+  const startRun = async () => {
+    setStarting(true)
+    try {
+      const result = await runEvaluation()
+      setRunStatus(result as Record<string, unknown>)
+    } catch (err) {
+      setRunStatus({ state: 'error', error: err instanceof Error ? err.message : String(err) })
+    } finally {
+      setStarting(false)
+    }
+  }
+
+  const running = runStatus?.state === 'running' || starting
+  const statusStep = runStatus?.step ? String(runStatus.step).replace(/_/g, ' ') : ''
+  const runButton = (
+    <div className="mt-3 flex flex-wrap items-center gap-3">
+      <button
+        type="button"
+        disabled={running}
+        onClick={() => void startRun()}
+        className="rounded-lg bg-navy px-3 py-2 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {running ? `Running… ${statusStep}` : 'Run evaluation'}
+      </button>
+      {runStatus?.state === 'done' ? (
+        <span className="text-xs text-success">Finished — numbers above are up to date.</span>
+      ) : null}
+      {runStatus?.state === 'error' ? (
+        <span className="text-xs text-danger">{String(runStatus.error ?? 'Run failed')}</span>
+      ) : null}
+    </div>
+  )
 
   if (loading) return <p className="text-sm text-muted">Loading evaluation summary…</p>
   if (error) {
@@ -125,7 +177,8 @@ export function EvalPage() {
       <div className="rounded-xl border border-line bg-white p-5 text-sm text-muted">
         <p className="font-medium text-ink">No evaluation summary available.</p>
         <p className="mt-1">{error}</p>
-        <p className="mt-2">Run <code>backend/.venv/bin/python evaluation/scripts/analyze.py</code> after the evaluation pipeline.</p>
+        <p className="mt-2">Run the evaluation from the button below, or run <code>evaluation/scripts/analyze.py</code> after the pipeline.</p>
+        {runButton}
       </div>
     )
   }
@@ -166,9 +219,18 @@ export function EvalPage() {
           {summary.generated_at ? ` — generated ${summary.generated_at}` : ''}
           {summary.git_revision ? ` · git ${summary.git_revision.slice(0, 7)}` : ''}
         </p>
+        <p className="mt-2 text-xs leading-relaxed text-muted">
+          This is a <span className="font-medium text-ink">static snapshot</span>, not live telemetry. It only
+          changes when you re-run <code>evaluation/scripts/analyze.py</code> — normal use of the app
+          (uploading, recommending, trying on) does not update these numbers.
+        </p>
+        {runButton}
       </div>
 
-      <Card title="Upload screening and tagging">
+      <Card
+        title="Upload screening and tagging"
+        hint="How to read: acceptance/rejection rates tell you how well the screen catches non-clothing, multi-item, and model-worn photos. Category/color/style accuracy (over accepted photos only) measures tagging quality. End-to-end tagging success is the honest headline number — a valid photo that gets wrongly rejected still counts against it."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <p className="mb-1 text-xs font-medium text-ink">Tagging accuracy (VLM)</p>
@@ -194,7 +256,10 @@ export function EvalPage() {
         </div>
       </Card>
 
-      <Card title="Recommendation ablation">
+      <Card
+        title="Recommendation ablation"
+        hint="How to read: overall score (0–1) is the system's internal ranking, so compare conditions rather than trusting the absolute value. If full beats no-reference more often and by more, the retailer-reference styling adds value; if it ties, the venue/cohesion rules are doing the work. Complete rate = share of cases with a full top+bottom (or dress) outfit; fallback rate = share of best-effort returns."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <p className="mb-1 text-xs font-medium text-ink">Overall score by condition</p>
@@ -225,7 +290,10 @@ export function EvalPage() {
         </p>
       </Card>
 
-      <Card title="Latency">
+      <Card
+        title="Latency"
+        hint="How to read: median is the typical wait; p95 is the wait in the slowest 5% of runs — that's what you'll feel during a live demo. The ≤20 s rate is the share of successful upload-to-recommend runs that finish within the 20-second target (want ≥0.95). A large gap between median and p95 means occasional slow runs, usually an external API tail."
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             {Object.entries(latency).map(([scenario, m]) => (
@@ -251,7 +319,10 @@ export function EvalPage() {
         </div>
       </Card>
 
-      <Card title="Functional reliability">
+      <Card
+        title="Functional reliability"
+        hint="How to read: pass rate is the share of defined user-flow scenarios that behaved as expected (aim ≥0.9). Each row compares the expected HTTP status with the actual one; SKIP means the scenario could not be exercised in this environment (e.g. no body photo, or DeepSeek configured)."
+      >
         <p className="mb-2 text-xs text-muted">
           Pass rate {fmt(func?.pass_rate)} ({fmt(func?.passed)} passed, {fmt(func?.failed)} failed,{' '}
           {fmt(func?.skipped)} skipped)

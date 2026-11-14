@@ -1,0 +1,53 @@
+{
+  "conditions": {
+    "full": {
+      "cases": 0,
+      "overall_mean": null,
+      "overall_median": null,
+      "venue_fit_mean": null,
+      "cohesion_mean": null,
+      "complete_rate": null,
+      "duplicate_rate": null,
+      "invalid_rate": null,
+      "empty_rate": null,
+      "fallback_rate": null
+    },
+    "no_reference": {
+      "cases": 0,
+      "overall_mean": null,
+      "overall_median": null,
+      "venue_fit_mean": null,
+      "cohesion_mean": null,
+      "complete_rate": null,
+      "duplicate_rate": null,
+      "invalid_rate": null,
+      "empty_rate": null,
+      "fallback_rate": null
+    },
+    "random": {
+      "cases": 0,
+      "overall_mean": null,
+      "overall_median": null,
+      "venue_fit_mean": null,
+      "cohesion_mean": null,
+      "complete_rate": null,
+      "duplicate_rate": null,
+      "invalid_rate": null,
+      "empty_rate": null,
+      "fallback_rate": null
+    }
+  },
+  "per_venue": {},
+  "full_vs_no_reference": {
+    "wins": 0,
+    "ties": 0,
+    "losses": 0,
+    "mean_diff": null
+  },
+  "full_vs_random": {
+    "wins": 0,
+    "ties": 0,
+    "losses": 0,
+    "mean_diff": null
+  }
+}

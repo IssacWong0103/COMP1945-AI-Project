@@ -1,0 +1,57 @@
+{
+  "counts": {
+    "valid_total": 6,
+    "negative_total": 4,
+    "accepted_valid": 0,
+    "rejected_valid": 6,
+    "unavailable_valid": 0,
+    "accepted_negative": 0,
+    "rejected_negative": 4
+  },
+  "screening": {
+    "valid_acceptance_rate": 0.0,
+    "false_rejection_rate": 1.0,
+    "false_acceptance_rate": 0.0,
+    "model_worn_rejection_rate": null,
+    "confusion_matrix": {
+      "tp": 0,
+      "fn": 6,
+      "tn": 4,
+      "fp": 0
+    },
+    "rejection_reasons": {
+      "Plain blue placeholder graphic with text label; no clothing item or accessory is": 1,
+      "Image is a solid navy placeholder with text only; no clothing item or accessory ": 1,
+      "Image is a flat red placeholder swatch with text label, not a photo of a garment": 1,
+      "Image is a blank placeholder with only faint text; no clothing item or accessory": 1,
+      "Image is a plain black placeholder frame with a text label; no clothing item or ": 1,
+      "Image is a plain gray placeholder with text, no clothing item visible": 1,
+      "Abstract image of two colored blocks with text; no clothing or accessory present": 1,
+      "Image shows two plain colored rectangles with text, not a clothing item or acces": 1,
+      "Image contains only the placeholder text 'OBJECT' on a blank background; no clot": 1,
+      "Image is a blank white page with placeholder text, no clothing item visible": 1
+    }
+  },
+  "tagging": {
+    "category_accuracy": 0.0,
+    "category_macro_f1": 0.0,
+    "color_accuracy": 0.0,
+    "style_accuracy": 0.0,
+    "formality_mae": null,
+    "formality_agreement_rate": null,
+    "end_to_end_tagging_success": 0.0
+  },
+  "heuristic_baseline": {
+    "screening": {
+      "valid_acceptance_rate": 1.0,
+      "false_rejection_rate": 0.0,
+      "false_acceptance_rate": 1.0
+    },
+    "tagging": {
+      "category_accuracy": null,
+      "color_accuracy": null,
+      "style_accuracy": null,
+      "formality_mae": null
+    }
+  }
+}
