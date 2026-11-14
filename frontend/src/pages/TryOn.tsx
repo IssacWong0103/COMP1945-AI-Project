@@ -258,7 +258,7 @@ export function TryOnPage() {
             ) : null}
             {status === 'idle' && !profile?.bodyPhotoUrl ? (
               <Link
-                to="/settings"
+                to="/profile"
                 className="inline-flex w-full items-center justify-center rounded-lg bg-navy px-3.5 py-2 text-sm font-semibold text-white no-underline"
               >
                 Add a full-body photo in Profile

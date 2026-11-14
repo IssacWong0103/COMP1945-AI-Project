@@ -21,7 +21,7 @@ const PRIMARY_LINKS: NavItem[] = [
 ]
 
 const SYSTEM_LINKS: NavItem[] = [
-  { to: '/settings', label: 'Profile', icon: SettingsIcon, section: 'system' },
+  { to: '/profile', label: 'Profile', icon: SettingsIcon, section: 'system' },
 ]
 
 const TITLES: Record<string, string> = {
@@ -31,9 +31,6 @@ const TITLES: Record<string, string> = {
   '/dress-me': 'Studio',
   '/looks': 'Looks',
   '/try-on': 'Try-On',
-  '/activity': 'Activity',
-  '/alerts': 'Alerts',
-  '/settings': 'Profile',
   '/profile': 'Profile',
 }
 
@@ -44,10 +41,7 @@ export function Layout() {
   const [setupDone, setSetupDone] = useState<number | null>(null)
   const isHome = location.pathname === '/'
   const flushHeader =
-    isHome ||
-    location.pathname === '/wardrobe' ||
-    location.pathname === '/settings' ||
-    location.pathname === '/profile'
+    isHome || location.pathname === '/wardrobe' || location.pathname === '/profile'
 
   useEffect(() => {
     setMenuOpen(false)

@@ -5,7 +5,7 @@
 export type RecoveryKind = 'success' | 'partial' | 'failure' | 'offline' | 'emptyCloset' | 'noBodyPhoto'
 
 export type RecoveryAction = {
-  id: 'retry' | 'adjust' | 'openCloset' | 'openSettings' | 'openAlerts'
+  id: 'retry' | 'adjust' | 'openCloset' | 'openSettings'
   label: string
   to?: string
 }
@@ -33,7 +33,6 @@ export function resolveRecovery(input: {
       title: "We can't reach the USTyle server",
       message: 'Check that the API is running, then retry. Your closet edits stay local until reconnect.',
       primary: { id: 'retry', label: 'Retry connection' },
-      secondary: { id: 'openAlerts', label: 'Open alerts', to: '/alerts' },
     }
   }
 
@@ -71,7 +70,7 @@ export function resolveRecovery(input: {
       kind: 'noBodyPhoto',
       title: 'Try-on needs a full-body photo',
       message: 'Matching still works. Add a photo in Profile to unlock virtual try-on.',
-      primary: { id: 'openSettings', label: 'Go to Profile', to: '/settings' },
+      primary: { id: 'openSettings', label: 'Go to Profile', to: '/profile' },
     }
   }
 
@@ -85,7 +84,6 @@ export function mapApiErrorToRecovery(status: number, detail: string): RecoveryS
       title: 'Studio is unreachable',
       message: detail || 'The styling studio had a moment. Give it another go.',
       primary: { id: 'retry', label: 'Retry' },
-      secondary: { id: 'openAlerts', label: 'Open alerts', to: '/alerts' },
     }
   }
   return {

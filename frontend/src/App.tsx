@@ -1,11 +1,9 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
-import { Activity } from './pages/Activity'
-import { Alerts } from './pages/Alerts'
 import { Closet } from './pages/Closet'
 import { Home } from './pages/Home'
 import { Looks } from './pages/Looks'
-import { Settings } from './pages/Settings'
+import { Profile } from './pages/Profile'
 import { Studio } from './pages/Studio'
 import { TryOnPage } from './pages/TryOn'
 
@@ -19,11 +17,9 @@ export default function App() {
           <Route path="/studio" element={<Studio />} />
           <Route path="/looks" element={<Looks />} />
           <Route path="/try-on" element={<TryOnPage />} />
-          <Route path="/activity" element={<Activity />} />
-          <Route path="/alerts" element={<Alerts />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<Navigate to="/settings" replace />} />
-          <Route path="/you" element={<Navigate to="/settings" replace />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/settings" element={<Navigate to="/profile" replace />} />
+          <Route path="/you" element={<Navigate to="/profile" replace />} />
           <Route path="/dress-me" element={<Navigate to="/studio" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

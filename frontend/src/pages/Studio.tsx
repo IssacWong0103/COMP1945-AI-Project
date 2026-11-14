@@ -422,7 +422,7 @@ export function Studio() {
       {hasBodyPhoto === false && machine.phase === 'results' ? (
         <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
           No body photo yet.{' '}
-          <Link to="/settings" className="font-semibold underline">
+          <Link to="/profile" className="font-semibold underline">
             Add one in Profile
           </Link>{' '}
           to unlock virtual try-on.

@@ -119,14 +119,14 @@ export function Home() {
           <section className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatusCard to="/wardrobe" icon={<ShirtIcon />} label="Closet" value={pieceLabel} />
             <StatusCard
-              to="/settings"
+              to="/profile"
               icon={<ScanIcon />}
               label="Try-on photos"
               value={hasPhoto ? 'Full-body photo added' : 'Not added'}
             />
-            <StatusCard to="/settings" icon={<PersonIcon />} label="Profile" value={`${filledCount} of 5 filled`} />
+            <StatusCard to="/profile" icon={<PersonIcon />} label="Profile" value={`${filledCount} of 5 filled`} />
             <StatusCard
-              to="/settings"
+              to="/profile"
               icon={<SlidersIcon />}
               label="Preferred style"
               value={profile?.preferredStyle ? humanize(profile.preferredStyle) : 'Not set'}
