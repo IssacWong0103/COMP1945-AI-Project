@@ -1,45 +1,43 @@
 {
   "counts": {
-    "valid_total": 6,
-    "negative_total": 4,
-    "accepted_valid": 0,
-    "rejected_valid": 6,
+    "valid_total": 10,
+    "negative_total": 10,
+    "accepted_valid": 10,
+    "rejected_valid": 0,
     "unavailable_valid": 0,
-    "accepted_negative": 0,
-    "rejected_negative": 4
+    "accepted_negative": 1,
+    "rejected_negative": 9
   },
   "screening": {
-    "valid_acceptance_rate": 0.0,
-    "false_rejection_rate": 1.0,
-    "false_acceptance_rate": 0.0,
-    "model_worn_rejection_rate": null,
+    "valid_acceptance_rate": 1.0,
+    "false_rejection_rate": 0.0,
+    "false_acceptance_rate": 0.1,
+    "model_worn_rejection_rate": 1.0,
     "confusion_matrix": {
-      "tp": 0,
-      "fn": 6,
-      "tn": 4,
-      "fp": 0
+      "tp": 10,
+      "fn": 0,
+      "tn": 9,
+      "fp": 1
     },
     "rejection_reasons": {
-      "Image is a plain blue placeholder graphic with text, not a photograph of a cloth": 1,
-      "Image is a plain navy placeholder swatch with a text label, not a photo of a gar": 1,
-      "Flat red color swatch with a text label; no actual garment or accessory is visib": 1,
-      "Image is a near-blank light gray placeholder with only faint filename text; no c": 1,
-      "Image is a blank dark placeholder with only text, no clothing item or accessory ": 1,
-      "Image is a plain gray placeholder with label text, not an actual garment photo.": 1,
-      "Abstract image of two colored rectangles with text; no clothing item shown": 1,
-      "Image shows two flat colored rectangles with text, not a clothing item or access": 1,
-      "Blank image containing only the text 'OBJECT'; no clothing item or accessory is ": 1,
-      "Image is a blank white placeholder with the text '??? blur'; no clothing item or": 1
+      "Model wearing a full outfit of multiple items (shirt, tie, trousers), not one st": 1,
+      "Photo shows a male model wearing a full outfit (t-shirt, trousers, shoes), not o": 1,
+      "Photo shows a model wearing the cable-knit polo along with trousers and a watch,": 1,
+      "Photo shows a model wearing an outfit with multiple separate items (top, shorts,": 1,
+      "Photo shows a red car on a road, not a clothing item or accessory.": 1,
+      "The photo shows a cat, not a clothing item or fashion accessory.": 1,
+      "Photo shows a man wearing a full outfit (polo shirt, jeans, sunglasses), not one": 1,
+      "Model wearing a full outfit (black tank top and jeans), not a single standalone ": 1,
+      "Photo shows a person wearing a full outfit with multiple items rather than one s": 1
     }
   },
   "tagging": {
-    "category_accuracy": 0.0,
-    "category_macro_f1": 0.0,
-    "color_accuracy": 0.0,
-    "style_accuracy": 0.0,
-    "formality_mae": null,
-    "formality_agreement_rate": null,
-    "end_to_end_tagging_success": 0.0
+    "category_accuracy": 1.0,
+    "color_accuracy": 0.8,
+    "style_accuracy": 1.0,
+    "formality_mae": 3.9,
+    "formality_agreement_rate": 1.0,
+    "end_to_end_tagging_success": 1.0
   },
   "heuristic_baseline": {
     "screening": {
@@ -48,10 +46,10 @@
       "false_acceptance_rate": 1.0
     },
     "tagging": {
-      "category_accuracy": null,
-      "color_accuracy": null,
-      "style_accuracy": null,
-      "formality_mae": null
+      "category_accuracy": 0.4,
+      "color_accuracy": 0.3,
+      "style_accuracy": 0.6,
+      "formality_mae": 15.5
     }
   }
 }

@@ -99,10 +99,12 @@ Never trap users in a dead-end modal. Always expose one progressive action.
 ### Formality matching
 - Each uploaded garment has an AI-generated, user-editable formality score from 0–100.
 - Venue ranges are Lecture 40–50, Career Fair 70–80, Casual Date 50–70, Hall Gathering 20–40, and Formal 91–100 (the effective range for “greater than 90”).
-- Tops, bottoms, dresses, and outerwear must be inside the selected venue range for a matched result. Shoes and accessories affect the weighted outfit score but do not independently hard-filter the look.
+- A wardrobe must contain at least one top, one bottom and one pair of shoes before Studio can create outfits; otherwise the Create button is disabled and the requirement is shown.
+- Every returned outfit contains exactly one top, one bottom and one pair of shoes from the user's closet.
+- Tops and bottoms must be inside the selected venue range for a matched result. Shoes are attached to every core look but do not independently hard-filter the look.
 - If no complete matched look exists, Studio shows “Currently you don't have the matched style clothes” and up to three recommended alternatives, ranked by core-garment distance from the range and then overall quality.
 - Fallback results use `matchStatus: "fallback"`, remain successful result states, and persist across session restoration.
-- Core-garment swaps use the same venue range; shoes and accessories remain swappable without that hard filter.
+- Core-garment swaps use the same venue range for tops and bottoms; shoes remain swappable without that hard filter.
 
 ### Try-on page (`12`)
 - States: idle → rendering → ready | failed.

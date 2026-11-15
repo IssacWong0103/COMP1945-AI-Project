@@ -20,6 +20,7 @@ import {
   STYLE_OPTIONS,
   TIME_OF_DAY_OPTIONS,
   WEATHER_OPTIONS,
+  humanize,
 } from '../constants'
 import { track } from '../lib/analytics'
 import { pushActivity, pushAlert } from '../lib/activityStore'
@@ -155,6 +156,17 @@ export function Studio() {
     [outfits, machine.activeOutfitId],
   )
 
+  const requiredCategories = useMemo(
+    () =>
+      (['top', 'bottom', 'shoes'] as const).map((category) => ({
+        category,
+        ready: closetItems.some((item) => item.category === category),
+      })),
+    [closetItems],
+  )
+  const closetReady = requiredCategories.every((entry) => entry.ready)
+  const missingRequired = requiredCategories.filter((entry) => !entry.ready).map((entry) => entry.category)
+
   const recovery = resolveRecovery({
     phase:
       machine.phase === 'partial' || machine.phase === 'failure'
@@ -165,7 +177,6 @@ export function Studio() {
     warning: machine.lastWarning,
     error: machine.lastError,
     outfitCount: machine.outfitCount,
-    closetCount: closetItems.length,
     hasBodyPhoto: machine.phase === 'idle' ? hasBodyPhoto : undefined,
   })
 
@@ -185,6 +196,14 @@ export function Studio() {
   async function runCreate(feedback?: string) {
     if (!venue) {
       emit({ type: 'SUBMIT_INVALID' })
+      return
+    }
+    if (!closetReady) {
+      const missingLabel = missingRequired.map((category) => humanize(category)).join(', ')
+      emit({
+        type: 'RUN_FAILURE',
+        message: `Your closet needs at least one top, one bottom and one pair of shoes before creating outfits. Missing: ${missingLabel}.`,
+      })
       return
     }
     if (feedback !== undefined) {
@@ -429,6 +448,19 @@ export function Studio() {
         </p>
       ) : null}
 
+      {!closetReady ? (
+        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+          Your closet needs at least one top, one bottom and one pair of shoes before you can create
+          outfits.{' '}
+          <Link to="/wardrobe" className="font-semibold underline">
+            Add them in Closet
+          </Link>
+          {missingRequired.length > 0
+            ? ` — missing ${missingRequired.map((category) => humanize(category)).join(', ')}.`
+            : ''}
+        </p>
+      ) : null}
+
       <div className="grid gap-4 lg:grid-cols-12">
         <form
           onSubmit={(event) => void onSubmit(event)}
@@ -560,13 +592,19 @@ export function Studio() {
               className={TEXTAREA_CLASS}
             />
             <p className="mt-1.5 text-xs text-muted">
-              Using {closetItems.length} closet pieces. After results appear you can refine with
-              free-form feedback.
+              Using {closetItems.length} closet piece{closetItems.length === 1 ? '' : 's'}. After
+              results appear you can refine with free-form feedback.
             </p>
+            {!closetReady ? (
+              <p className="mt-1.5 text-xs font-medium text-amber-700">
+                Required: one top, one bottom and one pair of shoes. Missing:{' '}
+                {missingRequired.map((category) => humanize(category)).join(', ')}.
+              </p>
+            ) : null}
           </div>
 
           <div className="mt-6">
-            <Button type="submit" className="w-full" disabled={busy || !venue}>
+            <Button type="submit" className="w-full" disabled={busy || !venue || !closetReady}>
               {primaryCtaLabel(busy, tick)}
             </Button>
             <p className="mt-2 text-xs text-muted">

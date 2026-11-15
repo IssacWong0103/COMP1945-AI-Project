@@ -1,14 +1,13 @@
 """Orchestrate the full evaluation pipeline end-to-end.
 
 Starts an isolated backend instance, runs every measurement script against it,
-aggregates, and generates the report. Designed to be invoked by the web UI
-(POST /api/eval/run) or directly from the command line.
+aggregates, and generates the report. Run directly from the command line.
 
 Usage:
     backend/.venv/bin/python evaluation/scripts/run_eval.py [--reps N] [--tryon-reps N]
 
-Progress is written to evaluation/results/raw/eval_run_status.json so the UI
-can poll it.
+Progress is written to evaluation/results/raw/eval_run_status.json for
+observability.
 """
 
 from __future__ import annotations

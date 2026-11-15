@@ -35,6 +35,8 @@ const FILTER_LABELS: Record<(typeof FILTERS)[number], string> = {
   accessory: 'Accessory',
 }
 
+const REQUIRED_CATEGORIES = ['top', 'bottom', 'shoes'] as const
+
 const UPLOAD_TYPES = [
   { key: 'tops', label: 'Tops', icon: TopIcon },
   { key: 'bottoms', label: 'Bottoms', icon: BottomIcon },
@@ -106,6 +108,18 @@ export function Closet() {
       ),
     [items],
   )
+
+  const requiredCategories = useMemo(
+    () =>
+      REQUIRED_CATEGORIES.map((category) => ({
+        category,
+        count: items.filter((item) => item.category === category).length,
+        ready: items.some((item) => item.category === category),
+      })),
+    [items],
+  )
+  const closetReady = requiredCategories.every((entry) => entry.ready)
+  const missingRequired = requiredCategories.filter((entry) => !entry.ready)
 
   const visible = useMemo(() => {
     const narrowed = filter === 'all' ? items : items.filter((item) => item.category === filter)
@@ -296,18 +310,52 @@ export function Closet() {
         <div className="text-right">
           <ButtonLink
             to="/studio"
-            disabled={items.length === 0}
+            disabled={!closetReady}
             className={
-              items.length === 0
-                ? 'rounded-xl border-0 bg-[#e9eef6] px-4 py-2 text-[#99a4b4] shadow-none hover:bg-[#e9eef6]'
-                : 'rounded-xl px-4 py-2'
+              closetReady
+                ? 'rounded-xl px-4 py-2'
+                : 'rounded-xl border-0 bg-[#e9eef6] px-4 py-2 text-[#99a4b4] shadow-none hover:bg-[#e9eef6]'
             }
           >
             + Create outfit
           </ButtonLink>
-          {items.length === 0 ? <p className="mt-1 text-[11px] text-muted">Add clothes first</p> : null}
+          {closetReady ? null : (
+            <p className="mt-1 max-w-[240px] text-[11px] text-muted">
+              Add at least one top, one bottom and one pair of shoes first
+            </p>
+          )}
         </div>
       </div>
+
+      <section className="mt-6 rounded-xl border border-line bg-surface px-4 py-3">
+        <p className="text-sm font-semibold text-ink">Closet requirements</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {requiredCategories.map((entry) => (
+            <span
+              key={entry.category}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                entry.ready
+                  ? 'bg-[#e7f6ec] text-[#1c7c43]'
+                  : 'bg-amber-50 text-amber-800 ring-1 ring-amber-200'
+              }`}
+            >
+              {entry.ready ? '✓' : '•'} {humanize(entry.category)} · {entry.count}
+            </span>
+          ))}
+        </div>
+        {closetReady ? (
+          <p className="mt-2 text-xs text-muted">
+            You have at least one top, one bottom and one pair of shoes — outfit creation is unlocked.
+          </p>
+        ) : (
+          <p className="mt-2 text-xs text-muted">
+            To create outfits you must upload at least one top, one bottom and one pair of shoes.
+            {missingRequired.length > 0
+              ? ` Still needed: ${missingRequired.map((entry) => humanize(entry.category)).join(', ')}.`
+              : ''}
+          </p>
+        )}
+      </section>
 
       {!loading ? (
         <div className="mt-6">

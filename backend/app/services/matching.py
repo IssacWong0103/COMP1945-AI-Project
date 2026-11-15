@@ -228,7 +228,7 @@ def _in_formality_range(item: WardrobeItem, venue: str) -> bool:
 
 def _has_complete_look(items: Sequence[WardrobeItem]) -> bool:
     categories = {item.category for item in items}
-    return ("top" in categories and "bottom" in categories) or "dress" in categories
+    return {"top", "bottom", "shoes"} <= categories
 
 
 def _outfit_formality(items: Sequence[WardrobeItem]) -> float:
@@ -268,18 +268,11 @@ def generate_cores(items: Sequence[WardrobeItem], rng: random.Random) -> list[li
     grouped = _by_category(items)
     tops = _sample(grouped["top"], 12, rng)
     bottoms = _sample(grouped["bottom"], 12, rng)
-    dresses = _sample(grouped["dress"], 8, rng)
 
     cores: list[list[WardrobeItem]] = []
     for top, bottom in product(tops, bottoms):
         cores.append([top, bottom])
-    for dress in dresses:
-        cores.append([dress])
 
-    if not cores:
-        leftover = [item for item in items if item.category not in {"accessory"}]
-        if leftover:
-            cores.append(leftover[:3])
     if len(cores) > MAX_CORE_LOOKS:
         cores = rng.sample(cores, MAX_CORE_LOOKS)
     return cores
@@ -350,13 +343,11 @@ def venue_fit_score(
         pref_hits = sum(1 for item in items if _item_matches_preferred(item, preferred_style))
         score += 0.06 * (pref_hits / len(items))
 
-    complete = ("top" in categories and "bottom" in categories) or ("dress" in categories)
+    complete = {"top", "bottom", "shoes"} <= categories
     if complete:
         score += 0.05
     else:
         score -= 0.18
-    if "shoes" in categories:
-        score += 0.03
 
     return max(0.0, min(1.0, score))
 
@@ -619,7 +610,6 @@ def _attach_optionals(
     venue: str,
     preferred_style: str | None,
 ) -> list[list[WardrobeItem]]:
-    variants = [list(core)]
     core_ids = {item.id for item in core}
 
     def best_of(pool: list[WardrobeItem]) -> WardrobeItem | None:
@@ -640,29 +630,12 @@ def _attach_optionals(
         ranked.sort(key=lambda pair: pair[0], reverse=True)
         return ranked[0][1]
 
-    outer = best_of(grouped.get("outerwear") or [])
+    # Shoes are mandatory, not optional: every returned outfit must contain exactly
+    # one top, one bottom and one pair of shoes from the user's uploaded closet.
     shoes = best_of(grouped.get("shoes") or [])
-    accessory = best_of(grouped.get("accessory") or [])
-
-    if outer:
-        variants.append(core + [outer])
-    if shoes:
-        variants.append(core + [shoes])
-    if outer and shoes:
-        variants.append(core + [outer, shoes])
-    if accessory and len(variants[0]) >= 2:
-        variants.append(core + ([outer] if outer else []) + [accessory])
-
-    # Keep the core plus at most a couple of richer looks.
-    unique: list[list[WardrobeItem]] = []
-    seen: set[frozenset[str]] = set()
-    for variant in variants:
-        key = frozenset(item.id for item in variant)
-        if key in seen:
-            continue
-        seen.add(key)
-        unique.append(variant)
-    return unique[:4]
+    if not shoes:
+        return []
+    return [core + [shoes]]
 
 
 def _inspiration_text(ref: dict | None) -> str | None:
@@ -856,23 +829,6 @@ def _generate_candidates(
                 )
             )
 
-    if not candidates and wardrobe and not require_complete:
-        combo = list(wardrobe[:4])
-        v_fit = venue_fit_score(combo, venue, preferred_style)
-        coh = cohesion_score(combo, preferred_style)
-        overall = 0.55 * v_fit + 0.45 * coh
-        candidates.append(
-            Candidate(
-                items=combo,
-                venue_fit=v_fit,
-                cohesion=coh,
-                overall=overall,
-                formality=_outfit_formality(combo),
-                formality_distance=_formality_distance(combo, venue),
-                rationale=_rationale(combo, venue, v_fit, coh),
-                warning=warning,
-            )
-        )
     return candidates
 
 
@@ -892,9 +848,18 @@ def recommend_outfits(
     if not wardrobe:
         return [], "Wardrobe is empty. Upload a few garments first.", "matched"
 
+    missing = {"top", "bottom", "shoes"} - {item.category for item in wardrobe}
+    if missing:
+        label = ", ".join(sorted(missing))
+        return (
+            [],
+            f"Closet must include at least one top, one bottom and one pair of shoes before creating outfits. Missing: {label}.",
+            "fallback",
+        )
+
     warning: str | None = None
     if not _has_complete_look(wardrobe):
-        warning = "Need a top+bottom or a dress for a complete look; returning the best available pieces."
+        warning = "Need a top, a bottom and a pair of shoes for a complete look; returning the best available pieces."
 
     eligible_pool = [
         item

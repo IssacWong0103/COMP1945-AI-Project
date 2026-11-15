@@ -1,1 +1,21 @@
 case_id,filename,expected_class,expected_category,expected_color,expected_style,expected_formality,expected_gender,notes
+judge-item11,negative/item11.jpg,model_worn,,,,,,"AI judge ground truth: A model is wearing a shirt, tie, and trousers."
+judge-item13,negative/item13.jpg,model_worn,,,,,,AI judge ground truth: A model is wearing a complete outfit.
+judge-item14,negative/item14.jpg,model_worn,,,,,,AI judge ground truth: A person is wearing a top and trousers.
+judge-item15,negative/item15.jpg,model_worn,,,,,,"AI judge ground truth: A model is wearing shorts, socks, and shoes."
+judge-item17,negative/item17.jpg,irrelevant,,,,,,"AI judge ground truth: The primary subject is a car, not clothing."
+judge-item18,negative/item18.jpg,irrelevant,,,,,,"AI judge ground truth: The primary subject is a cat, not clothing."
+judge-item19,negative/item19.jpg,model_worn,,,,,,AI judge ground truth: A person is wearing a polo shirt and trousers.
+judge-item20,negative/item20.jpg,model_worn,,,,,,AI judge ground truth: A person is wearing the garment.
+judge-item6,negative/item6.jpg,multi_item,,,,,,AI judge ground truth: Multiple formal garments are shown together.
+judge-item7,negative/item7.jpg,model_worn,,,,,,AI judge ground truth: A person is wearing multiple clothing items.
+judge-item1,valid/item1.jpg,valid_single,bottom,tan,casual,45,male,AI judge ground truth
+judge-item10,valid/item10.jpg,valid_single,top,white,smartCasual,70,male,AI judge ground truth
+judge-item12,valid/item12.jpg,valid_single,bottom,navy,casual,35,male,AI judge ground truth
+judge-item16,valid/item16.jpg,valid_single,top,brown,casual,45,male,AI judge ground truth
+judge-item2,valid/item2.jpg,valid_single,bottom,navy,smartCasual,70,male,AI judge ground truth
+judge-item3,valid/item3.jpg,valid_single,bottom,blue,casual,45,unisex,AI judge ground truth
+judge-item4,valid/item4.jpg,valid_single,bottom,gray,casual,40,male,AI judge ground truth
+judge-item5,valid/item5.jpg,valid_single,top,white,casual,30,unisex,AI judge ground truth
+judge-item8,valid/item8.jpg,valid_single,top,gray,smartCasual,70,male,AI judge ground truth
+judge-item9,valid/item9.jpg,valid_single,bottom,gray,smartCasual,75,male,AI judge ground truth

@@ -1,53 +1,96 @@
 {
   "conditions": {
     "full": {
-      "cases": 0,
-      "overall_mean": null,
-      "overall_median": null,
-      "venue_fit_mean": null,
-      "cohesion_mean": null,
-      "complete_rate": null,
-      "duplicate_rate": null,
-      "invalid_rate": null,
-      "empty_rate": null,
-      "fallback_rate": null
+      "cases": 3,
+      "overall_mean": 1.0,
+      "overall_median": 1.0,
+      "venue_fit_mean": 1.0,
+      "cohesion_mean": 0.99,
+      "complete_rate": 1.0,
+      "duplicate_rate": 0.0,
+      "invalid_rate": 0.0,
+      "empty_rate": 0.0,
+      "fallback_rate": 0.0
     },
     "no_reference": {
-      "cases": 0,
-      "overall_mean": null,
-      "overall_median": null,
-      "venue_fit_mean": null,
-      "cohesion_mean": null,
-      "complete_rate": null,
-      "duplicate_rate": null,
-      "invalid_rate": null,
-      "empty_rate": null,
-      "fallback_rate": null
+      "cases": 3,
+      "overall_mean": 0.9955,
+      "overall_median": 0.9955,
+      "venue_fit_mean": 1.0,
+      "cohesion_mean": 0.99,
+      "complete_rate": 1.0,
+      "duplicate_rate": 0.0,
+      "invalid_rate": 0.0,
+      "empty_rate": 0.0,
+      "fallback_rate": 0.0
     },
     "random": {
-      "cases": 0,
-      "overall_mean": null,
-      "overall_median": null,
-      "venue_fit_mean": null,
-      "cohesion_mean": null,
-      "complete_rate": null,
-      "duplicate_rate": null,
-      "invalid_rate": null,
-      "empty_rate": null,
-      "fallback_rate": null
+      "cases": 3,
+      "overall_mean": 0.842,
+      "overall_median": 0.955,
+      "venue_fit_mean": 0.77,
+      "cohesion_mean": 0.93,
+      "complete_rate": 1.0,
+      "duplicate_rate": 0.0,
+      "invalid_rate": 0.0,
+      "empty_rate": 0.0,
+      "fallback_rate": 0.0
     }
   },
-  "per_venue": {},
+  "per_venue": {
+    "careerFair": {
+      "full": {
+        "cases": 1,
+        "overall_mean": 1.0
+      },
+      "no_reference": {
+        "cases": 1,
+        "overall_mean": 0.9955
+      },
+      "random": {
+        "cases": 1,
+        "overall_mean": 0.616
+      }
+    },
+    "casualDate": {
+      "full": {
+        "cases": 1,
+        "overall_mean": 1.0
+      },
+      "no_reference": {
+        "cases": 1,
+        "overall_mean": 0.9955
+      },
+      "random": {
+        "cases": 1,
+        "overall_mean": 0.955
+      }
+    },
+    "lecture": {
+      "full": {
+        "cases": 1,
+        "overall_mean": 1.0
+      },
+      "no_reference": {
+        "cases": 1,
+        "overall_mean": 0.9955
+      },
+      "random": {
+        "cases": 1,
+        "overall_mean": 0.955
+      }
+    }
+  },
   "full_vs_no_reference": {
-    "wins": 0,
+    "wins": 3,
     "ties": 0,
     "losses": 0,
-    "mean_diff": null
+    "mean_diff": 0.0045
   },
   "full_vs_random": {
-    "wins": 0,
+    "wins": 3,
     "ties": 0,
     "losses": 0,
-    "mean_diff": null
+    "mean_diff": 0.158
   }
 }

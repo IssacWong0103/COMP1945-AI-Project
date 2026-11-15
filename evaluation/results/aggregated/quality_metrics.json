@@ -1,0 +1,23 @@
+{
+  "outfit": {
+    "count": 6,
+    "overall_mean": 3.17,
+    "questions": {
+      "Venue appropriate": 2.67,
+      "Visually cohesive": 3.17,
+      "Complete outfit": 3.5,
+      "Practical to wear": 3.33
+    }
+  },
+  "tryon": {
+    "count": 6,
+    "overall_mean": 4.5,
+    "questions": {
+      "Same person": 5.0,
+      "Natural proportions": 4.83,
+      "Photorealistic": 4.33,
+      "No artifacts": 4.17,
+      "Garments kept": 4.17
+    }
+  }
+}

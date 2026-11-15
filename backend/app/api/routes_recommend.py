@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timezone
 from time import perf_counter
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -38,6 +38,19 @@ def _persist(db: Session, outfit: OutfitOut, venue: str) -> OutfitOut:
 def recommend(payload: RecommendRequest, db: Session = Depends(get_db)) -> RecommendResponse:
     started = perf_counter()
     items = db.scalars(select(WardrobeItem).order_by(WardrobeItem.created_at.asc())).all()
+
+    required_categories = ("top", "bottom", "shoes")
+    available_categories = {item.category for item in items}
+    missing = [category for category in required_categories if category not in available_categories]
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Closet must include at least one top, one bottom and one pair of shoes "
+                f"before creating outfits. Missing: {', '.join(missing)}."
+            ),
+        )
+
     profile = db.scalars(select(Profile).limit(1)).first()
     preferred = payload.preferred_style or (profile.preferred_style if profile else None)
     feedback = (payload.feedback or "").strip() or None

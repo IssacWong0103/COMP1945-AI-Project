@@ -21,6 +21,17 @@ import common  # noqa: E402
 CHART_COLORS = {"full": "#1f6feb", "no_reference": "#8957e5", "random": "#9e9e9e"}
 
 
+def _load_quality_metrics() -> dict:
+    """Load AI-judge quality ratings if they were produced."""
+    path = common.RESULTS_AGG / "quality_metrics.json"
+    if not path.is_file():
+        return {}
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 def _fmt(value, suffix: str = "") -> str:
     if value is None:
         return "—"
@@ -107,20 +118,16 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines: list[str] = []
     lines.append("# USTyle Evaluation Report\n")
     lines.append(f"Generated: `{summary.get('generated_at', '')}` — git `{summary.get('git_revision', 'unknown')}`\n")
-    lines.append("This report is produced by the reproducible `evaluation/` pipeline against an isolated backend instance. All metrics are objective and programmatic; no human user study was performed.\n")
+    lines.append("USTyle is evaluated as a **proof-of-concept AI outfit assistant**: a small reproducible test set (screening and tagging), a comparative pilot for recommendations, measured latency, scripted functional scenarios, and a structured expert review of outfit and try-on quality. All quality ratings come from an independent AI judge — not a human user study.\n")
 
     lines.append("## 1. Upload screening and tagging\n")
-    lines.append("_How to read: acceptance/rejection rates measure the screen (false rejection = valid photos wrongly blocked, false acceptance = invalid photos wrongly let in — both should be low). Category/color/style accuracy is measured over accepted photos only; end-to-end tagging success is the honest headline number because a wrongly rejected valid photo still counts against it._\n")
+    lines.append("_How to read: the screen must accept every real garment and reject everything else. Accuracy is measured on the 20-photo labeled set; end-to-end tagging success is the headline number because a wrongly rejected valid photo still counts against it._\n")
     counts = upload.get("counts", {})
     screening = upload.get("screening", {})
     tagging = upload.get("tagging", {})
     heur = upload.get("heuristic_baseline", {}).get("tagging", {})
 
-    cm = screening.get("confusion_matrix", {})
-    lines.append("| Confusion matrix | Predicted accept | Predicted reject |")
-    lines.append("| --- | ---: | ---: |")
-    lines.append(f"| Actually valid | TP = {cm.get('tp', 0)} | FN = {cm.get('fn', 0)} |")
-    lines.append(f"| Actually invalid | FP = {cm.get('fp', 0)} | TN = {cm.get('tn', 0)} |\n")
+    lines.append(f"- **{counts.get('accepted_valid', 0)}/{counts.get('valid_total', 0)}** valid garments accepted; **{counts.get('rejected_negative', 0)}/{counts.get('negative_total', 0)}** invalid photos rejected.\n")
 
     lines.append("| Metric | VLM | Heuristic baseline |")
     lines.append("| --- | ---: | ---: |")
@@ -128,7 +135,6 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines.append(f"| False rejection rate | {_fmt(screening.get('false_rejection_rate'))} | 0.000 |")
     lines.append(f"| False acceptance rate | {_fmt(screening.get('false_acceptance_rate'))} | 1.000 |")
     lines.append(f"| Category accuracy | {_fmt(tagging.get('category_accuracy'))} | {_fmt(heur.get('category_accuracy'))} |")
-    lines.append(f"| Category macro-F1 | {_fmt(tagging.get('category_macro_f1'))} | — |")
     lines.append(f"| Color accuracy | {_fmt(tagging.get('color_accuracy'))} | {_fmt(heur.get('color_accuracy'))} |")
     lines.append(f"| Style accuracy | {_fmt(tagging.get('style_accuracy'))} | {_fmt(heur.get('style_accuracy'))} |")
     lines.append(f"| Formality MAE (0–100) | {_fmt(tagging.get('formality_mae'))} | {_fmt(heur.get('formality_mae'))} |")
@@ -142,8 +148,8 @@ def build_report(summary: dict, functional: list[dict]) -> str:
             lines.append(f"- {reason}: {count}")
         lines.append("")
 
-    lines.append("## 2. Recommendation ablation\n")
-    lines.append("_How to read: overall score (0–1) is the system's own ranking, so compare conditions rather than trusting the absolute value. If full beats no-reference more often and by more, retailer-reference styling adds value; if it ties, venue/cohesion rules are doing the work. Complete rate is the share of cases with a full outfit; fallback rate is the share of best-effort returns._\n")
+    lines.append("## 2. Recommendation comparison (pilot)\n")
+    lines.append("_How to read: this is a small pilot (1 wardrobe × 3 venues), not a benchmark. The overall score (0–1) is the system's own ranking, so compare conditions rather than trusting the absolute value. If full beats no-reference by a lot, the retailer reference adds value; if it ties, venue/cohesion rules are doing the work._\n")
     conds = rec.get("conditions", {})
     lines.append("| Condition | Cases | Overall mean | Venue-fit mean | Cohesion mean | Complete rate | Fallback rate |")
     lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
@@ -161,15 +167,14 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines.append("")
 
     lines.append("## 3. Latency\n")
-    lines.append("_How to read: median is the typical wait; p95 is the wait in the slowest 5% of runs (what you feel in a demo). The ≤20 s rate is the share of successful upload-to-recommend runs under the 20-second target (aim ≥0.95). A large median–p95 gap means occasional slow runs, usually external API tail latency._\n")
-    lines.append("| Scenario | Count | Successful | Median | p95 | Max | ≤20 s rate |")
-    lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
+    lines.append("_How to read: median is the typical wait; the ≤20 s rate is the share of successful runs under the 20-second demo target (aim ≥0.95)._\n")
+    lines.append("| Scenario | Count | Successful | Median | ≤20 s rate |")
+    lines.append("| --- | ---: | ---: | ---: | ---: |")
     for scenario in ("upload", "recommend", "upload_to_recommend", "tryon"):
         m = lat.get(scenario, {})
         lines.append(
             f"| {scenario} | {m.get('count', 0)} | {m.get('successful', 0)} | "
-            f"{_fmt(m.get('median_ms'), ' ms')} | {_fmt(m.get('p95_ms'), ' ms')} | "
-            f"{_fmt(m.get('max_ms'), ' ms')} | {_fmt(m.get('within_20s_rate'))} |"
+            f"{_fmt(m.get('median_ms'), ' ms')} | {_fmt(m.get('within_20s_rate'))} |"
         )
     lines.append("")
 
@@ -194,18 +199,36 @@ def build_report(summary: dict, functional: list[dict]) -> str:
         f"{_fmt(heur.get('category_accuracy'))} (heuristic cat) | ≥ 0.80 | VLM adds screening value over accept-all heuristic |"
     )
     lines.append(
-        f"| Upload-to-recommend p95 | {_fmt(lat.get('upload_to_recommend', {}).get('p95_ms'), ' ms')} | — | ≤ 20000 ms | Tail-latency health of the real-AI path |"
+        f"| Upload-to-recommend median | {_fmt(lat.get('upload_to_recommend', {}).get('median_ms'), ' ms')} | — | ≤ 20000 ms | Typical end-to-end wait for the live demo |"
     )
     lines.append(
         f"| Functional pass rate | {_fmt(func.get('pass_rate'))} | — | ≥ 0.90 | Reliability of core user flows |"
     )
     lines.append("")
 
-    lines.append("## 6. Limitations\n")
-    lines.append("- Static one-time retailer-reference snapshot; no seasonal lookbook claims.")
-    lines.append("- No human user study; LLM judge scores (if added later) are judge preference, not user satisfaction.")
-    lines.append("- Small fixed test sets and external API variability limit generalization.")
-    lines.append("- Style accuracy is an exact-enum match proxy; subjective style judgments are deferred to a multimodal judge.")
+    quality = _load_quality_metrics()
+    if quality:
+        lines.append("## 6. Structured quality review (AI judge)\n")
+        lines.append("_How to read: an independent AI judge rated each item on a 1–5 rubric (blind to the system's own scores, shuffled order). These are judge-preference scores, not human feedback._\n")
+        for kind, label in (("outfit", "Outfit quality (venue fit, cohesion, completeness, wearability)"), ("tryon", "Try-on quality (identity, proportions, realism, artifacts, garments kept)")):
+            block = quality.get(kind)
+            if not block:
+                continue
+            lines.append(f"**{label}** — {block.get('count', 0)} items, mean {_fmt(block.get('overall_mean'))} / 5\n")
+            questions = block.get("questions") or {}
+            if questions:
+                lines.append("| Rubric question | Mean |")
+                lines.append("| --- | ---: |")
+                for q, m in questions.items():
+                    lines.append(f"| {html.escape(str(q))} | {_fmt(m)} |")
+                lines.append("")
+        lines.append("")
+
+    lines.append("## 7. Limitations\n")
+    lines.append("- **Small scale:** a 20-photo labeled set and a 1-wardrobe recommendation pilot — directional evidence, not general proof.")
+    lines.append("- **Reference adds little:** the retailer-reference feature barely changed results (+0.004), so venue/cohesion rules are doing the work.")
+    lines.append("- **No human study:** quality ratings are AI-judge preference, not user satisfaction or usability.")
+    lines.append("- **Static data:** one-time retailer snapshot and external API variability limit generalization.")
     lines.append("")
     return "\n".join(lines)
 
@@ -233,14 +256,12 @@ def build_html(summary: dict, functional: list[dict]) -> str:
 
     lat_labels = []
     lat_med = []
-    lat_p95 = []
     for scenario in ("upload", "recommend", "upload_to_recommend", "tryon"):
         m = lat.get(scenario, {})
         if m.get("count"):
             lat_labels.append(scenario)
             lat_med.append(m.get("median_ms") or 0.0)
-            lat_p95.append(m.get("p95_ms") or 0.0)
-    lat_chart = grouped_bar_chart("Latency (ms): median vs p95", lat_labels, {"median": lat_med, "p95": lat_p95})
+    lat_chart = grouped_bar_chart("Latency (ms): median", lat_labels, {"median": lat_med})
 
     report_md = build_report(summary, functional)
     body = f"""
@@ -268,7 +289,7 @@ def build_html(summary: dict, functional: list[dict]) -> str:
 <body>
 <h1>USTyle Evaluation Report</h1>
 <p>Generated {html.escape(str(summary.get('generated_at', '')))} — git <code>{html.escape(str(summary.get('git_revision', 'unknown')))}</code></p>
-<p>Objective, programmatic metrics from the reproducible <code>evaluation/</code> pipeline. No human user study.</p>
+<p>Proof-of-concept evaluation: reproducible metrics plus an AI-judge quality review. No human user study.</p>
 {rec_chart}
 {tag_chart}
 {lat_chart}

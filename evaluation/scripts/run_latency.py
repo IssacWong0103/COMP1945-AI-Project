@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "backend"
 import common  # noqa: E402
 
 
-def upload_file(client: httpx.Client, image_path: Path) -> tuple[float, int, str | None]:
+def upload_file(client: httpx.Client, image_path: Path) -> tuple[float, int, str | None, str | None]:
     started = perf_counter()
     with image_path.open("rb") as fh:
         response = client.post(
@@ -36,12 +36,16 @@ def upload_file(client: httpx.Client, image_path: Path) -> tuple[float, int, str
         )
     elapsed_ms = (perf_counter() - started) * 1000
     detail = None
-    if response.status_code not in {200, 201}:
-        try:
-            detail = response.json().get("detail")
-        except Exception:  # noqa: BLE001
-            detail = response.text[:240]
-    return elapsed_ms, response.status_code, detail
+    item_id = None
+    try:
+        body = response.json()
+        if response.status_code in {200, 201}:
+            item_id = body.get("id")
+        else:
+            detail = body.get("detail")
+    except Exception:  # noqa: BLE001
+        detail = response.text[:240]
+    return elapsed_ms, response.status_code, detail, item_id
 
 
 def recommend(client: httpx.Client, venue: str, use_reference: bool = True) -> tuple[float, int, dict]:
@@ -129,6 +133,7 @@ def main() -> None:
     parser.add_argument("--tryon-reps", type=int, default=5)
     parser.add_argument("--venue", default="lecture")
     parser.add_argument("--data-root", default=str(common.DATA_DIR))
+    parser.add_argument("--throttle", type=float, default=1.0, help="seconds to sleep between uploads (avoid API rate limits)")
     args = parser.parse_args()
 
     data_root = Path(args.data_root)
@@ -146,24 +151,32 @@ def main() -> None:
 
     results: list[dict] = []
     with httpx.Client() as client:
-        # recommend + upload_to_recommend need a seeded wardrobe.
-        clear_wardrobe(client)
-        seed_wardrobe(client, wardrobe_items, uploads_dir)
+        def reset_wardrobe() -> None:
+            """Seed a fixed base wardrobe so recommend runs on the same closet size."""
+            clear_wardrobe(client)
+            seed_wardrobe(client, wardrobe_items, uploads_dir)
+
+        # recommend + upload_to_recommend need a fixed seeded wardrobe.
+        reset_wardrobe()
 
         for rep in range(args.reps):
-            upload_ms, upload_status, upload_detail = upload_file(client, upload_image)
+            up_ms, up_status, up_detail, _ = upload_file(client, upload_image)
             results.append(
                 {
                     "scenario": "upload",
                     "rep": rep,
-                    "elapsed_ms": round(upload_ms, 1),
-                    "http_status": upload_status,
-                    "detail": upload_detail,
+                    "elapsed_ms": round(up_ms, 1),
+                    "http_status": up_status,
+                    "detail": up_detail,
                     "cold": rep == 0,
                     "recorded_at": common.now_iso(),
                 }
             )
+            if args.throttle > 0 and rep < args.reps - 1:
+                time.sleep(args.throttle)
 
+        # Reset so recommend measures a fixed closet, not the 30 uploads above.
+        reset_wardrobe()
         for rep in range(args.reps):
             rec_ms, rec_status, body = recommend(client, args.venue, use_reference=True)
             results.append(
@@ -179,9 +192,17 @@ def main() -> None:
                 }
             )
 
+        reset_wardrobe()
         for rep in range(args.reps):
-            up_ms, up_status, up_detail = upload_file(client, upload_image)
+            up_ms, up_status, up_detail, item_id = upload_file(client, upload_image)
             rec_ms, rec_status, body = recommend(client, args.venue, use_reference=True)
+            # Delete the just-uploaded item so the closet stays the same size
+            # across reps (upload-to-recommend should not measure a growing closet).
+            if item_id:
+                try:
+                    client.delete(f"{common.BASE_URL}/api/wardrobe/items/{item_id}", timeout=30.0)
+                except Exception:  # noqa: BLE001
+                    pass
             results.append(
                 {
                     "scenario": "upload_to_recommend",
@@ -195,6 +216,8 @@ def main() -> None:
                     "recorded_at": common.now_iso(),
                 }
             )
+            if args.throttle > 0 and rep < args.reps - 1:
+                time.sleep(args.throttle)
 
         # Try-on: needs a profile body photo; record as skipped when absent.
         if body_photos:
@@ -265,6 +288,7 @@ def main() -> None:
     manifest["tryon_reps"] = args.tryon_reps
     manifest["venue"] = args.venue
     manifest["data_root"] = str(data_root)
+    manifest["throttle_s"] = args.throttle
     common.write_jsonl(common.RESULTS_RAW / "latency_results.jsonl", results)
     common.write_jsonl(common.RESULTS_RAW / "latency_manifest.jsonl", [manifest])
     print(f"Wrote {len(results)} latency records to {common.RESULTS_RAW / 'latency_results.jsonl'}")

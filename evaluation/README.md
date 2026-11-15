@@ -7,17 +7,21 @@ wardrobe, profile, and saved looks are never touched.
 
 ## What is measured
 
-1. **Upload screening/tagging** — acceptance/rejection rates, confusion matrix,
-   category accuracy + macro-F1, color accuracy, formality MAE, end-to-end
-   tagging success, and the heuristic accept-all baseline.
-2. **Recommendation ablation** — full USTyle vs no-reference vs random-complete
-   outfit, per fixed wardrobe and venue.
-3. **Latency** — client wall-clock time for upload, recommend,
-   upload-to-recommend, and try-on (median + p95).
+1. **Upload screening/tagging** — acceptance/rejection rates, category/color/style
+   accuracy, formality MAE, end-to-end tagging success, and the heuristic
+   accept-all baseline.
+2. **Recommendation comparison (pilot)** — full USTyle vs no-reference vs
+   random-complete outfit, per fixed wardrobe and venue.
+3. **Latency** — client wall-clock time for upload, recommend, and
+   upload-to-recommend (median).
 4. **Functional reliability** — a pass/fail scenario matrix.
+5. **Structured quality review** — an independent AI judge rates outfit quality
+   and try-on visual quality on a 1–5 rubric (see
+   `data/quality_rubric.md` and `scripts/run_quality_rating.py`).
 
-No human user study is performed. Any future LLM-judge scores are "judge
-preference", never "user satisfaction".
+No human user study is performed. Quality ratings are **AI-judge preference**,
+never "user satisfaction". A hand-run demo script is in
+`report/DEMO_SCRIPT.md`.
 
 ## Directory layout
 
@@ -59,6 +63,10 @@ backend/.venv/bin/python evaluation/scripts/run_functional.py
 # 4. Aggregate + report
 backend/.venv/bin/python evaluation/scripts/analyze.py
 backend/.venv/bin/python evaluation/scripts/report.py
+
+# 5. Structured quality review (optional; rates the live backend's real outputs)
+backend/.venv/bin/python evaluation/scripts/run_quality_rating.py
+backend/.venv/bin/python evaluation/scripts/report.py   # re-run to include the ratings
 ```
 
 Results appear in `results/aggregated/` and `report/`.

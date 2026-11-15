@@ -86,51 +86,6 @@ export async function getHealth(): Promise<HealthResponse> {
   }
 }
 
-export async function getEvalSummary(): Promise<Record<string, unknown>> {
-  const res = await fetch('/api/eval/summary')
-  return parseJson<Record<string, unknown>>(res)
-}
-
-export async function runEvaluation(): Promise<{ state: string }> {
-  const res = await fetch('/api/eval/run', { method: 'POST' })
-  return parseJson<{ state: string }>(res)
-}
-
-export async function getEvalStatus(): Promise<Record<string, unknown>> {
-  const res = await fetch('/api/eval/status')
-  return parseJson<Record<string, unknown>>(res)
-}
-
-export async function getEvalDataset(): Promise<{
-  items: Array<Record<string, unknown>>
-  counts: Record<string, number>
-}> {
-  const res = await fetch('/api/eval/dataset')
-  return parseJson(res)
-}
-
-export async function addEvalDatasetItem(form: FormData): Promise<Record<string, unknown>> {
-  const res = await fetch('/api/eval/dataset/items', { method: 'POST', body: form })
-  return parseJson(res)
-}
-
-export async function updateEvalDatasetItem(
-  id: string,
-  patch: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
-  const res = await fetch(`/api/eval/dataset/items/${encodeURIComponent(id)}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(patch),
-  })
-  return parseJson(res)
-}
-
-export async function deleteEvalDatasetItem(id: string): Promise<void> {
-  const res = await fetch(`/api/eval/dataset/items/${encodeURIComponent(id)}`, { method: 'DELETE' })
-  if (!res.ok) throw new ApiError(await readDetail(res), res.status)
-}
-
 export async function getVenues(): Promise<VenueInfo[]> {
   const res = await fetch('/api/venues')
   const data = await parseJson<{ venues: VenueInfo[] }>(res)

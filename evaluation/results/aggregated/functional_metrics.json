@@ -1,54 +1,45 @@
 {
-  "total": 12,
+  "total": 11,
   "passed": 9,
   "failed": 1,
-  "skipped": 2,
+  "skipped": 1,
   "pass_rate": 0.9,
   "cases": [
     {
       "case_id": "valid-upload",
       "description": "A valid single-garment image is accepted (201).",
       "expected_status": 201,
+      "actual_status": 201,
+      "actual_detail": "{\"id\":\"ee427449-760d-46fd-b348-ff69e361a9c8\",\"imageUrl\":\"/uploads/wardrobe/42f4b7bc-8f2e-4642-9545-0adad9eca0e0.jpg\",\"category\":\"bottom\",\"color\":\"tan\",\"cut\":\"straight\",\"style\":\"casual\",\"formalityScore",
+      "passed": true,
+      "recorded_at": "2026-11-15T05:25:52.604983+00:00"
+    },
+    {
+      "case_id": "reject-model-outfit",
+      "description": "model worn image is rejected (400).",
+      "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is a plain blue p",
-      "passed": false,
-      "recorded_at": "2026-11-14T08:44:57.311994+00:00"
+      "actual_detail": "{\"detail\":\"Upload exactly one clothing item on its own (a pair of shoes is fine), not a person, model, full or partial outfit, collage, or multiple items. Photo shows a model wearing a full outfit (sh",
+      "passed": true,
+      "recorded_at": "2026-11-15T05:25:54.160195+00:00"
     },
     {
       "case_id": "reject-irrelevant",
       "description": "irrelevant image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Blank placeholder image",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Photo shows a red car o",
       "passed": true,
-      "recorded_at": "2026-11-14T08:44:58.421897+00:00"
+      "recorded_at": "2026-11-15T05:25:55.319373+00:00"
     },
     {
       "case_id": "reject-multi-item",
       "description": "multi item image is rejected (400).",
       "expected_status": 400,
-      "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image shows two flat co",
-      "passed": true,
-      "recorded_at": "2026-11-14T08:44:59.931586+00:00"
-    },
-    {
-      "case_id": "reject-collage",
-      "description": "collage image is rejected (400).",
-      "expected_status": 400,
-      "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is an abstract gr",
-      "passed": true,
-      "recorded_at": "2026-11-14T08:45:01.051643+00:00"
-    },
-    {
-      "case_id": "reject-unreadable",
-      "description": "unreadable image is rejected (400).",
-      "expected_status": 400,
-      "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Image is blank/unreadab",
-      "passed": true,
-      "recorded_at": "2026-11-14T08:45:02.028045+00:00"
+      "actual_status": 201,
+      "actual_detail": "{\"id\":\"54999a75-2cac-4868-8543-52a3c58dbc61\",\"imageUrl\":\"/uploads/wardrobe/2fde2a4d-32fc-4d7f-a104-7734419d4006.jpg\",\"category\":\"outerwear\",\"color\":\"black\",\"cut\":\"tailored\",\"style\":\"formal\",\"formality",
+      "passed": false,
+      "recorded_at": "2026-11-15T05:25:56.948594+00:00"
     },
     {
       "case_id": "empty-wardrobe",
@@ -57,43 +48,43 @@
       "actual_status": 200,
       "actual_detail": "{\"outfits\":[],\"elapsedMs\":0,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
       "passed": true,
-      "recorded_at": "2026-11-14T08:45:02.033017+00:00"
+      "recorded_at": "2026-11-15T05:25:56.993295+00:00"
     },
     {
       "case_id": "incomplete-wardrobe",
       "description": "Recommend with only a top returns 200 (best available) with a warning.",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"outfits\":[],\"elapsedMs\":6,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
+      "actual_detail": "{\"outfits\":[{\"id\":\"a8b69c0c-7f9d-4e26-a32b-683ebe62c04c\",\"items\":[{\"id\":\"d65b5fcd-9d4c-45f1-bb3c-f384c0328ce0\",\"category\":\"bottom\",\"color\":\"tan\",\"description\":\"Tan cotton chino trousers laid flat, mid",
       "passed": true,
-      "recorded_at": "2026-11-14T08:45:03.440147+00:00"
+      "recorded_at": "2026-11-15T05:26:05.180346+00:00"
     },
     {
       "case_id": "recommend-retry",
       "description": "Recommendation retry succeeds twice (200).",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"outfits\":[],\"elapsedMs\":1,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
+      "actual_detail": "{\"outfits\":[{\"id\":\"49de9b1b-3bfc-4639-9351-d99f2acf5b10\",\"items\":[{\"id\":\"d361267e-629b-4594-bb23-15d3939d2478\",\"category\":\"bottom\",\"color\":\"tan\",\"description\":\"Tan straight-leg cotton chino trousers l",
       "passed": true,
-      "recorded_at": "2026-11-14T08:45:04.880205+00:00"
+      "recorded_at": "2026-11-15T05:26:13.403323+00:00"
     },
     {
       "case_id": "save-restore",
       "description": "Saved looks are retrievable after recommendation (200).",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"looks\":[]}",
+      "actual_detail": "{\"looks\":[{\"id\":\"5d6e9a61-0d1e-434e-b9be-e0dab5d02590\",\"venue\":\"lecture\",\"overallScore\":0.8918,\"createdAt\":\"2026-11-15T05:26:21.513889\",\"thumbnailUrl\":\"/uploads/wardrobe/e890264e-08bd-477f-870f-926e6b",
       "passed": true,
-      "recorded_at": "2026-11-14T08:45:06.453259+00:00"
+      "recorded_at": "2026-11-15T05:26:21.551867+00:00"
     },
     {
       "case_id": "tryon-no-body-photo",
-      "description": "Try-on without a profile body photo returns 400 \u2014 skipped: no saved outfit available.",
+      "description": "Try-on without a profile body photo returns 400.",
       "expected_status": 400,
-      "actual_status": null,
-      "actual_detail": "skipped: no saved outfit available",
-      "passed": null,
-      "recorded_at": "2026-11-14T08:45:06.457479+00:00"
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"Upload a full-body photo in your profile before trying on an outfit.\"}",
+      "passed": true,
+      "recorded_at": "2026-11-15T05:26:27.362161+00:00"
     },
     {
       "case_id": "screening-unavailable",
@@ -102,7 +93,7 @@
       "actual_status": null,
       "actual_detail": "skipped: DeepSeek configured",
       "passed": null,
-      "recorded_at": "2026-11-14T08:45:06.458509+00:00"
+      "recorded_at": "2026-11-15T05:26:27.363901+00:00"
     },
     {
       "case_id": "offline-api",
@@ -111,7 +102,7 @@
       "actual_status": null,
       "actual_detail": "connection error",
       "passed": true,
-      "recorded_at": "2026-11-14T08:45:06.465177+00:00"
+      "recorded_at": "2026-11-15T05:26:27.371563+00:00"
     }
   ]
 }

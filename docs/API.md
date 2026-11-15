@@ -260,9 +260,20 @@ Response `200`:
 }
 ```
 
-Return up to **3** outfits. If wardrobe is too small, still return what is possible and include a `warning` string field (optional).
+Return up to **3** outfits. Each outfit contains exactly one `top`, one
+`bottom` and one pair of `shoes` drawn from the user's uploaded wardrobe.
 
-Core garments (tops, bottoms, dresses, and outerwear) must be inside the selected venue's inclusive formality range for `matchStatus: "matched"`. Shoes and accessories contribute to the weighted outfit score without an independent hard filter. If no complete matched outfit exists, return `matchStatus: "fallback"`, the warning `Currently you don't have the matched style clothes`, and up to three alternatives ranked by core-garment distance from the range, then overall quality.
+The wardrobe must already contain at least one `top`, one `bottom` and one pair
+of `shoes`; otherwise the endpoint returns `400` with a
+`Closet must include at least one top, one bottom and one pair of shoes ...`
+detail instead of generating looks.
+
+Tops and bottoms must be inside the selected venue's inclusive formality range
+for `matchStatus: "matched"`. Shoes are always attached to every core look. If
+no fully matched top+bottom+shoes outfit exists, the endpoint returns
+`matchStatus: "fallback"`, the warning `Currently you don't have the matched
+style clothes`, and up to three alternatives ranked by core-garment distance
+from the range, then overall quality.
 
 ### `POST /api/try-on`
 

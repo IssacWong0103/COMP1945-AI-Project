@@ -1,0 +1,20 @@
+[
+  {
+    "case_id": "real-wardrobe-01",
+    "name": "judge-valid-10",
+    "description": "All 10 AI-judge valid garments: 4 tops + 6 bottoms.",
+    "venues": ["lecture", "careerFair", "casualDate"],
+    "items": [
+      {"filename": "valid/item8.jpg",  "expected_category": "top",    "expected_color": "gray", "expected_style": "smartCasual", "expected_formality": 70, "expected_gender": "male"},
+      {"filename": "valid/item10.jpg", "expected_category": "top",    "expected_color": "white", "expected_style": "smartCasual", "expected_formality": 70, "expected_gender": "male"},
+      {"filename": "valid/item5.jpg",  "expected_category": "top",    "expected_color": "white", "expected_style": "casual",     "expected_formality": 30, "expected_gender": "unisex"},
+      {"filename": "valid/item16.jpg", "expected_category": "top",    "expected_color": "brown", "expected_style": "casual",     "expected_formality": 45, "expected_gender": "male"},
+      {"filename": "valid/item2.jpg",  "expected_category": "bottom", "expected_color": "navy",  "expected_style": "smartCasual", "expected_formality": 70, "expected_gender": "male"},
+      {"filename": "valid/item9.jpg",  "expected_category": "bottom", "expected_color": "gray",  "expected_style": "smartCasual", "expected_formality": 75, "expected_gender": "male"},
+      {"filename": "valid/item3.jpg",  "expected_category": "bottom", "expected_color": "blue",  "expected_style": "casual",     "expected_formality": 45, "expected_gender": "unisex"},
+      {"filename": "valid/item1.jpg",  "expected_category": "bottom", "expected_color": "tan",   "expected_style": "casual",     "expected_formality": 45, "expected_gender": "male"},
+      {"filename": "valid/item4.jpg",  "expected_category": "bottom", "expected_color": "gray",  "expected_style": "casual",     "expected_formality": 40, "expected_gender": "male"},
+      {"filename": "valid/item12.jpg", "expected_category": "bottom", "expected_color": "navy",  "expected_style": "casual",     "expected_formality": 35, "expected_gender": "male"}
+    ]
+  }
+]

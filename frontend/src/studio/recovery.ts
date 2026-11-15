@@ -24,7 +24,6 @@ export function resolveRecovery(input: {
   warning?: string | null
   error?: string | null
   outfitCount?: number
-  closetCount?: number
   hasBodyPhoto?: boolean | null
 }): RecoverySpec | null {
   if (input.offline) {
@@ -33,15 +32,6 @@ export function resolveRecovery(input: {
       title: "We can't reach the USTyle server",
       message: 'Check that the API is running, then retry. Your closet edits stay local until reconnect.',
       primary: { id: 'retry', label: 'Retry connection' },
-    }
-  }
-
-  if (input.closetCount != null && input.closetCount < 2) {
-    return {
-      kind: 'emptyCloset',
-      title: 'Not enough clothes yet',
-      message: 'Add at least two pieces so Studio can build full outfits.',
-      primary: { id: 'openCloset', label: 'Add clothes', to: '/wardrobe' },
     }
   }
 

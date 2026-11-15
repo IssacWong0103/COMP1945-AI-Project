@@ -111,7 +111,6 @@ def analyze_upload(records: list[dict]) -> dict:
     style_correct = 0
     formality_errors: list[float] = []
     formality_agree = 0
-    per_class: dict[str, dict[str, int]] = {}
 
     for r in accepted_valid:
         tags = r.get("tags") or {}
@@ -126,12 +125,8 @@ def analyze_upload(records: list[dict]) -> dict:
         pred_formality = tags.get("formalityScore")
 
         if expected_cat:
-            per_class.setdefault(expected_cat, {"tp": 0, "fn": 0})
             if pred_cat == expected_cat:
                 category_correct += 1
-                per_class[expected_cat]["tp"] += 1
-            else:
-                per_class[expected_cat]["fn"] += 1
         if expected_color:
             if normalize_color(pred_color) == normalize_color(expected_color):
                 color_correct += 1
@@ -143,24 +138,6 @@ def analyze_upload(records: list[dict]) -> dict:
             formality_errors.append(err)
             if err <= 15:
                 formality_agree += 1
-
-    # Macro-F1 over the expected categories observed in valid rows.
-    f1s: list[float] = []
-    for cat in sorted(per_class):
-        entry = per_class[cat]
-        tp_c = entry["tp"]
-        # Precision/recall for a single-class prediction problem approximated per
-        # expected class: precision = tp / predicted-as-cat, recall = tp / expected-cat.
-        predicted_as = sum(
-            1
-            for r in accepted_valid
-            if (r.get("tags") or {}).get("category") == cat
-        )
-        precision = tp_c / predicted_as if predicted_as else 0.0
-        recall = tp_c / (tp_c + entry["fn"]) if (tp_c + entry["fn"]) else 0.0
-        f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
-        f1s.append(f1)
-    macro_f1 = statistics.mean(f1s) if f1s else 0.0
 
     accepted_count = len(accepted_valid)
     category_accuracy = category_correct / accepted_count if accepted_count else 0.0
@@ -213,7 +190,6 @@ def analyze_upload(records: list[dict]) -> dict:
         },
         "tagging": {
             "category_accuracy": _round(category_accuracy),
-            "category_macro_f1": _round(macro_f1),
             "color_accuracy": _round(color_accuracy),
             "style_accuracy": _round(style_accuracy),
             "formality_mae": _round(formality_mae, 2) if formality_mae is not None else None,
@@ -295,8 +271,10 @@ def analyze_recommend(records: list[dict]) -> dict:
             best = max((o.get("overall_score") or 0.0) for o in outfits) if outfits else None
             if best is not None:
                 by_key[(key, r.get("condition"))] = best
-        for key in by_key:
-            case_key = key[0]
+        # Count each (case_id, venue) once — iterate unique case keys, not every
+        # (case, condition) entry, so wins/ties/losses aren't multiplied.
+        case_keys = {key[0] for key in by_key}
+        for case_key in case_keys:
             a = by_key.get((case_key, cond_a))
             b = by_key.get((case_key, cond_b))
             if a is None or b is None:

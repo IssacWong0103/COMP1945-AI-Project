@@ -32,6 +32,20 @@ def _upload(client: httpx.Client, rel: str, uploads_dir: Path) -> httpx.Response
         )
 
 
+def _upload_retry(client: httpx.Client, rel: str, uploads_dir: Path, attempts: int = 3) -> httpx.Response:
+    """Retry transient 503 (VLM screening unavailable) so a temporary upstream
+    rate limit doesn't fail a functional scenario."""
+    import time as _time
+
+    last: httpx.Response | None = None
+    for attempt in range(attempts):
+        last = _upload(client, rel, uploads_dir)
+        if last.status_code != 503 or attempt == attempts - 1:
+            return last
+        _time.sleep(2.0 * (attempt + 1))
+    return last
+
+
 def _clear(client: httpx.Client) -> None:
     response = client.get(f"{common.BASE_URL}/api/wardrobe/items", timeout=30.0)
     response.raise_for_status()
@@ -49,7 +63,7 @@ def _recommend(client: httpx.Client, venue: str = "lecture") -> httpx.Response:
 
 def _seed(client: httpx.Client, rels: list[str], uploads_dir: Path) -> None:
     for rel in rels:
-        _upload(client, rel, uploads_dir)
+        _upload_retry(client, rel, uploads_dir)
 
 
 def main() -> None:
@@ -94,7 +108,7 @@ def main() -> None:
 
         valid_file = first("valid_single")
         if valid_file:
-            add_case("valid-upload", "A valid single-garment image is accepted (201).", 201, lambda: _upload(client, valid_file, uploads_dir))
+            add_case("valid-upload", "A valid single-garment image is accepted (201).", 201, lambda: _upload_retry(client, valid_file, uploads_dir))
 
         for cls, case_id in (
             ("model_worn", "reject-model-outfit"),
@@ -109,7 +123,7 @@ def main() -> None:
                     case_id,
                     f"{cls.replace('_', ' ')} image is rejected (400).",
                     400,
-                    lambda rel=rel: _upload(client, rel, uploads_dir),
+                    lambda rel=rel: _upload_retry(client, rel, uploads_dir),
                 )
 
         # Empty wardrobe
@@ -209,7 +223,7 @@ def main() -> None:
                 "screening-unavailable",
                 "Upload when DeepSeek is not configured returns 503.",
                 503,
-                lambda: _upload(client, valid_file, uploads_dir),
+                lambda: _upload_retry(client, valid_file, uploads_dir),
             )
 
         # Offline behavior: connection to a closed port fails cleanly.
