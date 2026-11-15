@@ -6,6 +6,7 @@ export type ActivityKind =
   | 'tryon_started'
   | 'tryon_ready'
   | 'tryon_failed'
+  | 'tryon_deleted'
   | 'swap_applied'
   | 'look_saved'
   | 'look_removed'

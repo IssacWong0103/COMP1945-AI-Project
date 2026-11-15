@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { apiUrl, friendlyError, getProfile, listTryOns, pollTryOn } from '../api/client'
+import { apiUrl, deleteTryOn, friendlyError, getProfile, listTryOns, pollTryOn } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
 import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
@@ -9,6 +9,7 @@ import { track } from '../lib/analytics'
 import {
   listLocalSavedLooks,
   pushActivity,
+  removeLocalLook,
   saveLocalLook,
 } from '../lib/activityStore'
 import {
@@ -43,13 +44,25 @@ export function TryOnPage() {
   const [historySavedIds, setHistorySavedIds] = useState<Set<string>>(
     () => new Set(listLocalSavedLooks().map((look) => look.id)),
   )
+  const [deleteStage, setDeleteStage] = useState<'idle' | 'question' | 'final'>('idle')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
   const abortRef = useRef<AbortController | null>(null)
   const hasStartedRef = useRef(false)
+
+  function closeHistory() {
+    setOpenHistory(null)
+    setDeleteStage('idle')
+    setDeleteError(null)
+  }
 
   useEffect(() => {
     if (!openHistory) return
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') setOpenHistory(null)
+      if (event.key !== 'Escape') return
+      setOpenHistory(null)
+      setDeleteStage('idle')
+      setDeleteError(null)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
@@ -181,6 +194,38 @@ export function TryOnPage() {
       detail: entry.venue || 'Try-on',
       href: '/looks',
     })
+  }
+
+  async function onDeleteHistory(entry: TryOnHistoryItem) {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await deleteTryOn(entry.outfitId)
+      setHistory((prev) => prev.filter((item) => item.outfitId !== entry.outfitId))
+      setHistorySavedIds((prev) => {
+        const next = new Set(prev)
+        next.delete(entry.outfitId)
+        return next
+      })
+      removeLocalLook(entry.outfitId)
+      if (entry.outfitId === outfitId) {
+        setSaved(false)
+        setTryOnUrl(null)
+        setStatus('idle')
+      }
+      track('studio_tryon_deleted', { outfitId: entry.outfitId, venue: entry.venue })
+      pushActivity({
+        kind: 'tryon_deleted',
+        title: 'Try-on deleted',
+        detail: entry.venue || 'Try-on',
+        href: '/try-on',
+      })
+      setDeleting(false)
+      closeHistory()
+    } catch (err) {
+      setDeleting(false)
+      setDeleteError(friendlyError(err))
+    }
   }
 
   return (
@@ -367,7 +412,7 @@ export function TryOnPage() {
           role="dialog"
           aria-modal="true"
           aria-label={`Full size preview of past ${humanize(openHistory.venue)} try-on`}
-          onClick={() => setOpenHistory(null)}
+          onClick={closeHistory}
         >
           <div
             className="relative max-h-full max-w-3xl overflow-hidden rounded-xl bg-surface p-3 shadow-lg"
@@ -406,13 +451,38 @@ export function TryOnPage() {
                     Save
                   </Button>
                 )}
-                <Button type="button" variant="secondary" onClick={() => setOpenHistory(null)}>
+                <Button
+                  type="button"
+                  variant="danger"
+                  onClick={() => {
+                    setDeleteError(null)
+                    setDeleteStage('question')
+                  }}
+                >
+                  Delete
+                </Button>
+                <Button type="button" variant="secondary" onClick={closeHistory}>
                   Close
                 </Button>
               </div>
             </div>
           </div>
         </div>
+      ) : null}
+
+      {openHistory && deleteStage !== 'idle' ? (
+        <DeleteTryOnDialog
+          entry={openHistory}
+          stage={deleteStage}
+          busy={deleting}
+          error={deleteError}
+          onCancel={() => {
+            setDeleteStage('idle')
+            setDeleteError(null)
+          }}
+          onContinue={() => setDeleteStage('final')}
+          onConfirm={() => void onDeleteHistory(openHistory)}
+        />
       ) : null}
 
       <div className="mt-6 rounded-xl border border-line bg-surface p-5 shadow-sm">
@@ -425,5 +495,98 @@ export function TryOnPage() {
         </ol>
       </div>
     </div>
+  )
+}
+
+function DeleteTryOnDialog({
+  entry,
+  stage,
+  busy,
+  error,
+  onCancel,
+  onContinue,
+  onConfirm,
+}: {
+  entry: TryOnHistoryItem
+  stage: 'question' | 'final'
+  busy: boolean
+  error: string | null
+  onCancel: () => void
+  onContinue: () => void
+  onConfirm: () => void
+}) {
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      event.stopImmediatePropagation()
+      if (!busy) onCancel()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [busy, onCancel])
+
+  const isFinal = stage === 'final'
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <button
+        type="button"
+        className="absolute inset-0 bg-ink/45"
+        aria-label="Cancel delete"
+        disabled={busy}
+        onClick={onCancel}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="delete-tryon-title"
+        aria-describedby="delete-tryon-body"
+        className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-5 shadow-2xl"
+      >
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-red-50 text-danger">
+          <TrashIcon />
+        </span>
+        <h2
+          id="delete-tryon-title"
+          className="mt-4 text-[34px] leading-none font-semibold tracking-tight text-ink"
+        >
+          {isFinal ? 'Last check — delete?' : 'Delete this try-on?'}
+        </h2>
+        <p id="delete-tryon-body" className="mt-3 text-sm leading-relaxed text-muted">
+          {isFinal
+            ? 'This permanently deletes the photo and removes it from Saved looks. It cannot be undone.'
+            : `The ${humanize(entry.venue)} try-on from ${new Date(entry.createdAt).toLocaleDateString()} will be removed from Past try-ons.`}
+        </p>
+        {error ? (
+          <p role="alert" className="mt-3 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-danger">
+            {error}
+          </p>
+        ) : null}
+        <div className="mt-5 flex justify-end gap-2">
+          <Button type="button" variant="secondary" disabled={busy} onClick={onCancel}>
+            Cancel
+          </Button>
+          {isFinal ? (
+            <Button type="button" variant="danger" disabled={busy} onClick={onConfirm}>
+              {busy ? 'Deleting…' : 'Yes, delete'}
+            </Button>
+          ) : (
+            <Button type="button" variant="danger" disabled={busy} onClick={onContinue}>
+              Delete
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" aria-hidden>
+      <path d="M6.6 7.2V14a1 1 0 0 0 1 1h4.8a1 1 0 0 0 1-1V7.2" stroke="currentColor" strokeWidth="1.4" />
+      <path d="M5.3 5.8h9.4M8 5.8v-1a.8.8 0 0 1 .8-.8h2.4a.8.8 0 0 1 .8.8v1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
   )
 }

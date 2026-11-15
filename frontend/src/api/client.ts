@@ -204,6 +204,11 @@ export async function listTryOns(signal?: AbortSignal): Promise<TryOnHistoryResp
   return parseJson<TryOnHistoryResponse>(res)
 }
 
+export async function deleteTryOn(outfitId: string): Promise<void> {
+  const res = await fetch(`/api/try-ons/${encodeURIComponent(outfitId)}`, { method: 'DELETE' })
+  await parseJson<void>(res)
+}
+
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => resolve(), ms)

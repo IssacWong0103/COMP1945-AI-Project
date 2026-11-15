@@ -12,6 +12,7 @@ import {
 import { analyzePhoto, apiUrl, friendlyError, getProfile, updateProfile } from '../api/client'
 import { Button, ButtonLink } from '../components/Button'
 import { ErrorNote } from '../components/ErrorNote'
+import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
 import { SuggestSelect } from '../components/SuggestSelect'
 import {
@@ -197,15 +198,15 @@ export function Profile() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <h2 className="text-[26px] font-semibold tracking-tight text-ink">Profile</h2>
-        </div>
-        <ButtonLink to="/studio" variant="secondary" className="rounded-xl px-4">
-          <PlusIcon />
-          Create outfit
-        </ButtonLink>
-      </div>
+      <PageHeader
+        title="Profile"
+        actions={
+          <ButtonLink to="/studio" variant="secondary" className="rounded-xl px-4">
+            <PlusIcon />
+            Create outfit
+          </ButtonLink>
+        }
+      />
       <div className="mt-6">
         <h3 className="text-[34px] font-semibold tracking-tight text-navy">A little about you</h3>
         <p className="mt-1 text-sm text-muted">Make try-on more useful. Every attribute is optional.</p>

@@ -13,6 +13,7 @@ import { Spinner } from '../components/Spinner'
 import { StudioShell } from '../components/StudioShell'
 import { SuggestSelect } from '../components/SuggestSelect'
 import { SwapDrawer } from '../components/SwapDrawer'
+import { VenueIcon } from '../components/VenueIcon'
 import { Button } from '../components/Button'
 import {
   FALLBACK_VENUES,
@@ -149,6 +150,14 @@ export function Studio() {
   const selectedVenue = useMemo(
     () => venues.find((entry) => entry.id === venue),
     [venues, venue],
+  )
+
+  const sortedVenues = useMemo(
+    () =>
+      [...venues].sort(
+        (a, b) => a.formalityMin - b.formalityMin || a.formalityMax - b.formalityMax,
+      ),
+    [venues],
   )
 
   const activeOutfit = useMemo(
@@ -470,7 +479,7 @@ export function Studio() {
           <fieldset className="mt-4">
             <legend className="text-xs font-medium text-muted">Where are you going?</legend>
             <div className="mt-2 grid gap-2">
-              {venues.map((entry) => {
+              {sortedVenues.map((entry) => {
                 const selected = entry.id === venue
                 return (
                   <button
@@ -478,18 +487,23 @@ export function Studio() {
                     type="button"
                     aria-pressed={selected}
                     onClick={() => pickVenue(entry.id)}
-                    className={`rounded-lg border px-3 py-2.5 text-left transition ${
+                    className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 text-left transition ${
                       selected
                         ? 'border-navy bg-navy text-white'
                         : 'border-line bg-surface text-ink hover:border-navy/40'
                     }`}
                   >
-                    <span className="block text-sm font-semibold">{entry.label}</span>
-                    <span className={`mt-0.5 block text-xs ${selected ? 'text-white/75' : 'text-muted'}`}>
-                      {entry.description}
-                    </span>
-                    <span className={`mt-1 block text-[11px] font-medium ${selected ? 'text-white/80' : 'text-navy'}`}>
-                      Formality {entry.formalityMin}–{entry.formalityMax}
+                    <VenueIcon venue={entry.id} className="mt-0.5 h-10 w-10 shrink-0" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-semibold">{entry.label}</span>
+                      <span className={`mt-0.5 block text-xs ${selected ? 'text-white/75' : 'text-muted'}`}>
+                        {entry.description}
+                      </span>
+                      <span
+                        className={`mt-1 block text-[11px] font-medium ${selected ? 'text-white/80' : 'text-navy'}`}
+                      >
+                        Formality {entry.formalityMin}–{entry.formalityMax}
+                      </span>
                     </span>
                   </button>
                 )

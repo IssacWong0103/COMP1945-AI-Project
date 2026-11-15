@@ -62,28 +62,9 @@ export function Home() {
   ).length
   const pieceLabel = items.length === 1 ? '1 piece' : `${items.length} pieces`
   const greeting = useMemo(() => timeGreeting(), [])
-  const createHint = !hasWardrobe ? 'Add clothes first' : !hasPhoto ? 'Add a body photo first' : 'Finish profile first'
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="text-[28px] font-semibold tracking-tight text-navy">Home</h1>
-        {loading ? null : setupComplete ? (
-          <ButtonLink to="/studio" className="whitespace-nowrap rounded-full px-4">
-            <PlusIcon />
-            Create outfit
-          </ButtonLink>
-        ) : (
-          <div className="flex flex-col items-end">
-            <span className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-[#e7edf3] px-4 py-2 text-sm font-semibold text-[#9aa3b2]">
-              <PlusIcon />
-              Create outfit
-            </span>
-            <p className="mt-1 text-[11px] text-muted">{createHint}</p>
-          </div>
-        )}
-      </div>
-
       {error ? (
         <div className="mt-6">
           <ErrorNote message={error} />
@@ -329,14 +310,6 @@ function formatLookDate(value: string): string {
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ''
   return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
-}
-
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden>
-      <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  )
 }
 
 function UploadIcon() {

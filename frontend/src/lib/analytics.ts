@@ -13,6 +13,7 @@ export type AnalyticsEventName =
   | 'studio_tryon_started'
   | 'studio_tryon_ready'
   | 'studio_tryon_failed'
+  | 'studio_tryon_deleted'
   | 'studio_look_saved'
   | 'studio_look_unsaved'
   | 'studio_retry_clicked'

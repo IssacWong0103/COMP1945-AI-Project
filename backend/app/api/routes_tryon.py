@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -73,6 +73,22 @@ def list_try_ons(db: Session = Depends(get_db)) -> TryOnHistoryResponse:
             )
         )
     return TryOnHistoryResponse(results=results)
+
+
+@router.delete("/try-ons/{outfit_id}", status_code=204)
+def delete_try_on(outfit_id: str, db: Session = Depends(get_db)) -> Response:
+    outfit = db.get(Outfit, outfit_id)
+    if outfit is None or not outfit.try_on_url:
+        raise HTTPException(status_code=404, detail="Try-on not found.")
+
+    path = local_path_for(outfit.try_on_url)
+    outfit.try_on_url = None
+    outfit.try_on_status = None
+    outfit.kie_task_id = None
+    db.commit()
+    if path:
+        path.unlink(missing_ok=True)
+    return Response(status_code=204)
 
 
 @router.post("/try-on", response_model=TryOnResponse)

@@ -12,6 +12,7 @@ import {
 import { Button, ButtonLink } from '../components/Button'
 import { Dropzone } from '../components/Dropzone'
 import { ErrorNote } from '../components/ErrorNote'
+import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
 import {
   CATEGORY_OPTIONS,
@@ -294,38 +295,36 @@ export function Closet() {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-[38px] leading-none font-semibold tracking-tight text-ink">Closet</h2>
-          <p className="mt-5 text-[34px] leading-none font-semibold tracking-tight text-navy max-sm:text-[28px]">
-            {items.length === 0 ? 'A home for your everyday clothes' : 'Your clothes, all in one place'}
-          </p>
-          <p className="mt-2 text-sm text-muted">
-            {items.length === 0
-              ? "Add what you own. We'll help with the combinations."
-              : `${items.length} piece${items.length === 1 ? '' : 's'} · Only clothes you already own.`}
-          </p>
-        </div>
-
-        <div className="text-right">
-          <ButtonLink
-            to="/studio"
-            disabled={!closetReady}
-            className={
-              closetReady
-                ? 'rounded-xl px-4 py-2'
-                : 'rounded-xl border-0 bg-[#e9eef6] px-4 py-2 text-[#99a4b4] shadow-none hover:bg-[#e9eef6]'
-            }
-          >
-            + Create outfit
-          </ButtonLink>
-          {closetReady ? null : (
-            <p className="mt-1 max-w-[240px] text-[11px] text-muted">
-              Add at least one top, one bottom and one pair of shoes first
-            </p>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Closet"
+        description={
+          items.length === 0
+            ? "A home for your everyday clothes. Add what you own and we’ll help with the combinations."
+            : `Your clothes, all in one place. ${items.length} piece${
+                items.length === 1 ? '' : 's'
+              } · Only clothes you already own.`
+        }
+        actions={
+          <div className="text-right">
+            <ButtonLink
+              to="/studio"
+              disabled={!closetReady}
+              className={
+                closetReady
+                  ? 'rounded-xl px-4 py-2'
+                  : 'rounded-xl border-0 bg-[#e9eef6] px-4 py-2 text-[#99a4b4] shadow-none hover:bg-[#e9eef6]'
+              }
+            >
+              + Create outfit
+            </ButtonLink>
+            {closetReady ? null : (
+              <p className="mt-1 max-w-[240px] text-[11px] text-muted">
+                Add at least one top, one bottom and one pair of shoes first
+              </p>
+            )}
+          </div>
+        }
+      />
 
       <section className="mt-6 rounded-xl border border-line bg-surface px-4 py-3">
         <p className="text-sm font-semibold text-ink">Closet requirements</p>

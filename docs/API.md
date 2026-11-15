@@ -320,6 +320,16 @@ type TryOnHistoryItem = {
 };
 ```
 
+### `DELETE /api/try-ons/{outfitId}`
+
+Deletes a single past try-on record. The generated photo is removed from
+`uploads/tryon/`, and the outfit's `tryOnUrl`, status and stored task id are
+cleared (the outfit itself is kept so it can be tried on again). The Try-On UI
+asks for confirmation twice before calling this.
+
+Response `204 No Content`. Returns `404` with `{ "detail": "Try-on not found." }`
+when the outfit has no generated try-on.
+
 ### `GET /api/outfits`
 
 Recent generated looks gallery (camelCase). The Looks UI uses the client-side saved-looks store instead.
