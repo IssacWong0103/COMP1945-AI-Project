@@ -20,6 +20,8 @@ import type { Outfit, Profile, TryOnHistoryItem } from '../types'
 
 type TryOnStatus = 'idle' | 'rendering' | 'ready' | 'failed'
 
+const HISTORY_PAGE_SIZE = 6
+
 export function TryOnPage() {
   const [params] = useSearchParams()
   const session = useMemo(() => loadStudioSession(), [])
@@ -40,6 +42,7 @@ export function TryOnPage() {
     listLocalSavedLooks().some((look) => look.id === outfitId),
   )
   const [history, setHistory] = useState<TryOnHistoryItem[]>([])
+  const [historyPage, setHistoryPage] = useState(1)
   const [openHistory, setOpenHistory] = useState<TryOnHistoryItem | null>(null)
   const [historySavedIds, setHistorySavedIds] = useState<Set<string>>(
     () => new Set(listLocalSavedLooks().map((look) => look.id)),
@@ -81,6 +84,17 @@ export function TryOnPage() {
       cancelled = true
     }
   }, [status])
+
+  const historyPageCount = Math.max(1, Math.ceil(history.length / HISTORY_PAGE_SIZE))
+  const currentHistoryPage = Math.min(historyPage, historyPageCount)
+  const pagedHistory = history.slice(
+    (currentHistoryPage - 1) * HISTORY_PAGE_SIZE,
+    currentHistoryPage * HISTORY_PAGE_SIZE,
+  )
+
+  useEffect(() => {
+    if (historyPage > historyPageCount) setHistoryPage(historyPageCount)
+  }, [historyPage, historyPageCount])
 
   useEffect(() => {
     document.title = 'Try-On — USTyle'
@@ -379,7 +393,7 @@ export function TryOnPage() {
             Your generated photos, kept on the server — they survive browser and app restarts.
           </p>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {history.map((entry) => (
+            {pagedHistory.map((entry) => (
               <article
                 key={entry.outfitId}
                 className="overflow-hidden rounded-lg border border-line bg-canvas"
@@ -403,6 +417,43 @@ export function TryOnPage() {
               </article>
             ))}
           </div>
+          {historyPageCount > 1 ? (
+            <nav
+              aria-label="Past try-ons pages"
+              className="mt-4 flex flex-wrap items-center justify-center gap-2"
+            >
+              <Button
+                type="button"
+                variant="secondary"
+                aria-label="Previous page"
+                disabled={currentHistoryPage === 1}
+                onClick={() => setHistoryPage((page) => Math.max(1, page - 1))}
+              >
+                ←
+              </Button>
+              {Array.from({ length: historyPageCount }, (_, index) => index + 1).map((page) => (
+                <Button
+                  key={page}
+                  type="button"
+                  variant={page === currentHistoryPage ? 'primary' : 'secondary'}
+                  aria-label={`Page ${page}`}
+                  aria-current={page === currentHistoryPage ? 'page' : undefined}
+                  onClick={() => setHistoryPage(page)}
+                >
+                  {page}
+                </Button>
+              ))}
+              <Button
+                type="button"
+                variant="secondary"
+                aria-label="Next page"
+                disabled={currentHistoryPage === historyPageCount}
+                onClick={() => setHistoryPage((page) => Math.min(historyPageCount, page + 1))}
+              >
+                →
+              </Button>
+            </nav>
+          ) : null}
         </section>
       ) : null}
 
