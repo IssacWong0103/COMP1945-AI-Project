@@ -8,6 +8,87 @@ The tagged `run_metadata.json` is the completion record of the **offline
 captioning pipeline** (box ①), whose output (`captions.jsonl`) powers the
 recommendation engine (box ③).
 
+## What USTyle aims to help HKUST students with
+
+USTyle is a **single-user AI outfit assistant for HKUST students** (COMP1945,
+Group 18). It targets one very specific campus problem: **"what do I wear
+today, for this event, from the clothes I actually own?"** HKUST students
+regularly move between events with very different — and often unwritten — dress
+codes: lectures, career fairs, hall gatherings, casual dates and formal
+dinners. USTyle removes that daily decision by:
+
+- **Knowing your closet** — you upload photos of the clothes you own and the
+  system screens each one (is it really a single garment?) and tags it
+  (category, colour, cut, style, formality, gender fit).
+- **Matching the occasion** — you pick a venue and it assembles 2–3 outfits
+  from your own wardrobe, scored for venue fit, cohesion and similarity to
+  real fashion-DB looks.
+- **Showing the result** — a virtual try-on of *you* wearing the chosen
+  outfit, so you can preview it before committing.
+
+It is a **campus demo / proof-of-concept**: one user, one wardrobe, no
+authentication. Everything degrades gracefully if an AI service is missing.
+
+## The tabs and how they interact
+
+USTyle is a single-page app with six tabs in the left sidebar (see
+`frontend/src/components/Layout.tsx`). Each tab owns one job and hands data to
+the next tab through the shared FastAPI backend + SQLite database — the tabs
+never talk to each other directly.
+
+| Tab | Route | Owns | Feeds into |
+|---|---|---|---|
+| **Home** | `/` | Setup checklist, venue shortcuts, recent saved looks | Closet, Studio, Looks |
+| **Closet** | `/wardrobe` | Upload / edit / delete wardrobe items | Studio (outfit source) |
+| **Studio** | `/studio` | Venue + style + context → outfit recommendations | Looks, Try-On |
+| **Try-On** | `/try-on` | Virtual try-on of a saved outfit | Looks |
+| **Looks** | `/looks` | Saved-outfit gallery, download / delete / re-run | Studio |
+| **Profile** | `/profile` | Body photo, height/weight, gender, skin tone, preferred style | Studio, Try-On |
+
+Data flows between tabs:
+
+1. **Closet → Studio.** The `WardrobeItem` rows created in Closet are the only
+   ingredient `matching.recommend_outfits()` uses. Studio cannot run until the
+   closet has at least one top, one bottom and one pair of shoes.
+2. **Profile → Studio.** The stored `preferred_style` is used as the default
+   style whenever Studio runs without an explicit style override.
+3. **Profile → Try-On.** The body photo, height/weight, gender and skin tone
+   are baked into the try-on prompt sent to kie.ai.
+4. **Studio → Looks.** Every successful run persists `Outfit` rows; the Looks
+   tab lists the most recent saved looks.
+5. **Studio → Try-On.** A result card can send the chosen outfit straight to
+   the Try-On tab.
+6. **Try-On → Looks.** A finished try-on can be saved as a look.
+7. **Home → everywhere.** Home reads wardrobe/profile state to render a setup
+   checklist and deep-links into Closet ("start your closet"), Studio (venue
+   shortcuts) and Looks (recent looks).
+
+## User walkthrough
+
+A first-time student goes through this loop:
+
+1. **Open Home.** The setup checklist shows what is missing: at least 2
+   wardrobe items, a full-body photo, and height + preferred style.
+2. **Fill in Profile.** Upload a full-body photo (face visible) and enter
+   height, weight, gender, skin tone and preferred style. The photo is
+   AI-checked (full-body? face visible?) before it is saved.
+3. **Build the Closet.** Upload photos of their own clothes one by one. Each
+   photo is screened ("is it one standalone garment?") and tagged by DeepSeek
+   Flash, then saved as a `WardrobeItem`; invalid photos are rejected with a
+   reason.
+4. **Run Studio.** Pick a venue (lecture, career fair, casual date, hall
+   gathering, formal) and optionally a style, weather, time of day and
+   free-text feedback, then run. The backend scores every candidate
+   combination with venue-fit + cohesion + word-semantic reference similarity
+   and returns 2–3 ranked outfits with rationale items.
+5. **Save or refine.** Fine-tune with feedback ("too formal", "change the
+   shoes", …) and re-run, or save the look.
+6. **Generate the Try-On.** Pick a saved outfit and generate a virtual try-on
+   image. kie.ai returns the image; if unavailable, a PIL collage fallback is
+   used.
+7. **Manage Looks.** Browse, download or delete saved looks — and tap a look to
+   reopen it in Studio for the same venue.
+
 ```mermaid
 flowchart TB
     subgraph EXT["EXTERNAL AI SERVICES"]
@@ -37,16 +118,20 @@ flowchart TB
 
     subgraph FE["② ONLINE · REACT FRONTEND (Vite :1945)"]
         direction TB
-        F1["Studio<br/>state machine idle → fineTune → creating → results/partial/failure"]
+        F1["Home<br/>setup progress · venue shortcuts · recent looks"]
         F2["Closet<br/>wardrobe upload · edit · delete"]
-        F3["Settings<br/>full-body photo · fit attributes · preferred style"]
-        F4["Looks · Try-On · Activity · Alerts"]
-        F5["api/client.ts<br/>fetch /api/* · poll try-on"]
+        F3["Studio<br/>state machine idle → fineTune → creating → results/partial/failure"]
+        F4["Try-On<br/>try-on session history · queue"]
+        F5["Looks<br/>saved outfits gallery"]
+        F6["Profile<br/>full-body photo · fit attributes · preferred style"]
+        F7["api/client.ts<br/>fetch /api/* · poll try-on"]
 
-        F1 --> F5
-        F2 --> F5
-        F3 --> F5
-        F4 --> F5
+        F1 --> F7
+        F2 --> F7
+        F3 --> F7
+        F4 --> F7
+        F5 --> F7
+        F6 --> F7
     end
 
     subgraph BE["③ ONLINE · FASTAPI BACKEND (:8018)"]
@@ -70,8 +155,8 @@ flowchart TB
     end
 
     S6 -- "feeds backend/app/data/captions.jsonl" --> B3
-    F5 -- "JSON / multipart requests" --> B0
-    B0 -- "JSON / image URLs" --> F5
+    F7 -- "JSON / multipart requests" --> B0
+    B0 -- "JSON / image URLs" --> F7
     B5 -- "wardrobe + profile rows" --> B2
     B5 -- "outfit + profile snapshot" --> B4
     B3 -- "best reference caption + model image path" --> B2
