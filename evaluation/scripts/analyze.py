@@ -79,6 +79,40 @@ def _round(value: float, digits: int = 4) -> float:
     return round(value, digits)
 
 
+def wilson_ci(successes: int, n: int, z: float = 1.96) -> dict | None:
+    """Wilson 95 % interval for a binomial proportion."""
+    if n <= 0:
+        return None
+    p = successes / n
+    z2 = z * z
+    denom = 1.0 + z2 / n
+    centre = (p + z2 / (2.0 * n)) / denom
+    margin = z * math.sqrt((p * (1.0 - p) + z2 / (4.0 * n)) / n) / denom
+    lo = max(0.0, centre - margin)
+    hi = min(1.0, centre + margin)
+    return {
+        "n": n,
+        "successes": successes,
+        "p": _round(p),
+        "low": _round(lo),
+        "high": _round(hi),
+        "half_width": _round((hi - lo) / 2.0),
+    }
+
+
+def cliffs_delta(a: list[float], b: list[float]) -> float | None:
+    if not a or not b:
+        return None
+    gt = lt = 0
+    for x in a:
+        for y in b:
+            if x > y:
+                gt += 1
+            elif x < y:
+                lt += 1
+    return _round((gt - lt) / (len(a) * len(b)))
+
+
 def analyze_upload(records: list[dict]) -> dict:
     valid = [r for r in records if r.get("expected_class") == "valid_single"]
     negatives = [r for r in records if r.get("expected_class") in NEGATIVE_CLASSES]
@@ -187,6 +221,16 @@ def analyze_upload(records: list[dict]) -> dict:
             ) if any(r.get("expected_class") == "model_worn" for r in negatives) else None,
             "confusion_matrix": {"tp": tp, "fn": fn, "tn": tn, "fp": fp},
             "rejection_reasons": rejection_reasons,
+            "per_negative_class": {
+                cls: wilson_ci(
+                    sum(1 for r in rejected_negatives if r.get("expected_class") == cls),
+                    sum(1 for r in negatives if r.get("expected_class") == cls),
+                )
+                for cls in sorted(NEGATIVE_CLASSES)
+                if any(r.get("expected_class") == cls for r in negatives)
+            },
+            "valid_acceptance_ci": wilson_ci(tp, len(valid)) if valid else None,
+            "false_acceptance_ci": wilson_ci(fp, len(negatives)) if negatives else None,
         },
         "tagging": {
             "category_accuracy": _round(category_accuracy),
@@ -195,6 +239,10 @@ def analyze_upload(records: list[dict]) -> dict:
             "formality_mae": _round(formality_mae, 2) if formality_mae is not None else None,
             "formality_agreement_rate": _round(formality_agreement) if formality_agreement is not None else None,
             "end_to_end_tagging_success": _round(end_to_end),
+            "category_ci": wilson_ci(category_correct, accepted_count) if accepted_count else None,
+            "color_ci": wilson_ci(color_correct, accepted_count) if accepted_count else None,
+            "style_ci": wilson_ci(style_correct, accepted_count) if accepted_count else None,
+            "end_to_end_ci": wilson_ci(category_correct, len(valid)) if valid else None,
         },
         "heuristic_baseline": {
             "screening": {
@@ -213,7 +261,7 @@ def analyze_upload(records: list[dict]) -> dict:
 
 
 def analyze_recommend(records: list[dict]) -> dict:
-    conditions = ["full", "no_reference", "random"]
+    conditions = ["full", "no_reference", "random", "color_match"]
     venues: list[str] = sorted({r.get("venue") for r in records if r.get("venue")})
     per_condition: dict[str, dict] = {}
     per_venue: dict[str, dict] = {}
@@ -313,6 +361,19 @@ def analyze_recommend(records: list[dict]) -> dict:
         "per_venue": per_venue,
         "full_vs_no_reference": paired("full", "no_reference"),
         "full_vs_random": paired("full", "random"),
+        "full_vs_color_match": paired("full", "color_match"),
+        "cliffs_delta_full_vs_no_reference": cliffs_delta(
+            [
+                max((o.get("overall_score") or 0.0) for o in r.get("outfits") or [])
+                for r in records
+                if r.get("condition") == "full" and r.get("outfits")
+            ],
+            [
+                max((o.get("overall_score") or 0.0) for o in r.get("outfits") or [])
+                for r in records
+                if r.get("condition") == "no_reference" and r.get("outfits")
+            ],
+        ),
     }
 
 
@@ -337,6 +398,7 @@ def analyze_latency(records: list[dict]) -> dict:
             "timeout_or_failure_rate": _round(1 - len(successful) / len(rows)) if rows else None,
             "median_ms": _round(percentile(elapsed, 50), 1) if elapsed else None,
             "p95_ms": _round(percentile(elapsed, 95), 1) if elapsed else None,
+            "p99_ms": _round(percentile(elapsed, 99), 1) if elapsed else None,
             "min_ms": _round(min(elapsed), 1) if elapsed else None,
             "max_ms": _round(max(elapsed), 1) if elapsed else None,
             "within_20s_rate": _round(len(within_20s) / len(successful)) if successful else None,

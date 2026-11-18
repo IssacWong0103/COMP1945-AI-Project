@@ -1,0 +1,416 @@
+[
+  {
+    "case_id": "wardrobe-casual-complete",
+    "name": "complete-casual",
+    "description": "Casual top/bottom/shoes plus outerwear and an accessory.",
+    "venues": [
+      "lecture",
+      "careerFair",
+      "casualDate",
+      "hallGathering",
+      "formal"
+    ],
+    "items": [
+      {
+        "filename": "valid/top/top-003.jpg",
+        "expected_category": "top",
+        "expected_color": "off-white",
+        "expected_style": "casual",
+        "expected_formality": 35,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/top/top-004.jpg",
+        "expected_category": "top",
+        "expected_color": "light grey",
+        "expected_style": "casual",
+        "expected_formality": 30,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/top/top-005.jpg",
+        "expected_category": "top",
+        "expected_color": "red",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/bottom/bottom-005.jpg",
+        "expected_category": "bottom",
+        "expected_color": "brown",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/bottom/bottom-006.jpg",
+        "expected_category": "bottom",
+        "expected_color": "light green",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/bottom/bottom-007.jpg",
+        "expected_category": "bottom",
+        "expected_color": "beige",
+        "expected_style": "casual",
+        "expected_formality": 35,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/shoes/shoes-001.jpg",
+        "expected_category": "shoes",
+        "expected_color": "white",
+        "expected_style": "casual",
+        "expected_formality": 40,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/shoes/shoes-002.jpg",
+        "expected_category": "shoes",
+        "expected_color": "white",
+        "expected_style": "casual",
+        "expected_formality": 35,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/outerwear/outerwear-001.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "olive",
+        "expected_style": "casual",
+        "expected_formality": 35,
+        "expected_gender": "male"
+      },
+      {
+        "filename": "valid/accessory/accessory-003.jpg",
+        "expected_category": "accessory",
+        "expected_color": "pink",
+        "expected_style": "casual",
+        "expected_formality": 25,
+        "expected_gender": "unisex"
+      }
+    ]
+  },
+  {
+    "case_id": "wardrobe-smart-formal",
+    "name": "complete-smart-formal",
+    "description": "Smart/formal shirts, trousers, blazer, dress shoes, and a dress.",
+    "venues": [
+      "lecture",
+      "careerFair",
+      "casualDate",
+      "hallGathering",
+      "formal"
+    ],
+    "items": [
+      {
+        "filename": "valid/top/top-001.jpg",
+        "expected_category": "top",
+        "expected_color": "blue",
+        "expected_style": "smartCasual",
+        "expected_formality": 65,
+        "expected_gender": "male"
+      },
+      {
+        "filename": "valid/top/top-002.jpg",
+        "expected_category": "top",
+        "expected_color": "white",
+        "expected_style": "smartCasual",
+        "expected_formality": 70,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/bottom/bottom-001.jpg",
+        "expected_category": "bottom",
+        "expected_color": "gray",
+        "expected_style": "minimal",
+        "expected_formality": 55,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/bottom/bottom-002.jpg",
+        "expected_category": "bottom",
+        "expected_color": "taupe",
+        "expected_style": "smartCasual",
+        "expected_formality": 60,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/outerwear/outerwear-003.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "black",
+        "expected_style": "formal",
+        "expected_formality": 80,
+        "expected_gender": null
+      },
+      {
+        "filename": "valid/outerwear/outerwear-005.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "beige",
+        "expected_style": "smartCasual",
+        "expected_formality": 75,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/shoes/shoes-006.jpg",
+        "expected_category": "shoes",
+        "expected_color": "brown",
+        "expected_style": "smartCasual",
+        "expected_formality": 70,
+        "expected_gender": "male"
+      },
+      {
+        "filename": "valid/shoes/shoes-007.jpg",
+        "expected_category": "shoes",
+        "expected_color": "black",
+        "expected_style": "formal",
+        "expected_formality": 90,
+        "expected_gender": "male"
+      },
+      {
+        "filename": "valid/dress/dress-001.jpg",
+        "expected_category": "dress",
+        "expected_color": "black",
+        "expected_style": "formal",
+        "expected_formality": 80,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/accessory/accessory-001.jpg",
+        "expected_category": "accessory",
+        "expected_color": "blue",
+        "expected_style": "formal",
+        "expected_formality": 75,
+        "expected_gender": "unisex"
+      }
+    ]
+  },
+  {
+    "case_id": "wardrobe-minimal-tops",
+    "name": "minimal-tops-only",
+    "description": "Incomplete closet: tops only, no bottoms or shoes.",
+    "venues": [
+      "lecture",
+      "careerFair",
+      "casualDate",
+      "hallGathering",
+      "formal"
+    ],
+    "items": [
+      {
+        "filename": "valid/top/top-006.jpg",
+        "expected_category": "top",
+        "expected_color": "dark green",
+        "expected_style": "smartCasual",
+        "expected_formality": 55,
+        "expected_gender": "male"
+      },
+      {
+        "filename": "valid/top/top-007.jpg",
+        "expected_category": "top",
+        "expected_color": "black",
+        "expected_style": "minimal",
+        "expected_formality": 30,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/top/top-008.jpg",
+        "expected_category": "top",
+        "expected_color": "red",
+        "expected_style": "casual",
+        "expected_formality": 30,
+        "expected_gender": "unisex"
+      }
+    ]
+  },
+  {
+    "case_id": "wardrobe-female-unisex",
+    "name": "female-unisex-dress",
+    "description": "Dress-led closet with shoes, outerwear, and accessories.",
+    "venues": [
+      "lecture",
+      "careerFair",
+      "casualDate",
+      "hallGathering",
+      "formal"
+    ],
+    "items": [
+      {
+        "filename": "valid/top/top-010.jpg",
+        "expected_category": "dress",
+        "expected_color": "pink",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/dress/dress-002.jpg",
+        "expected_category": "dress",
+        "expected_color": "red",
+        "expected_style": "smartCasual",
+        "expected_formality": 70,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/dress/dress-003.jpg",
+        "expected_category": "dress",
+        "expected_color": "blue and cream",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/bottom/bottom-003.jpg",
+        "expected_category": "bottom",
+        "expected_color": "gray",
+        "expected_style": "minimal",
+        "expected_formality": 55,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/shoes/shoes-003.jpg",
+        "expected_category": "shoes",
+        "expected_color": "white",
+        "expected_style": "casual",
+        "expected_formality": 30,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/shoes/shoes-004.jpg",
+        "expected_category": "shoes",
+        "expected_color": "tan",
+        "expected_style": "casual",
+        "expected_formality": 35,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/outerwear/outerwear-002.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "red",
+        "expected_style": "casual",
+        "expected_formality": 30,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/accessory/accessory-002.jpg",
+        "expected_category": "accessory",
+        "expected_color": "silver",
+        "expected_style": "smartCasual",
+        "expected_formality": 65,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/accessory/accessory-004.jpg",
+        "expected_category": "accessory",
+        "expected_color": "black",
+        "expected_style": "casual",
+        "expected_formality": 30,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/top/top-009.jpg",
+        "expected_category": "top",
+        "expected_color": "pink",
+        "expected_style": "casual",
+        "expected_formality": 40,
+        "expected_gender": "unisex"
+      }
+    ]
+  },
+  {
+    "case_id": "wardrobe-clashing-colour",
+    "name": "clashing-colour",
+    "description": "Deliberate red/pink vs green/olive mix to stress cohesion.",
+    "venues": [
+      "lecture",
+      "careerFair",
+      "casualDate",
+      "hallGathering",
+      "formal"
+    ],
+    "items": [
+      {
+        "filename": "valid/top/top-018.jpg",
+        "expected_category": "top",
+        "expected_color": "red",
+        "expected_style": "casual",
+        "expected_formality": 40,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/bottom/bottom-010.jpg",
+        "expected_category": "bottom",
+        "expected_color": "red",
+        "expected_style": "sporty",
+        "expected_formality": 15,
+        "expected_gender": "male"
+      },
+      {
+        "filename": "valid/outerwear/outerwear-004.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "red",
+        "expected_style": "sporty",
+        "expected_formality": 20,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/outerwear/outerwear-016.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "red",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/top/top-016.png",
+        "expected_category": "top",
+        "expected_color": "olive",
+        "expected_style": "smartCasual",
+        "expected_formality": 55,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/bottom/bottom-014.jpg",
+        "expected_category": "bottom",
+        "expected_color": "green",
+        "expected_style": "casual",
+        "expected_formality": 45,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/outerwear/outerwear-017.jpg",
+        "expected_category": "outerwear",
+        "expected_color": "olive",
+        "expected_style": "sporty",
+        "expected_formality": 25,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/dress/dress-005.jpg",
+        "expected_category": "dress",
+        "expected_color": "teal",
+        "expected_style": "smartCasual",
+        "expected_formality": 60,
+        "expected_gender": "female"
+      },
+      {
+        "filename": "valid/shoes/shoes-005.jpg",
+        "expected_category": "shoes",
+        "expected_color": "brown",
+        "expected_style": "casual",
+        "expected_formality": 35,
+        "expected_gender": "unisex"
+      },
+      {
+        "filename": "valid/shoes/shoes-008.jpg",
+        "expected_category": "shoes",
+        "expected_color": "black",
+        "expected_style": "smartCasual",
+        "expected_formality": 75,
+        "expected_gender": "unisex"
+      }
+    ]
+  }
+]

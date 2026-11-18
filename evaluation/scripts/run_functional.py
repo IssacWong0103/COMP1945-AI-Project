@@ -27,7 +27,7 @@ def _upload(client: httpx.Client, rel: str, uploads_dir: Path) -> httpx.Response
     with image_path.open("rb") as fh:
         return client.post(
             f"{common.BASE_URL}/api/wardrobe/items",
-            files={"file": (image_path.name, fh, "image/jpeg")},
+            files={"file": (image_path.name, fh, common.image_mime(image_path))},
             timeout=120.0,
         )
 
@@ -61,9 +61,40 @@ def _recommend(client: httpx.Client, venue: str = "lecture") -> httpx.Response:
     )
 
 
-def _seed(client: httpx.Client, rels: list[str], uploads_dir: Path) -> None:
+def _seed(client: httpx.Client, rels: list[str], uploads_dir: Path) -> list[str]:
+    seeded: list[str] = []
     for rel in rels:
-        _upload_retry(client, rel, uploads_dir)
+        try:
+            response = _upload_retry(client, rel, uploads_dir)
+        except FileNotFoundError:
+            continue
+        if response.status_code == 201:
+            seeded.append(rel)
+    return seeded
+
+
+def _seed_complete(client: httpx.Client, by_category: dict[str, list[str]], uploads_dir: Path) -> list[str]:
+    """Upload one accepted item per required category, trying fallbacks."""
+    seeded: list[str] = []
+    for cat in ("top", "bottom", "shoes"):
+        for rel in by_category.get(cat, []):
+            try:
+                response = _upload_retry(client, rel, uploads_dir)
+            except FileNotFoundError:
+                continue
+            if response.status_code == 201:
+                seeded.append(rel)
+                break
+    for cat in ("outerwear", "accessory"):
+        for rel in by_category.get(cat, [])[:1]:
+            try:
+                response = _upload_retry(client, rel, uploads_dir)
+            except FileNotFoundError:
+                continue
+            if response.status_code == 201:
+                seeded.append(rel)
+                break
+    return seeded
 
 
 def main() -> None:
@@ -78,8 +109,21 @@ def main() -> None:
     labels = common.load_labels(data_root / "labels" / "upload_labels.csv")
 
     by_class: dict[str, list[str]] = {}
+    by_category: dict[str, list[str]] = {}
     for row in labels:
         by_class.setdefault(row["expected_class"], []).append(row["filename"])
+        if row.get("expected_class") == "valid_single" and row.get("expected_category"):
+            by_category.setdefault(row["expected_category"], []).append(row["filename"])
+
+    # Prefer garments the held-out upload run actually accepted, so venue
+    # scenarios are not poisoned by the one known false-reject shoe.
+    accepted_by_cat: dict[str, list[str]] = {}
+    upload_results = common.load_jsonl(common.RESULTS_RAW / "upload_results.jsonl")
+    for record in upload_results:
+        if record.get("outcome") == "accepted" and record.get("expected_category"):
+            accepted_by_cat.setdefault(record["expected_category"], []).append(record["filename"])
+    if accepted_by_cat:
+        by_category = accepted_by_cat
 
     def first(cls: str) -> str | None:
         return by_class.get(cls, [None])[0]
@@ -106,7 +150,15 @@ def main() -> None:
                 }
             )
 
-        valid_file = first("valid_single")
+        valid_file = (accepted_by_cat.get("top") or [None])[0] or first("valid_single")
+        mixed: list[str] = []
+        for cat in ("top", "bottom", "shoes", "outerwear"):
+            files = by_category.get(cat) or []
+            if files:
+                mixed.append(files[0])
+        if not mixed and valid_file:
+            mixed = [valid_file]
+        complete = mixed if len(mixed) >= 3 else mixed
         if valid_file:
             add_case("valid-upload", "A valid single-garment image is accepted (201).", 201, lambda: _upload_retry(client, valid_file, uploads_dir))
 
@@ -139,10 +191,10 @@ def main() -> None:
             )
 
         # Recommendation retry (same request twice, both 200)
-        if valid_file:
+        if complete:
             def retry_twice():
                 _clear(client)
-                _seed(client, [valid_file], uploads_dir)
+                _seed_complete(client, by_category, uploads_dir)
                 first_resp = _recommend(client)
                 second_resp = _recommend(client)
                 if first_resp.status_code == 200 and second_resp.status_code == 200:
@@ -152,10 +204,10 @@ def main() -> None:
             add_case("recommend-retry", "Recommendation retry succeeds twice (200).", 200, retry_twice)
 
         # Save/restore: recommend then list saved looks
-        if valid_file:
+        if complete:
             def save_restore():
                 _clear(client)
-                _seed(client, [valid_file], uploads_dir)
+                _seed_complete(client, by_category, uploads_dir)
                 _recommend(client)
                 return client.get(f"{common.BASE_URL}/api/outfits", timeout=30.0)
 
@@ -163,6 +215,8 @@ def main() -> None:
 
         # Try-on without a profile body photo (needs a saved outfit first).
         def tryon_without_body_photo():
+            _clear(client)
+            _seed_complete(client, by_category, uploads_dir)
             rec = _recommend(client)
             if rec.status_code != 200:
                 return rec
@@ -224,6 +278,38 @@ def main() -> None:
                 "Upload when DeepSeek is not configured returns 503.",
                 503,
                 lambda: _upload_retry(client, valid_file, uploads_dir),
+            )
+
+        # Duplicate upload of the same valid image.
+        if valid_file:
+            def duplicate_upload():
+                _clear(client)
+                first_resp = _upload_retry(client, valid_file, uploads_dir)
+                second_resp = _upload_retry(client, valid_file, uploads_dir)
+                if first_resp.status_code == 201 and second_resp.status_code == 201:
+                    return second_resp
+                return second_resp if second_resp.status_code != 201 else first_resp
+
+            add_case("duplicate-upload", "Re-uploading the same valid garment is accepted again (201).", 201, duplicate_upload)
+
+        # Every venue should return 200 on a mixed closet.
+        if mixed:
+            for venue in ("lecture", "careerFair", "casualDate", "hallGathering", "formal"):
+                add_case(
+                    f"recommend-{venue}",
+                    f"Recommend for {venue} on a mixed closet returns 200.",
+                    200,
+                    lambda venue=venue: (_clear(client), _seed_complete(client, by_category, uploads_dir), _recommend(client, venue))[2],
+                )
+
+        # Formal venue with only casual-looking items should still 200 (graceful fallback).
+        casual_only = (by_category.get("top") or [valid_file])[:2] if valid_file else []
+        if casual_only:
+            add_case(
+                "formal-insufficient-fallback",
+                "Recommend for formal with an incomplete/casual closet returns 200 (best available).",
+                200,
+                lambda: (_clear(client), _seed(client, casual_only, uploads_dir), _recommend(client, "formal"))[2],
             )
 
         # Offline behavior: connection to a closed port fails cleanly.

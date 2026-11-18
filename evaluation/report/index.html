@@ -22,129 +22,173 @@
 </head>
 <body>
 <h1>USTyle Evaluation Report</h1>
-<p>Generated 2026-11-15T16:53:24.360538+00:00 — git <code>990c2ec0ab085d9b6ec4cd644c0b8c9237c32673</code></p>
+<p>Generated 2026-11-18T13:44:52.243257+00:00 — git <code>f177f618632666839c712ebce6f9b032ba45d941</code></p>
 <p>Proof-of-concept evaluation: reproducible metrics plus an AI-judge quality review. No human user study.</p>
-<svg viewBox="0 0 560 142" class="chart" role="img" aria-label="Recommendation: mean scores by condition"><text x="0" y="22" class="title">Recommendation: mean scores by condition</text><text x="0" y="56" class="tick">full</text><rect x="150.0" y="43" width="35" height="20" rx="2" fill="#666"/><rect x="186.0" y="43" width="35" height="20" rx="2" fill="#666"/><text x="0" y="90" class="tick">no_reference</text><rect x="253.33333333333331" y="78" width="35" height="19" rx="2" fill="#666"/><rect x="289.3333333333333" y="77" width="35" height="20" rx="2" fill="#666"/><text x="0" y="124" class="tick">random</text><rect x="356.66666666666663" y="115" width="35" height="16" rx="2" fill="#666"/><rect x="392.66666666666663" y="116" width="35" height="15" rx="2" fill="#666"/></svg><div class="legend-row"><span class="legend"><span class="swatch" style="background:#666"></span>overall</span><span class="legend"><span class="swatch" style="background:#666"></span>venue_fit</span></div>
-<svg viewBox="0 0 560 176" class="chart" role="img" aria-label="Tagging accuracy: VLM vs heuristic"><text x="0" y="22" class="title">Tagging accuracy: VLM vs heuristic</text><text x="0" y="56" class="tick">category</text><rect x="150.0" y="43" width="26" height="20" rx="2" fill="#666"/><rect x="177.0" y="55" width="26" height="8" rx="2" fill="#666"/><text x="0" y="90" class="tick">color</text><rect x="227.5" y="81" width="26" height="16" rx="2" fill="#666"/><rect x="254.5" y="91" width="26" height="6" rx="2" fill="#666"/><text x="0" y="124" class="tick">style</text><rect x="305.0" y="111" width="26" height="20" rx="2" fill="#666"/><rect x="332.0" y="119" width="26" height="12" rx="2" fill="#666"/><text x="0" y="158" class="tick">end-to-end</text><rect x="382.5" y="145" width="26" height="20" rx="2" fill="#666"/><rect x="409.5" y="165" width="26" height="0" rx="2" fill="#666"/></svg><div class="legend-row"><span class="legend"><span class="swatch" style="background:#666"></span>VLM</span><span class="legend"><span class="swatch" style="background:#666"></span>heuristic</span></div>
-<svg viewBox="0 0 560 176" class="chart" role="img" aria-label="Latency (ms): median"><text x="0" y="22" class="title">Latency (ms): median</text><text x="0" y="56" class="tick">upload</text><rect x="150.0" y="59" width="53" height="4" rx="2" fill="#666"/><text x="0" y="90" class="tick">recommend</text><rect x="227.5" y="81" width="53" height="16" rx="2" fill="#666"/><text x="0" y="124" class="tick">upload_to_recommend</text><rect x="305.0" y="111" width="53" height="20" rx="2" fill="#666"/><text x="0" y="158" class="tick">tryon</text><rect x="382.5" y="165" width="53" height="0" rx="2" fill="#666"/></svg><div class="legend-row"><span class="legend"><span class="swatch" style="background:#666"></span>median</span></div>
+<svg viewBox="0 0 560 176" class="chart" role="img" aria-label="Recommendation: mean scores by condition"><text x="0" y="22" class="title">Recommendation: mean scores by condition</text><text x="0" y="56" class="tick">full</text><rect x="150.0" y="43" width="26" height="20" rx="2" fill="#666"/><rect x="177.0" y="44" width="26" height="19" rx="2" fill="#666"/><text x="0" y="90" class="tick">no_reference</text><rect x="227.5" y="78" width="26" height="19" rx="2" fill="#666"/><rect x="254.5" y="78" width="26" height="19" rx="2" fill="#666"/><text x="0" y="124" class="tick">random</text><rect x="305.0" y="115" width="26" height="16" rx="2" fill="#666"/><rect x="332.0" y="118" width="26" height="13" rx="2" fill="#666"/><text x="0" y="158" class="tick">color_match</text><rect x="382.5" y="148" width="26" height="17" rx="2" fill="#666"/><rect x="409.5" y="151" width="26" height="14" rx="2" fill="#666"/></svg><div class="legend-row"><span class="legend"><span class="swatch" style="background:#666"></span>overall</span><span class="legend"><span class="swatch" style="background:#666"></span>venue_fit</span></div>
+<svg viewBox="0 0 560 176" class="chart" role="img" aria-label="Tagging accuracy: VLM vs heuristic"><text x="0" y="22" class="title">Tagging accuracy: VLM vs heuristic</text><text x="0" y="56" class="tick">category</text><rect x="150.0" y="43" width="26" height="20" rx="2" fill="#666"/><rect x="177.0" y="44" width="26" height="19" rx="2" fill="#666"/><text x="0" y="90" class="tick">color</text><rect x="227.5" y="81" width="26" height="16" rx="2" fill="#666"/><rect x="254.5" y="93" width="26" height="4" rx="2" fill="#666"/><text x="0" y="124" class="tick">style</text><rect x="305.0" y="115" width="26" height="16" rx="2" fill="#666"/><rect x="332.0" y="122" width="26" height="9" rx="2" fill="#666"/><text x="0" y="158" class="tick">end-to-end</text><rect x="382.5" y="146" width="26" height="19" rx="2" fill="#666"/><rect x="409.5" y="165" width="26" height="0" rx="2" fill="#666"/></svg><div class="legend-row"><span class="legend"><span class="swatch" style="background:#666"></span>VLM</span><span class="legend"><span class="swatch" style="background:#666"></span>heuristic</span></div>
+<svg viewBox="0 0 560 176" class="chart" role="img" aria-label="Latency (ms): median"><text x="0" y="22" class="title">Latency (ms): median</text><text x="0" y="56" class="tick">upload</text><rect x="150.0" y="57" width="53" height="6" rx="2" fill="#666"/><text x="0" y="90" class="tick">recommend</text><rect x="227.5" y="79" width="53" height="18" rx="2" fill="#666"/><text x="0" y="124" class="tick">upload_to_recommend</text><rect x="305.0" y="111" width="53" height="20" rx="2" fill="#666"/><text x="0" y="158" class="tick">tryon</text><rect x="382.5" y="165" width="53" height="0" rx="2" fill="#666"/></svg><div class="legend-row"><span class="legend"><span class="swatch" style="background:#666"></span>median</span></div>
 <h2>Summary tables</h2>
 <pre style="white-space:pre-wrap;font-size:.85rem;background:#fafafa;padding:1rem;border:1px solid #eee;"># USTyle Evaluation Report
 
-Generated: `2026-11-15T16:53:24.360538+00:00` — git `990c2ec0ab085d9b6ec4cd644c0b8c9237c32673`
+Generated: `2026-11-18T13:44:52.243257+00:00` — git `f177f618632666839c712ebce6f9b032ba45d941`
 
-USTyle is evaluated as a **proof-of-concept AI outfit assistant**: a small reproducible test set (screening and tagging), a comparative pilot for recommendations, measured latency, scripted functional scenarios, and a structured expert review of outfit and try-on quality. All quality ratings come from an independent AI judge — not a human user study.
+USTyle is evaluated as a **proof-of-concept AI outfit assistant** on a held-out 159-photo set (120 valid + 39 negative), five wardrobes × five venues, measured latency, a scripted functional matrix, and a structured LLM-as-a-judge review of outfit and try-on quality. All quality ratings are independent AI-judge preference — not a human user study. The previous 20-photo set is kept as **dev** data and is not counted as test evidence.
 
 ## 1. Upload screening and tagging
 
-_How to read: the screen must accept every real garment and reject everything else. Accuracy is measured on the 20-photo labeled set; end-to-end tagging success is the headline number because a wrongly rejected valid photo still counts against it._
+_How to read: the screen must accept every real garment and reject everything else. Proportions are reported with Wilson 95 % CIs. End-to-end tagging success counts a valid photo as a success only if it is accepted **and** the category is correct._
 
-- **10/10** valid garments accepted; **9/10** invalid photos rejected.
+- **119/120** valid garments accepted; **39/39** invalid photos rejected.
 
-| Metric | VLM | Heuristic baseline |
+| Metric | VLM (95 % Wilson CI) | Heuristic baseline |
 | --- | ---: | ---: |
-| Valid acceptance rate | 1.000 | 1.000 |
-| False rejection rate | 0.000 | 0.000 |
-| False acceptance rate | 0.100 | 1.000 |
-| Category accuracy | 1.000 | 0.400 |
-| Color accuracy | 0.800 | 0.300 |
-| Style accuracy | 1.000 | 0.600 |
-| Formality MAE (0–100) | 3.900 | 15.500 |
-| End-to-end tagging success | 1.000 | — |
+| Valid acceptance rate | 0.992 [0.954, 0.999] n=120 | 1.000 |
+| False rejection rate | 0.008 | 0.000 |
+| False acceptance rate | 0.000 [0.000, 0.090] n=39 | 1.000 |
+| Category accuracy | 1.000 [0.969, 1.000] n=119 | 0.992 |
+| Color accuracy | 0.840 [0.764, 0.895] n=119 | 0.227 |
+| Style accuracy | 0.849 [0.773, 0.902] n=119 | 0.487 |
+| Formality MAE (0–100) | 4.390 | 15.080 |
+| End-to-end tagging success | 0.992 [0.954, 0.999] n=120 | — |
 
-Counts: 10 valid, 10 negative, 10 accepted-valid, 0 unavailable.
+Per-negative-class rejection (Wilson 95 % CI):
+- `collage`: 1.000 [0.510, 1.000] n=4
+- `irrelevant`: 1.000 [0.610, 1.000] n=6
+- `model_worn`: 1.000 [0.785, 1.000] n=14
+- `multi_item`: 1.000 [0.741, 1.000] n=11
+- `unreadable`: 1.000 [0.510, 1.000] n=4
+
+Counts: 120 valid, 39 negative, 119 accepted-valid, 0 unavailable.
 
 Rejection-reason distribution:
-- Model wearing a full outfit of multiple items (shirt, tie, trousers), not one st: 1
-- Photo shows a male model wearing a full outfit (t-shirt, trousers, shoes), not o: 1
-- Photo shows a model wearing the cable-knit polo along with trousers and a watch,: 1
-- Photo shows a model wearing an outfit with multiple separate items (top, shorts,: 1
-- Photo shows a red car on a road, not a clothing item or accessory.: 1
-- The photo shows a cat, not a clothing item or fashion accessory.: 1
-- Photo shows a man wearing a full outfit (polo shirt, jeans, sunglasses), not one: 1
-- Model wearing a full outfit (black tank top and jeans), not a single standalone : 1
-- Photo shows a person wearing a full outfit with multiple items rather than one s: 1
+- Collage of two stacked views of the same sneaker rather than one standalone item: 1
+- Model wearing a full outfit (suit, shirt, tie, shoes), not a single standalone i: 1
+- Photo shows a model wearing a full outfit (white shirt and black leather trouser: 1
+- Photo shows a model wearing a full outfit (hoodie, jeans, sneakers, sunglasses),: 1
+- Model wearing a full outfit, not a single standalone item.: 1
+- Model wearing a full outfit of multiple garments (lace crop top, wide-leg trouse: 1
+- Photo shows a model wearing a full outfit (hoodie, jeans, sneakers), not one sta: 1
+- Model wearing a full outfit (blazer, shirt, trousers, belt, shoes, sunglasses), : 1
+- Photo shows a person wearing a full outfit of multiple garments, not one standal: 1
+- Photo shows a person wearing a full outfit, not one standalone item: 1
+- Photo shows a model wearing a full outfit of multiple items: black shirt, light : 1
+- Model wearing a full outfit (polo shirt and trousers), not a single standalone i: 1
+- Photo shows a model wearing a full outfit (red graphic tee with blue jeans), not: 1
+- Photo shows three stacked long-sleeve henley shirts in different colours, not a : 1
+- Photo shows two separate shirts (blue and white) stacked together, not one stand: 1
+- Photo shows a person&#x27;s arm and a closet rail with multiple hanging garments, not: 1
+- Photo shows a clothing rack with many separate garments, not one standalone item: 1
+- Multiple garments hanging on a clothing rack, not a single standalone item: 1
+- Multiple shirts hanging on a rack, not one standalone item: 1
+- Flat-lay shows multiple stacked pairs of jeans plus sunglasses, a camera, and sn: 1
+- Photo shows several folded knit garments stacked together, not one standalone it: 1
+- Stack of several folded garments, not a single standalone item: 1
+- Stack of several folded knit sweaters, not a single standalone item: 1
+- Flat-lay collage of several separate items (scarf, top, shorts, hat, jewelry, ca: 1
+- Photo shows five models wearing full outfits, not one standalone garment.: 1
+- Collage of two photos showing a person wearing full outfits, not one standalone : 1
+- Collage of many models wearing full outfits, not a single standalone garment: 1
+- Runway photo showing multiple models in full outfits, not one standalone item: 1
+- Photo shows three people wearing full outfits, not one standalone item: 1
+- Photo shows three people wearing full outfits, not one standalone clothing item: 1
+- Photo shows a bunch of bananas, a food item, not clothing or a fashion accessory: 1
+- Photo shows bicycles parked on a street, not a clothing item or accessory.: 1
+- Photo shows a dog in tall grass, not a clothing item or accessory: 1
+- Photo shows a bunch of bananas on a wooden pallet, not a clothing item or access: 1
+- Photo shows a bicycle parked on a street; no clothing or accessory is the subjec: 1
+- Blurry night street scene with bokeh lights; no clothing item or accessory visib: 1
+- Abstract motion-blurred black-and-white image with no clearly identifiable cloth: 1
+- Abstract out-of-focus bokeh lights; no clothing item or accessory is visible.: 1
+- Blurry long-exposure photo of light trails with no identifiable clothing item: 1
+- Heavily motion-blurred photo of a person; no single garment or accessory is clea: 1
 
-## 2. Recommendation comparison (pilot)
+## 2. Recommendation comparison
 
-_How to read: this is a small pilot (1 wardrobe × 3 venues), not a benchmark. The overall score (0–1) is the system&#x27;s own ranking, so compare conditions rather than trusting the absolute value. If full beats no-reference by a lot, the retailer reference adds value; if it ties, venue/cohesion rules are doing the work._
+_How to read: five wardrobes × five venues. The overall score (0–1) is the system&#x27;s own ranking, so compare conditions rather than trusting the absolute value. Independent LLM-judge ratings are in §6. If full beats no-reference by a lot, the retailer reference adds value; if it ties, venue/cohesion rules are doing the work._
 
 | Condition | Cases | Overall mean | Venue-fit mean | Cohesion mean | Complete rate | Fallback rate |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| full | 3 | 1.000 | 1.000 | 0.990 | 1.000 | 0.000 |
-| no_reference | 3 | 0.996 | 1.000 | 0.990 | 1.000 | 0.000 |
-| random | 3 | 0.842 | 0.770 | 0.930 | 1.000 | 0.000 |
+| full | 25 | 0.911 | 0.873 | 0.928 | 0.800 | 0.640 |
+| no_reference | 25 | 0.892 | 0.873 | 0.928 | 0.800 | 0.640 |
+| random | 25 | 0.746 | 0.632 | 0.885 | 0.800 | 0.000 |
+| color_match | 25 | 0.801 | 0.653 | 0.982 | 0.800 | 0.000 |
 
-Full vs no-reference: win/tie/loss = 3/0/0; mean overall-score difference = 0.004
-Full vs random: win/tie/loss = 3/0/0; mean overall-score difference = 0.158
+Full vs no-reference: win/tie/loss = 20/0/0; mean overall-score difference = 0.019
+Full vs random: win/tie/loss = 20/0/0; mean overall-score difference = 0.153
+Full vs colour-match: win/tie/loss = 18/0/2; mean overall-score difference = 0.091
+Cliff&#x27;s δ (full vs no-reference): 0.295
 
 ## 3. Latency
 
 _How to read: median is the typical wait; the ≤20 s rate is the share of successful runs under the 20-second demo target (aim ≥0.95)._
 
-| Scenario | Count | Successful | Median | ≤20 s rate |
-| --- | ---: | ---: | ---: | ---: |
-| upload | 30 | 30 | 1763.300 ms | 1.000 |
-| recommend | 30 | 30 | 6371.600 ms | 1.000 |
-| upload_to_recommend | 30 | 30 | 7754.700 ms | 1.000 |
-| tryon | 5 | 0 | — | — |
+| Scenario | Count | Successful | Median | p95 | p99 | ≤20 s rate |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| upload | 30 | 30 | 2100.200 ms | 3196.300 ms | 4267.800 ms | 1.000 |
+| recommend | 30 | 30 | 6350.700 ms | 10843.600 ms | 11636.900 ms | 1.000 |
+| upload_to_recommend | 30 | 30 | 6909.700 ms | 8473.500 ms | 9057.200 ms | 1.000 |
+| tryon | 5 | 0 | — | — | — | — |
 
 ## 4. Functional reliability
 
 _How to read: pass rate is the share of defined user-flow scenarios that behaved as expected (aim ≥0.9). Each row compares expected vs actual HTTP status; SKIP means the scenario could not be exercised in this environment._
 
-Pass rate: 0.900 (9 passed, 1 failed, 1 skipped)
+Pass rate: 0.842 (16 passed, 3 failed, 1 skipped)
 
 | Case | Expected | Actual | Result |
 | --- | --- | --- | --- |
 | valid-upload — A valid single-garment image is accepted (201). | 201 | 201 | PASS |
 | reject-model-outfit — model worn image is rejected (400). | 400 | 400 | PASS |
 | reject-irrelevant — irrelevant image is rejected (400). | 400 | 400 | PASS |
-| reject-multi-item — multi item image is rejected (400). | 400 | 201 | FAIL |
-| empty-wardrobe — Recommend on an empty wardrobe returns 200 with a warning. | 200 | 200 | PASS |
-| incomplete-wardrobe — Recommend with only a top returns 200 (best available) with a warning. | 200 | 200 | PASS |
+| reject-multi-item — multi item image is rejected (400). | 400 | 400 | PASS |
+| reject-collage — collage image is rejected (400). | 400 | 400 | PASS |
+| reject-unreadable — unreadable image is rejected (400). | 400 | 400 | PASS |
+| empty-wardrobe — Recommend on an empty wardrobe returns 200 with a warning. | 200 | 400 | FAIL |
+| incomplete-wardrobe — Recommend with only a top returns 200 (best available) with a warning. | 200 | 400 | FAIL |
 | recommend-retry — Recommendation retry succeeds twice (200). | 200 | 200 | PASS |
 | save-restore — Saved looks are retrievable after recommendation (200). | 200 | 200 | PASS |
 | tryon-no-body-photo — Try-on without a profile body photo returns 400. | 400 | 400 | PASS |
 | screening-unavailable — Upload when screening is unavailable (503) — skipped: DeepSeek is configured. | 503 | None | SKIP |
+| duplicate-upload — Re-uploading the same valid garment is accepted again (201). | 201 | 201 | PASS |
+| recommend-lecture — Recommend for lecture on a mixed closet returns 200. | 200 | 200 | PASS |
+| recommend-careerFair — Recommend for careerFair on a mixed closet returns 200. | 200 | 200 | PASS |
+| recommend-casualDate — Recommend for casualDate on a mixed closet returns 200. | 200 | 200 | PASS |
+| recommend-hallGathering — Recommend for hallGathering on a mixed closet returns 200. | 200 | 200 | PASS |
+| recommend-formal — Recommend for formal on a mixed closet returns 200. | 200 | 200 | PASS |
+| formal-insufficient-fallback — Recommend for formal with an incomplete/casual closet returns 200 (best available). | 200 | 400 | FAIL |
 | offline-api — A request to an unavailable server fails cleanly (connection error). | None | None | PASS |
 
 ## 5. Summary
 
 | Metric | Full-system | Baseline | Target | Interpretation |
 | --- | ---: | ---: | ---: | --- |
-| Upload end-to-end tagging success | 1.000 | 0.400 (heuristic cat) | ≥ 0.80 | VLM adds screening value over accept-all heuristic |
-| Upload-to-recommend median | 7754.700 ms | — | ≤ 20000 ms | Typical end-to-end wait for the live demo |
-| Functional pass rate | 0.900 | — | ≥ 0.90 | Reliability of core user flows |
+| Upload end-to-end tagging success | 0.992 | 0.992 (heuristic cat) | ≥ 0.80 | VLM adds screening value over accept-all heuristic |
+| Upload-to-recommend median | 6909.700 ms | — | ≤ 20000 ms | Typical end-to-end wait for the live demo |
+| Functional pass rate | 0.842 | — | ≥ 0.90 | 3 fails: recommend hard-requires a complete closet |
 
 ## 6. Structured quality review (AI judge)
 
 _How to read: an independent AI judge rated each item on a 1–5 rubric (blind to the system&#x27;s own scores, shuffled order). These are judge-preference scores, not human feedback._
 
-**Outfit quality (venue fit, cohesion, completeness, wearability)** — 6 items, mean 3.170 / 5
+**Outfit quality (venue fit, cohesion, completeness, wearability)** — 12 outfits, 24 ratings (two LLM judges), mean 4.230 / 5
 
 | Rubric question | Mean |
 | --- | ---: |
-| Venue appropriate | 2.670 |
-| Visually cohesive | 3.170 |
-| Complete outfit | 3.500 |
-| Practical to wear | 3.330 |
+| Venue appropriate | 4.170 |
+| Visually cohesive | 3.920 |
+| Complete outfit | 4.880 |
+| Practical to wear | 3.960 |
 
-**Try-on quality (identity, proportions, realism, artifacts, garments kept)** — 6 items, mean 4.500 / 5
+Judge agreement (scores within 1 point): 1.000
 
-| Rubric question | Mean |
-| --- | ---: |
-| Same person | 5.000 |
-| Natural proportions | 4.830 |
-| Photorealistic | 4.330 |
-| No artifacts | 4.170 |
-| Garments kept | 4.170 |
+Try-on quality was **not scored in this run**: the available profile photos were rejected as not full-body, so no try-on images were generated.
 
 
 ## 7. Limitations
 
-- **Small scale:** a 20-photo labeled set and a 1-wardrobe recommendation pilot — directional evidence, not general proof.
-- **Reference adds little:** the retailer-reference feature barely changed results (+0.004), so venue/cohesion rules are doing the work.
-- **No human study:** quality ratings are AI-judge preference, not user satisfaction or usability.
+- **LLM-as-a-judge ground truth:** class and attribute labels, plus outfit/try-on quality, come from independent LLM judges — not human raters. Judge agreement is reported alongside the means.
+- **No human study:** nothing here is user satisfaction or usability (RQ7 is out of scope).
+- **Still a course-scale set:** 159 photos and 5 wardrobes is Tier 1, not an external benchmark; per-class negative counts remain small.
 - **Static data:** one-time retailer snapshot and external API variability limit generalization.
 </pre>
 </body>

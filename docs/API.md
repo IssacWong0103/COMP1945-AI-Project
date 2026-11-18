@@ -260,17 +260,21 @@ Response `200`:
 }
 ```
 
-Return up to **3** outfits. Each outfit contains exactly one `top`, one
-`bottom` and one pair of `shoes` drawn from the user's uploaded wardrobe.
+Return up to **3** outfits. Every outfit includes one `top`, one `bottom` and
+one pair of `shoes` from the user's uploaded wardrobe. When relevant, the
+matcher may also attach optional extras such as `outerwear` (jacket, blazer,
+coat) or an `accessory` (hat, etc.).
 
 The wardrobe must already contain at least one `top`, one `bottom` and one pair
 of `shoes`; otherwise the endpoint returns `400` with a
 `Closet must include at least one top, one bottom and one pair of shoes ...`
-detail instead of generating looks.
+detail instead of generating looks. Outerwear and accessories are optional and
+are not required to unlock outfit creation.
 
 Tops and bottoms must be inside the selected venue's inclusive formality range
-for `matchStatus: "matched"`. Shoes are always attached to every core look. If
-no fully matched top+bottom+shoes outfit exists, the endpoint returns
+for `matchStatus: "matched"`. Shoes are always attached to every core look.
+Optional outerwear/accessories are scored as variants and kept when they improve
+fit. If no fully matched top+bottom+shoes outfit exists, the endpoint returns
 `matchStatus: "fallback"`, the warning `Currently you don't have the matched
 style clothes`, and up to three alternatives ranked by core-garment distance
 from the range, then overall quality.

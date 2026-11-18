@@ -19,6 +19,7 @@ from __future__ import annotations
 import base64
 import csv
 import json
+import os
 import random
 import re
 import sqlite3
@@ -32,6 +33,10 @@ EVAL_ROOT = Path(__file__).resolve().parent.parent
 REPO_ROOT = EVAL_ROOT.parent
 BACKEND_ROOT = REPO_ROOT / "backend"
 sys.path.insert(0, str(BACKEND_ROOT))
+
+# Prefer the isolated eval DB when it exists so ratings match the held-out run.
+os.environ.setdefault("USTYLE_DB_PATH", str(EVAL_ROOT / "runtime" / "eval.db"))
+os.environ.setdefault("USTYLE_UPLOADS_DIR", str(EVAL_ROOT / "runtime" / "uploads"))
 
 from app.config import settings  # noqa: E402
 
@@ -88,13 +93,13 @@ def _data_url(path: Path) -> str:
     return f"data:{mime};base64,{base64.b64encode(raw).decode()}"
 
 
-def _call(messages: list[dict]) -> dict:
+def _call(messages: list[dict], *, temperature: float = 0.0) -> dict:
     api_key = settings.deepseek_api_key.strip()
     if not api_key:
         raise RuntimeError("DEEPSEEK_API_KEY is not configured")
     body = {
         "model": DEEPSEEK_MODEL,
-        "temperature": 0.0,
+        "temperature": temperature,
         "response_format": {"type": "json_object"},
         "messages": messages,
     }
@@ -116,11 +121,12 @@ def _clamp(score: object) -> int:
 
 def load_outfits() -> list[dict]:
     db_path = settings.db_path
+    if not Path(db_path).is_file():
+        return []
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     rows = conn.execute(
-        "SELECT id, venue, items_json, try_on_url FROM outfits "
-        "WHERE try_on_url IS NOT NULL AND try_on_status = 'ready'"
+        "SELECT id, venue, items_json, try_on_url, try_on_status FROM outfits"
     ).fetchall()
     conn.close()
 
@@ -130,12 +136,14 @@ def load_outfits() -> list[dict]:
             items = json.loads(row["items_json"]).get("items", [])
         except (json.JSONDecodeError, AttributeError):
             items = []
-        try_on_rel = (row["try_on_url"] or "").lstrip("/")
-        if try_on_rel.startswith("uploads/"):
-            try_on_rel = try_on_rel[len("uploads/") :]
-        try_on_path = settings.uploads_dir / try_on_rel
-        if not try_on_path.is_file():
-            continue
+        try_on_path = None
+        if row["try_on_url"] and row["try_on_status"] == "ready":
+            try_on_rel = (row["try_on_url"] or "").lstrip("/")
+            if try_on_rel.startswith("uploads/"):
+                try_on_rel = try_on_rel[len("uploads/") :]
+            candidate = settings.uploads_dir / try_on_rel
+            if candidate.is_file():
+                try_on_path = candidate
         outfits.append(
             {
                 "id": row["id"],
@@ -158,17 +166,20 @@ def describe_outfit(outfit: dict) -> str:
     return "\n".join(parts)
 
 
-def rate_outfit(outfit: dict) -> dict:
+def rate_outfit(outfit: dict, *, temperature: float = 0.0) -> dict:
     prompt = (
         "Score this outfit on a 1-5 scale for each question.\n\n"
         f"{describe_outfit(outfit)}\n\n"
         'Return JSON with keys: "venue_appropriate", "visually_cohesive", '
         '"complete", "practical" (integers 1-5) and "justification" (string).'
     )
-    return _call([{"role": "system", "content": OUTFIT_SYSTEM}, {"role": "user", "content": prompt}])
+    return _call(
+        [{"role": "system", "content": OUTFIT_SYSTEM}, {"role": "user", "content": prompt}],
+        temperature=temperature,
+    )
 
 
-def rate_tryon(outfit: dict) -> dict:
+def rate_tryon(outfit: dict, *, temperature: float = 0.0) -> dict:
     garment_list = "\n".join(
         f"- {item.get('category')} ({item.get('color')})" for item in outfit["items"]
     )
@@ -190,57 +201,67 @@ def rate_tryon(outfit: dict) -> dict:
             ],
         },
     ]
-    return _call(messages)
+    return _call(messages, temperature=temperature)
+
+
+JUDGES = (("judge_a", 0.0), ("judge_b", 0.7))
 
 
 def main() -> None:
     outfits = load_outfits()
     if not outfits:
-        print("No ready try-on outfits found in the live database.")
+        print("No outfits found in the evaluation database.")
         return
 
     rng = random.Random(0)
     shuffled = list(outfits)
     rng.shuffle(shuffled)
+    # Cap outfit ratings so two judges stay affordable; prefer venue diversity.
+    shuffled = shuffled[:12]
 
     rows: list[dict] = []
     failures = 0
-    for outfit in shuffled:
-        try:
-            rating = rate_outfit(outfit)
-        except Exception as exc:  # noqa: BLE001
-            print(f"outfit rating failed for {outfit['id']}: {exc}")
-            failures += 1
-            continue
-        row = {
-            "type": "outfit",
-            "item_id": outfit["id"],
-            "venue": outfit["venue"],
-            "justification": str(rating.get("justification") or "").strip(),
-        }
-        for key, _ in OUTFIT_QUESTIONS:
-            row[key] = _clamp(rating.get(key))
-        rows.append(row)
+    for judge_name, temperature in JUDGES:
+        for outfit in shuffled:
+            try:
+                rating = rate_outfit(outfit, temperature=temperature)
+            except Exception as exc:  # noqa: BLE001
+                print(f"outfit rating failed for {outfit['id']} ({judge_name}): {exc}")
+                failures += 1
+                continue
+            row = {
+                "type": "outfit",
+                "item_id": outfit["id"],
+                "venue": outfit["venue"],
+                "judge": judge_name,
+                "justification": str(rating.get("justification") or "").strip(),
+            }
+            for key, _ in OUTFIT_QUESTIONS:
+                row[key] = _clamp(rating.get(key))
+            rows.append(row)
 
-        try:
-            rating = rate_tryon(outfit)
-        except Exception as exc:  # noqa: BLE001
-            print(f"try-on rating failed for {outfit['id']}: {exc}")
-            failures += 1
-            continue
-        trow = {
-            "type": "tryon",
-            "item_id": outfit["id"],
-            "venue": outfit["venue"],
-            "justification": str(rating.get("justification") or "").strip(),
-        }
-        for key, _ in TRYON_QUESTIONS:
-            trow[key] = _clamp(rating.get(key))
-        rows.append(trow)
+            if not outfit.get("try_on_path"):
+                continue
+            try:
+                rating = rate_tryon(outfit, temperature=temperature)
+            except Exception as exc:  # noqa: BLE001
+                print(f"try-on rating failed for {outfit['id']} ({judge_name}): {exc}")
+                failures += 1
+                continue
+            trow = {
+                "type": "tryon",
+                "item_id": outfit["id"],
+                "venue": outfit["venue"],
+                "judge": judge_name,
+                "justification": str(rating.get("justification") or "").strip(),
+            }
+            for key, _ in TRYON_QUESTIONS:
+                trow[key] = _clamp(rating.get(key))
+            rows.append(trow)
 
     raw_path = EVAL_ROOT / "results" / "raw" / "quality_ratings.csv"
     raw_path.parent.mkdir(parents=True, exist_ok=True)
-    columns = ["type", "item_id", "venue"] + [k for k, _ in OUTFIT_QUESTIONS] + [k for k, _ in TRYON_QUESTIONS] + ["justification"]
+    columns = ["type", "item_id", "venue", "judge"] + [k for k, _ in OUTFIT_QUESTIONS] + [k for k, _ in TRYON_QUESTIONS] + ["justification"]
     with raw_path.open("w", encoding="utf-8", newline="") as fh:
         writer = csv.DictWriter(fh, fieldnames=columns, extrasaction="ignore")
         writer.writeheader()
@@ -257,10 +278,25 @@ def main() -> None:
             values = [r[key] for r in subset if key in r]
             question_means[label] = round(float(statistics.mean(values)), 2) if values else None
         overall = [statistics.mean([r[k] for k, _ in questions if k in r]) for r in subset]
+        a_rows = [r for r in subset if r.get("judge") == "judge_a"]
+        b_rows = [r for r in subset if r.get("judge") == "judge_b"]
+        paired = 0
+        agree = 0
+        b_by_id = {r["item_id"]: r for r in b_rows}
+        for a in a_rows:
+            b = b_by_id.get(a["item_id"])
+            if not b:
+                continue
+            for key, _ in questions:
+                paired += 1
+                if abs(int(a.get(key, 0)) - int(b.get(key, 0))) <= 1:
+                    agree += 1
         metrics[kind] = {
             "count": len(subset),
+            "n_items": len({r["item_id"] for r in subset}),
             "overall_mean": round(float(statistics.mean(overall)), 2),
             "questions": question_means,
+            "judge_agreement_within_1": round(agree / paired, 4) if paired else None,
         }
 
     agg_path = EVAL_ROOT / "results" / "aggregated" / "quality_metrics.json"

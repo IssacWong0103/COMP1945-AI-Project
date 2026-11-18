@@ -31,7 +31,7 @@ def upload_file(client: httpx.Client, image_path: Path) -> tuple[float, int, str
     with image_path.open("rb") as fh:
         response = client.post(
             f"{common.BASE_URL}/api/wardrobe/items",
-            files={"file": (image_path.name, fh, "image/jpeg")},
+            files={"file": (image_path.name, fh, common.image_mime(image_path))},
             timeout=120.0,
         )
     elapsed_ms = (perf_counter() - started) * 1000
@@ -79,7 +79,7 @@ def seed_wardrobe(client: httpx.Client, items: list[dict], uploads_dir: Path) ->
         with image_path.open("rb") as fh:
             client.post(
                 f"{common.BASE_URL}/api/wardrobe/items",
-                files={"file": (image_path.name, fh, "image/jpeg")},
+                files={"file": (image_path.name, fh, common.image_mime(image_path))},
                 timeout=120.0,
             )
 
@@ -88,7 +88,7 @@ def seed_profile(client: httpx.Client, body_photo: Path) -> bool:
     with body_photo.open("rb") as fh:
         response = client.put(
             f"{common.BASE_URL}/api/profile",
-            files={"file": (body_photo.name, fh, "image/jpeg")},
+            files={"file": (body_photo.name, fh, common.image_mime(body_photo))},
             data={"gender": "preferNot"},
             timeout=120.0,
         )
@@ -147,7 +147,10 @@ def main() -> None:
 
     manifests = common.load_wardrobe_manifests(data_root / "wardrobes")
     wardrobe_items = manifests[0]["items"] if manifests else []
-    body_photos = sorted((data_root / "body_photos").glob("*.jpg"))
+    body_dir = data_root / "body_photos"
+    body_photos = sorted(
+        p for p in body_dir.iterdir() if p.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}
+    ) if body_dir.is_dir() else []
 
     results: list[dict] = []
     with httpx.Client() as client:

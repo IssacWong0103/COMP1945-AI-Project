@@ -1,43 +1,164 @@
 {
   "counts": {
-    "valid_total": 10,
-    "negative_total": 10,
-    "accepted_valid": 10,
-    "rejected_valid": 0,
+    "valid_total": 120,
+    "negative_total": 39,
+    "accepted_valid": 119,
+    "rejected_valid": 1,
     "unavailable_valid": 0,
-    "accepted_negative": 1,
-    "rejected_negative": 9
+    "accepted_negative": 0,
+    "rejected_negative": 39
   },
   "screening": {
-    "valid_acceptance_rate": 1.0,
-    "false_rejection_rate": 0.0,
-    "false_acceptance_rate": 0.1,
+    "valid_acceptance_rate": 0.9917,
+    "false_rejection_rate": 0.0083,
+    "false_acceptance_rate": 0.0,
     "model_worn_rejection_rate": 1.0,
     "confusion_matrix": {
-      "tp": 10,
-      "fn": 0,
-      "tn": 9,
-      "fp": 1
+      "tp": 119,
+      "fn": 1,
+      "tn": 39,
+      "fp": 0
     },
     "rejection_reasons": {
-      "Model wearing a full outfit of multiple items (shirt, tie, trousers), not one st": 1,
-      "Photo shows a male model wearing a full outfit (t-shirt, trousers, shoes), not o": 1,
-      "Photo shows a model wearing the cable-knit polo along with trousers and a watch,": 1,
-      "Photo shows a model wearing an outfit with multiple separate items (top, shorts,": 1,
-      "Photo shows a red car on a road, not a clothing item or accessory.": 1,
-      "The photo shows a cat, not a clothing item or fashion accessory.": 1,
-      "Photo shows a man wearing a full outfit (polo shirt, jeans, sunglasses), not one": 1,
-      "Model wearing a full outfit (black tank top and jeans), not a single standalone ": 1,
-      "Photo shows a person wearing a full outfit with multiple items rather than one s": 1
+      "Collage of two stacked views of the same sneaker rather than one standalone item": 1,
+      "Model wearing a full outfit (suit, shirt, tie, shoes), not a single standalone i": 1,
+      "Photo shows a model wearing a full outfit (white shirt and black leather trouser": 1,
+      "Photo shows a model wearing a full outfit (hoodie, jeans, sneakers, sunglasses),": 1,
+      "Model wearing a full outfit, not a single standalone item.": 1,
+      "Model wearing a full outfit of multiple garments (lace crop top, wide-leg trouse": 1,
+      "Photo shows a model wearing a full outfit (hoodie, jeans, sneakers), not one sta": 1,
+      "Model wearing a full outfit (blazer, shirt, trousers, belt, shoes, sunglasses), ": 1,
+      "Photo shows a person wearing a full outfit of multiple garments, not one standal": 1,
+      "Photo shows a person wearing a full outfit, not one standalone item": 1,
+      "Photo shows a model wearing a full outfit of multiple items: black shirt, light ": 1,
+      "Model wearing a full outfit (polo shirt and trousers), not a single standalone i": 1,
+      "Photo shows a model wearing a full outfit (red graphic tee with blue jeans), not": 1,
+      "Photo shows three stacked long-sleeve henley shirts in different colours, not a ": 1,
+      "Photo shows two separate shirts (blue and white) stacked together, not one stand": 1,
+      "Photo shows a person's arm and a closet rail with multiple hanging garments, not": 1,
+      "Photo shows a clothing rack with many separate garments, not one standalone item": 1,
+      "Multiple garments hanging on a clothing rack, not a single standalone item": 1,
+      "Multiple shirts hanging on a rack, not one standalone item": 1,
+      "Flat-lay shows multiple stacked pairs of jeans plus sunglasses, a camera, and sn": 1,
+      "Photo shows several folded knit garments stacked together, not one standalone it": 1,
+      "Stack of several folded garments, not a single standalone item": 1,
+      "Stack of several folded knit sweaters, not a single standalone item": 1,
+      "Flat-lay collage of several separate items (scarf, top, shorts, hat, jewelry, ca": 1,
+      "Photo shows five models wearing full outfits, not one standalone garment.": 1,
+      "Collage of two photos showing a person wearing full outfits, not one standalone ": 1,
+      "Collage of many models wearing full outfits, not a single standalone garment": 1,
+      "Runway photo showing multiple models in full outfits, not one standalone item": 1,
+      "Photo shows three people wearing full outfits, not one standalone item": 1,
+      "Photo shows three people wearing full outfits, not one standalone clothing item": 1,
+      "Photo shows a bunch of bananas, a food item, not clothing or a fashion accessory": 1,
+      "Photo shows bicycles parked on a street, not a clothing item or accessory.": 1,
+      "Photo shows a dog in tall grass, not a clothing item or accessory": 1,
+      "Photo shows a bunch of bananas on a wooden pallet, not a clothing item or access": 1,
+      "Photo shows a bicycle parked on a street; no clothing or accessory is the subjec": 1,
+      "Blurry night street scene with bokeh lights; no clothing item or accessory visib": 1,
+      "Abstract motion-blurred black-and-white image with no clearly identifiable cloth": 1,
+      "Abstract out-of-focus bokeh lights; no clothing item or accessory is visible.": 1,
+      "Blurry long-exposure photo of light trails with no identifiable clothing item": 1,
+      "Heavily motion-blurred photo of a person; no single garment or accessory is clea": 1
+    },
+    "per_negative_class": {
+      "collage": {
+        "n": 4,
+        "successes": 4,
+        "p": 1.0,
+        "low": 0.5101,
+        "high": 1.0,
+        "half_width": 0.245
+      },
+      "irrelevant": {
+        "n": 6,
+        "successes": 6,
+        "p": 1.0,
+        "low": 0.6097,
+        "high": 1.0,
+        "half_width": 0.1952
+      },
+      "model_worn": {
+        "n": 14,
+        "successes": 14,
+        "p": 1.0,
+        "low": 0.7847,
+        "high": 1.0,
+        "half_width": 0.1077
+      },
+      "multi_item": {
+        "n": 11,
+        "successes": 11,
+        "p": 1.0,
+        "low": 0.7412,
+        "high": 1.0,
+        "half_width": 0.1294
+      },
+      "unreadable": {
+        "n": 4,
+        "successes": 4,
+        "p": 1.0,
+        "low": 0.5101,
+        "high": 1.0,
+        "half_width": 0.245
+      }
+    },
+    "valid_acceptance_ci": {
+      "n": 120,
+      "successes": 119,
+      "p": 0.9917,
+      "low": 0.9543,
+      "high": 0.9985,
+      "half_width": 0.0221
+    },
+    "false_acceptance_ci": {
+      "n": 39,
+      "successes": 0,
+      "p": 0.0,
+      "low": 0.0,
+      "high": 0.0897,
+      "half_width": 0.0448
     }
   },
   "tagging": {
     "category_accuracy": 1.0,
-    "color_accuracy": 0.8,
-    "style_accuracy": 1.0,
-    "formality_mae": 3.9,
-    "formality_agreement_rate": 1.0,
-    "end_to_end_tagging_success": 1.0
+    "color_accuracy": 0.8403,
+    "style_accuracy": 0.8487,
+    "formality_mae": 4.39,
+    "formality_agreement_rate": 0.9916,
+    "end_to_end_tagging_success": 0.9917,
+    "category_ci": {
+      "n": 119,
+      "successes": 119,
+      "p": 1.0,
+      "low": 0.9687,
+      "high": 1.0,
+      "half_width": 0.0156
+    },
+    "color_ci": {
+      "n": 119,
+      "successes": 100,
+      "p": 0.8403,
+      "low": 0.764,
+      "high": 0.8953,
+      "half_width": 0.0656
+    },
+    "style_ci": {
+      "n": 119,
+      "successes": 101,
+      "p": 0.8487,
+      "low": 0.7735,
+      "high": 0.9021,
+      "half_width": 0.0643
+    },
+    "end_to_end_ci": {
+      "n": 120,
+      "successes": 119,
+      "p": 0.9917,
+      "low": 0.9543,
+      "high": 0.9985,
+      "half_width": 0.0221
+    }
   },
   "heuristic_baseline": {
     "screening": {
@@ -46,10 +167,10 @@
       "false_acceptance_rate": 1.0
     },
     "tagging": {
-      "category_accuracy": 0.4,
-      "color_accuracy": 0.3,
-      "style_accuracy": 0.6,
-      "formality_mae": 15.5
+      "category_accuracy": 0.9916,
+      "color_accuracy": 0.2269,
+      "style_accuracy": 0.4874,
+      "formality_mae": 15.08
     }
   }
 }

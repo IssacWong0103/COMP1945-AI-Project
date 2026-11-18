@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import common  # noqa: E402
 
-CHART_COLORS = {"full": "#1f6feb", "no_reference": "#8957e5", "random": "#9e9e9e"}
+CHART_COLORS = {"full": "#1f6feb", "no_reference": "#8957e5", "random": "#9e9e9e", "color_match": "#d97706"}
 
 
 def _load_quality_metrics() -> dict:
@@ -38,6 +38,12 @@ def _fmt(value, suffix: str = "") -> str:
     if isinstance(value, float):
         return f"{value:.3f}{suffix}"
     return f"{value}{suffix}"
+
+
+def _fmt_ci(block) -> str:
+    if not block:
+        return "—"
+    return f"{_fmt(block.get('p'))} [{_fmt(block.get('low'))}, {_fmt(block.get('high'))}] n={block.get('n', '—')}"
 
 
 def bar_chart(title: str, labels: list[str], values: list[float], *, suffix: str = "", max_value: float = 1.0) -> str:
@@ -118,10 +124,10 @@ def build_report(summary: dict, functional: list[dict]) -> str:
     lines: list[str] = []
     lines.append("# USTyle Evaluation Report\n")
     lines.append(f"Generated: `{summary.get('generated_at', '')}` — git `{summary.get('git_revision', 'unknown')}`\n")
-    lines.append("USTyle is evaluated as a **proof-of-concept AI outfit assistant**: a small reproducible test set (screening and tagging), a comparative pilot for recommendations, measured latency, scripted functional scenarios, and a structured expert review of outfit and try-on quality. All quality ratings come from an independent AI judge — not a human user study.\n")
+    lines.append("USTyle is evaluated as a **proof-of-concept AI outfit assistant** on a held-out 159-photo set (120 valid + 39 negative), five wardrobes × five venues, measured latency, a scripted functional matrix, and a structured LLM-as-a-judge review of outfit and try-on quality. All quality ratings are independent AI-judge preference — not a human user study. The previous 20-photo set is kept as **dev** data and is not counted as test evidence.\n")
 
     lines.append("## 1. Upload screening and tagging\n")
-    lines.append("_How to read: the screen must accept every real garment and reject everything else. Accuracy is measured on the 20-photo labeled set; end-to-end tagging success is the headline number because a wrongly rejected valid photo still counts against it._\n")
+    lines.append("_How to read: the screen must accept every real garment and reject everything else. Proportions are reported with Wilson 95 % CIs. End-to-end tagging success counts a valid photo as a success only if it is accepted **and** the category is correct._\n")
     counts = upload.get("counts", {})
     screening = upload.get("screening", {})
     tagging = upload.get("tagging", {})
@@ -129,16 +135,22 @@ def build_report(summary: dict, functional: list[dict]) -> str:
 
     lines.append(f"- **{counts.get('accepted_valid', 0)}/{counts.get('valid_total', 0)}** valid garments accepted; **{counts.get('rejected_negative', 0)}/{counts.get('negative_total', 0)}** invalid photos rejected.\n")
 
-    lines.append("| Metric | VLM | Heuristic baseline |")
+    lines.append("| Metric | VLM (95 % Wilson CI) | Heuristic baseline |")
     lines.append("| --- | ---: | ---: |")
-    lines.append(f"| Valid acceptance rate | {_fmt(screening.get('valid_acceptance_rate'))} | 1.000 |")
+    lines.append(f"| Valid acceptance rate | {_fmt_ci(screening.get('valid_acceptance_ci')) or _fmt(screening.get('valid_acceptance_rate'))} | 1.000 |")
     lines.append(f"| False rejection rate | {_fmt(screening.get('false_rejection_rate'))} | 0.000 |")
-    lines.append(f"| False acceptance rate | {_fmt(screening.get('false_acceptance_rate'))} | 1.000 |")
-    lines.append(f"| Category accuracy | {_fmt(tagging.get('category_accuracy'))} | {_fmt(heur.get('category_accuracy'))} |")
-    lines.append(f"| Color accuracy | {_fmt(tagging.get('color_accuracy'))} | {_fmt(heur.get('color_accuracy'))} |")
-    lines.append(f"| Style accuracy | {_fmt(tagging.get('style_accuracy'))} | {_fmt(heur.get('style_accuracy'))} |")
+    lines.append(f"| False acceptance rate | {_fmt_ci(screening.get('false_acceptance_ci')) or _fmt(screening.get('false_acceptance_rate'))} | 1.000 |")
+    lines.append(f"| Category accuracy | {_fmt_ci(tagging.get('category_ci')) or _fmt(tagging.get('category_accuracy'))} | {_fmt(heur.get('category_accuracy'))} |")
+    lines.append(f"| Color accuracy | {_fmt_ci(tagging.get('color_ci')) or _fmt(tagging.get('color_accuracy'))} | {_fmt(heur.get('color_accuracy'))} |")
+    lines.append(f"| Style accuracy | {_fmt_ci(tagging.get('style_ci')) or _fmt(tagging.get('style_accuracy'))} | {_fmt(heur.get('style_accuracy'))} |")
     lines.append(f"| Formality MAE (0–100) | {_fmt(tagging.get('formality_mae'))} | {_fmt(heur.get('formality_mae'))} |")
-    lines.append(f"| End-to-end tagging success | {_fmt(tagging.get('end_to_end_tagging_success'))} | — |\n")
+    lines.append(f"| End-to-end tagging success | {_fmt_ci(tagging.get('end_to_end_ci')) or _fmt(tagging.get('end_to_end_tagging_success'))} | — |\n")
+    per_neg = screening.get("per_negative_class") or {}
+    if per_neg:
+        lines.append("Per-negative-class rejection (Wilson 95 % CI):")
+        for cls, block in per_neg.items():
+            lines.append(f"- `{cls}`: {_fmt_ci(block)}")
+        lines.append("")
     lines.append(f"Counts: {counts.get('valid_total', 0)} valid, {counts.get('negative_total', 0)} negative, {counts.get('accepted_valid', 0)} accepted-valid, {counts.get('unavailable_valid', 0)} unavailable.\n")
 
     reasons = screening.get("rejection_reasons", {})
@@ -148,12 +160,12 @@ def build_report(summary: dict, functional: list[dict]) -> str:
             lines.append(f"- {reason}: {count}")
         lines.append("")
 
-    lines.append("## 2. Recommendation comparison (pilot)\n")
-    lines.append("_How to read: this is a small pilot (1 wardrobe × 3 venues), not a benchmark. The overall score (0–1) is the system's own ranking, so compare conditions rather than trusting the absolute value. If full beats no-reference by a lot, the retailer reference adds value; if it ties, venue/cohesion rules are doing the work._\n")
+    lines.append("## 2. Recommendation comparison\n")
+    lines.append("_How to read: five wardrobes × five venues. The overall score (0–1) is the system's own ranking, so compare conditions rather than trusting the absolute value. Independent LLM-judge ratings are in §6. If full beats no-reference by a lot, the retailer reference adds value; if it ties, venue/cohesion rules are doing the work._\n")
     conds = rec.get("conditions", {})
     lines.append("| Condition | Cases | Overall mean | Venue-fit mean | Cohesion mean | Complete rate | Fallback rate |")
     lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
-    for cond in ("full", "no_reference", "random"):
+    for cond in ("full", "no_reference", "random", "color_match"):
         c = conds.get(cond, {})
         lines.append(
             f"| {cond} | {c.get('cases', 0)} | {_fmt(c.get('overall_mean'))} | "
@@ -161,20 +173,23 @@ def build_report(summary: dict, functional: list[dict]) -> str:
             f"{_fmt(c.get('complete_rate'))} | {_fmt(c.get('fallback_rate'))} |"
         )
     lines.append("")
-    for pair, label in (("full_vs_no_reference", "Full vs no-reference"), ("full_vs_random", "Full vs random")):
+    for pair, label in (("full_vs_no_reference", "Full vs no-reference"), ("full_vs_random", "Full vs random"), ("full_vs_color_match", "Full vs colour-match")):
         p = rec.get(pair, {})
         lines.append(f"{label}: win/tie/loss = {p.get('wins', 0)}/{p.get('ties', 0)}/{p.get('losses', 0)}; mean overall-score difference = {_fmt(p.get('mean_diff'))}")
+    if rec.get("cliffs_delta_full_vs_no_reference") is not None:
+        lines.append(f"Cliff's δ (full vs no-reference): {_fmt(rec.get('cliffs_delta_full_vs_no_reference'))}")
     lines.append("")
 
     lines.append("## 3. Latency\n")
     lines.append("_How to read: median is the typical wait; the ≤20 s rate is the share of successful runs under the 20-second demo target (aim ≥0.95)._\n")
-    lines.append("| Scenario | Count | Successful | Median | ≤20 s rate |")
-    lines.append("| --- | ---: | ---: | ---: | ---: |")
+    lines.append("| Scenario | Count | Successful | Median | p95 | p99 | ≤20 s rate |")
+    lines.append("| --- | ---: | ---: | ---: | ---: | ---: | ---: |")
     for scenario in ("upload", "recommend", "upload_to_recommend", "tryon"):
         m = lat.get(scenario, {})
         lines.append(
             f"| {scenario} | {m.get('count', 0)} | {m.get('successful', 0)} | "
-            f"{_fmt(m.get('median_ms'), ' ms')} | {_fmt(m.get('within_20s_rate'))} |"
+            f"{_fmt(m.get('median_ms'), ' ms')} | {_fmt(m.get('p95_ms'), ' ms')} | "
+            f"{_fmt(m.get('p99_ms'), ' ms')} | {_fmt(m.get('within_20s_rate'))} |"
         )
     lines.append("")
 
@@ -202,7 +217,7 @@ def build_report(summary: dict, functional: list[dict]) -> str:
         f"| Upload-to-recommend median | {_fmt(lat.get('upload_to_recommend', {}).get('median_ms'), ' ms')} | — | ≤ 20000 ms | Typical end-to-end wait for the live demo |"
     )
     lines.append(
-        f"| Functional pass rate | {_fmt(func.get('pass_rate'))} | — | ≥ 0.90 | Reliability of core user flows |"
+        f"| Functional pass rate | {_fmt(func.get('pass_rate'))} | — | ≥ 0.90 | 3 fails: recommend hard-requires a complete closet |"
     )
     lines.append("")
 
@@ -214,7 +229,8 @@ def build_report(summary: dict, functional: list[dict]) -> str:
             block = quality.get(kind)
             if not block:
                 continue
-            lines.append(f"**{label}** — {block.get('count', 0)} items, mean {_fmt(block.get('overall_mean'))} / 5\n")
+            n_items = block.get("n_items") or block.get("count", 0)
+            lines.append(f"**{label}** — {n_items} outfits, {block.get('count', 0)} ratings (two LLM judges), mean {_fmt(block.get('overall_mean'))} / 5\n")
             questions = block.get("questions") or {}
             if questions:
                 lines.append("| Rubric question | Mean |")
@@ -222,12 +238,16 @@ def build_report(summary: dict, functional: list[dict]) -> str:
                 for q, m in questions.items():
                     lines.append(f"| {html.escape(str(q))} | {_fmt(m)} |")
                 lines.append("")
+            if block.get("judge_agreement_within_1") is not None:
+                lines.append(f"Judge agreement (scores within 1 point): {_fmt(block.get('judge_agreement_within_1'))}\n")
+        if not quality.get("tryon"):
+            lines.append("Try-on quality was **not scored in this run**: the available profile photos were rejected as not full-body, so no try-on images were generated.\n")
         lines.append("")
 
     lines.append("## 7. Limitations\n")
-    lines.append("- **Small scale:** a 20-photo labeled set and a 1-wardrobe recommendation pilot — directional evidence, not general proof.")
-    lines.append("- **Reference adds little:** the retailer-reference feature barely changed results (+0.004), so venue/cohesion rules are doing the work.")
-    lines.append("- **No human study:** quality ratings are AI-judge preference, not user satisfaction or usability.")
+    lines.append("- **LLM-as-a-judge ground truth:** class and attribute labels, plus outfit/try-on quality, come from independent LLM judges — not human raters. Judge agreement is reported alongside the means.")
+    lines.append("- **No human study:** nothing here is user satisfaction or usability (RQ7 is out of scope).")
+    lines.append("- **Still a course-scale set:** 159 photos and 5 wardrobes is Tier 1, not an external benchmark; per-class negative counts remain small.")
     lines.append("- **Static data:** one-time retailer snapshot and external API variability limit generalization.")
     lines.append("")
     return "\n".join(lines)
@@ -240,7 +260,7 @@ def build_html(summary: dict, functional: list[dict]) -> str:
     func = summary.get("functional", {})
 
     conds = rec.get("conditions", {})
-    rec_groups = ["full", "no_reference", "random"]
+    rec_groups = ["full", "no_reference", "random", "color_match"]
     rec_series = {
         "overall": [conds.get(c, {}).get("overall_mean") or 0.0 for c in rec_groups],
         "venue_fit": [conds.get(c, {}).get("venue_fit_mean") or 0.0 for c in rec_groups],

@@ -1,0 +1,12 @@
+{
+  "n_images": 159,
+  "n_conflicts": 63,
+  "class_raw_agreement": 0.9937,
+  "class_cohen_kappa": 0.9849,
+  "category_cohen_kappa": 0.99,
+  "style_cohen_kappa": 0.7144,
+  "gender_cohen_kappa": 0.7692,
+  "color_raw_agreement": 0.775,
+  "formality_mae_between_judges": 5.6,
+  "generated_at": "2026-11-18T13:05:48.390558+00:00"
+}

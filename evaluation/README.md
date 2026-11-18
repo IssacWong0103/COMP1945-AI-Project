@@ -26,10 +26,12 @@ never "user satisfaction". A hand-run demo script is in
 ## Directory layout
 
 - `schemas/` — JSON schemas for labels, manifests, and raw results.
-- `data/uploads/valid/` — single-garment images (one garment per photo).
+- `data/uploads/valid/` — single-garment images (one garment per photo). The
+  held-out set is the cleaned 159-photo collection (120 valid + 39 negative);
+  the original 20-photo smoke set lives in `data/dev/` and is not test evidence.
 - `data/uploads/negative/` — reject cases (model-worn outfits, multiple items,
   collages, irrelevant objects, unreadable images).
-- `data/labels/upload_labels.csv` — ground-truth labels for every upload image.
+- `data/labels/upload_labels.csv` — LLM-judge ground-truth labels for every upload image.
 - `data/wardrobes/*.json` — fixed wardrobe manifests for recommendation cases.
 - `data/body_photos/` — consented body photos for try-on cases (gitignored).
 - `scripts/` — pipeline scripts (see below).

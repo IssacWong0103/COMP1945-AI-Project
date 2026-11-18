@@ -27,6 +27,18 @@ REPORT_DIR = EVAL_ROOT / "report"
 
 BASE_URL = os.environ.get("USTYLE_BASE_URL", "http://127.0.0.1:8000").rstrip("/")
 
+MIME_BY_SUFFIX = {
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".png": "image/png",
+    ".webp": "image/webp",
+    ".gif": "image/gif",
+}
+
+
+def image_mime(path: Path) -> str:
+    return MIME_BY_SUFFIX.get(path.suffix.lower(), "image/jpeg")
+
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()

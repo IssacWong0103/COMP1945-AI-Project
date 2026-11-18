@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+import time
 from pathlib import Path
 from time import perf_counter
 
@@ -41,32 +42,38 @@ def heuristic_baseline(image_path: Path) -> dict:
         return {"error": str(exc)}
 
 
-def upload_one(client: httpx.Client, image_path: Path, row: dict) -> dict:
+def upload_one(client: httpx.Client, image_path: Path, row: dict, *, retries: int = 3) -> dict:
     started = perf_counter()
     elapsed_ms = 0.0
     outcome = "error"
     http_status: int | None = None
     detail: str | None = None
     tags: dict = {}
+    mime = common.image_mime(image_path)
     try:
-        with image_path.open("rb") as fh:
-            response = client.post(
-                f"{common.BASE_URL}/api/wardrobe/items",
-                files={"file": (image_path.name, fh, "image/jpeg")},
-                timeout=120.0,
-            )
+        response = None
+        for attempt in range(retries):
+            with image_path.open("rb") as fh:
+                response = client.post(
+                    f"{common.BASE_URL}/api/wardrobe/items",
+                    files={"file": (image_path.name, fh, mime)},
+                    timeout=120.0,
+                )
+            if response.status_code != 503 or attempt == retries - 1:
+                break
+            time.sleep(2.0 * (attempt + 1))
         elapsed_ms = (perf_counter() - started) * 1000
-        http_status = response.status_code
-        if response.status_code == 201:
+        http_status = response.status_code if response is not None else None
+        if response is not None and response.status_code == 201:
             outcome = "accepted"
             tags = response.json()
-        elif response.status_code == 400:
+        elif response is not None and response.status_code == 400:
             outcome = "rejected"
             try:
                 detail = response.json().get("detail")
             except Exception:  # noqa: BLE001
                 detail = response.text[:240]
-        elif response.status_code == 503:
+        elif response is not None and response.status_code == 503:
             outcome = "unavailable"
             try:
                 detail = response.json().get("detail")
@@ -74,7 +81,7 @@ def upload_one(client: httpx.Client, image_path: Path, row: dict) -> dict:
                 detail = response.text[:240]
         else:
             outcome = "error"
-            detail = response.text[:240]
+            detail = response.text[:240] if response is not None else "no response"
     except Exception as exc:  # noqa: BLE001
         elapsed_ms = (perf_counter() - started) * 1000
         outcome = "error"
@@ -105,6 +112,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--labels", default=None)
     parser.add_argument("--data-root", default=str(common.DATA_DIR))
+    parser.add_argument("--resume", action="store_true", help="skip case_ids already in upload_results.jsonl")
+    parser.add_argument("--throttle", type=float, default=0.4)
     args = parser.parse_args()
 
     data_root = Path(args.data_root)
@@ -116,9 +125,18 @@ def main() -> None:
         print("No label rows found. Generate a smoke set or add labels first.")
         sys.exit(1)
 
-    results: list[dict] = []
+    out_path = common.RESULTS_RAW / "upload_results.jsonl"
+    done: dict[str, dict] = {}
+    if args.resume:
+        for record in common.load_jsonl(out_path):
+            cid = record.get("case_id")
+            if cid:
+                done[cid] = record
+    results: list[dict] = list(done.values())
     with httpx.Client() as client:
-        for row in rows:
+        pending = [row for row in rows if row["case_id"] not in done]
+        print(f"Upload screening: {len(done)} done, {len(pending)} remaining")
+        for i, row in enumerate(pending, 1):
             image_path = uploads_dir / row["filename"]
             if not image_path.is_file():
                 result = {
@@ -139,10 +157,13 @@ def main() -> None:
                 continue
             result = upload_one(client, image_path, row)
             results.append(result)
+            common.write_jsonl(out_path, results)
             print(
-                f"[{row['case_id']}] {result['outcome']} "
+                f"[{i}/{len(pending)}] {row['case_id']} {result['outcome']} "
                 f"http={result['http_status']} {result['elapsed_ms']:.0f}ms"
             )
+            if args.throttle > 0:
+                time.sleep(args.throttle)
 
     manifest = common.base_manifest()
     manifest["labels_file"] = str(labels_path)

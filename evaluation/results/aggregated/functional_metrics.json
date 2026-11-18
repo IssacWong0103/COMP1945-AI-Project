@@ -1,81 +1,99 @@
 {
-  "total": 11,
-  "passed": 9,
-  "failed": 1,
+  "total": 20,
+  "passed": 16,
+  "failed": 3,
   "skipped": 1,
-  "pass_rate": 0.9,
+  "pass_rate": 0.8421,
   "cases": [
     {
       "case_id": "valid-upload",
       "description": "A valid single-garment image is accepted (201).",
       "expected_status": 201,
       "actual_status": 201,
-      "actual_detail": "{\"id\":\"ee427449-760d-46fd-b348-ff69e361a9c8\",\"imageUrl\":\"/uploads/wardrobe/42f4b7bc-8f2e-4642-9545-0adad9eca0e0.jpg\",\"category\":\"bottom\",\"color\":\"tan\",\"cut\":\"straight\",\"style\":\"casual\",\"formalityScore",
+      "actual_detail": "{\"id\":\"a2f439a5-9337-418f-b7ea-2e659ec13b5d\",\"imageUrl\":\"/uploads/wardrobe/e648eb6f-cfe7-4ae8-98af-41fa13f2c9de.jpg\",\"category\":\"top\",\"color\":\"light blue\",\"cut\":\"slim\",\"style\":\"smartCasual\",\"formality",
       "passed": true,
-      "recorded_at": "2026-11-15T05:25:52.604983+00:00"
+      "recorded_at": "2026-11-18T13:33:11.398294+00:00"
     },
     {
       "case_id": "reject-model-outfit",
       "description": "model worn image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"Upload exactly one clothing item on its own (a pair of shoes is fine), not a person, model, full or partial outfit, collage, or multiple items. Photo shows a model wearing a full outfit (sh",
+      "actual_detail": "{\"detail\":\"Upload exactly one clothing item on its own (a pair of shoes is fine), not a person, model, full or partial outfit, collage, or multiple items. Photo shows a person wearing a full outfit (s",
       "passed": true,
-      "recorded_at": "2026-11-15T05:25:54.160195+00:00"
+      "recorded_at": "2026-11-18T13:33:13.191742+00:00"
     },
     {
       "case_id": "reject-irrelevant",
       "description": "irrelevant image is rejected (400).",
       "expected_status": 400,
       "actual_status": 400,
-      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Photo shows a red car o",
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Photo shows a bunch of ",
       "passed": true,
-      "recorded_at": "2026-11-15T05:25:55.319373+00:00"
+      "recorded_at": "2026-11-18T13:33:15.450157+00:00"
     },
     {
       "case_id": "reject-multi-item",
       "description": "multi item image is rejected (400).",
       "expected_status": 400,
-      "actual_status": 201,
-      "actual_detail": "{\"id\":\"54999a75-2cac-4868-8543-52a3c58dbc61\",\"imageUrl\":\"/uploads/wardrobe/2fde2a4d-32fc-4d7f-a104-7734419d4006.jpg\",\"category\":\"outerwear\",\"color\":\"black\",\"cut\":\"tailored\",\"style\":\"formal\",\"formality",
-      "passed": false,
-      "recorded_at": "2026-11-15T05:25:56.948594+00:00"
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"Upload exactly one clothing item on its own (a pair of shoes is fine), not a person, model, full or partial outfit, collage, or multiple items. Photo shows a three-pack of separate long-sle",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:33:17.093726+00:00"
+    },
+    {
+      "case_id": "reject-collage",
+      "description": "collage image is rejected (400).",
+      "expected_status": 400,
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"Upload exactly one clothing item on its own (a pair of shoes is fine), not a person, model, full or partial outfit, collage, or multiple items. Photo shows five models wearing full outfits,",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:33:19.065083+00:00"
+    },
+    {
+      "case_id": "reject-unreadable",
+      "description": "unreadable image is rejected (400).",
+      "expected_status": 400,
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"This photo does not show a clothing item or fashion accessory. Upload one garment on its own; pets, objects, vehicles, and other non-clothing images cannot be added. Abstract heavily motion",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:33:20.350699+00:00"
     },
     {
       "case_id": "empty-wardrobe",
       "description": "Recommend on an empty wardrobe returns 200 with a warning.",
       "expected_status": 200,
-      "actual_status": 200,
-      "actual_detail": "{\"outfits\":[],\"elapsedMs\":0,\"warning\":\"Wardrobe is empty. Upload a few garments first.\",\"matchStatus\":\"matched\"}",
-      "passed": true,
-      "recorded_at": "2026-11-15T05:25:56.993295+00:00"
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"Closet must include at least one top, one bottom and one pair of shoes before creating outfits. Missing: top, bottom, shoes.\"}",
+      "passed": false,
+      "recorded_at": "2026-11-18T13:33:20.378102+00:00"
     },
     {
       "case_id": "incomplete-wardrobe",
       "description": "Recommend with only a top returns 200 (best available) with a warning.",
       "expected_status": 200,
-      "actual_status": 200,
-      "actual_detail": "{\"outfits\":[{\"id\":\"a8b69c0c-7f9d-4e26-a32b-683ebe62c04c\",\"items\":[{\"id\":\"d65b5fcd-9d4c-45f1-bb3c-f384c0328ce0\",\"category\":\"bottom\",\"color\":\"tan\",\"description\":\"Tan cotton chino trousers laid flat, mid",
-      "passed": true,
-      "recorded_at": "2026-11-15T05:26:05.180346+00:00"
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"Closet must include at least one top, one bottom and one pair of shoes before creating outfits. Missing: bottom, shoes.\"}",
+      "passed": false,
+      "recorded_at": "2026-11-18T13:33:22.286023+00:00"
     },
     {
       "case_id": "recommend-retry",
       "description": "Recommendation retry succeeds twice (200).",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"outfits\":[{\"id\":\"49de9b1b-3bfc-4639-9351-d99f2acf5b10\",\"items\":[{\"id\":\"d361267e-629b-4594-bb23-15d3939d2478\",\"category\":\"bottom\",\"color\":\"tan\",\"description\":\"Tan straight-leg cotton chino trousers l",
+      "actual_detail": "{\"outfits\":[{\"id\":\"b4df8148-2810-45d5-9b84-8497ef43be3d\",\"items\":[{\"id\":\"6f50a20a-a435-469b-8e89-91e2c681743c\",\"category\":\"top\",\"color\":\"grey\",\"description\":\"Long-sleeve button-up shirt in fine grey m",
       "passed": true,
-      "recorded_at": "2026-11-15T05:26:13.403323+00:00"
+      "recorded_at": "2026-11-18T13:33:48.376023+00:00"
     },
     {
       "case_id": "save-restore",
       "description": "Saved looks are retrievable after recommendation (200).",
       "expected_status": 200,
       "actual_status": 200,
-      "actual_detail": "{\"looks\":[{\"id\":\"5d6e9a61-0d1e-434e-b9be-e0dab5d02590\",\"venue\":\"lecture\",\"overallScore\":0.8918,\"createdAt\":\"2026-11-15T05:26:21.513889\",\"thumbnailUrl\":\"/uploads/wardrobe/e890264e-08bd-477f-870f-926e6b",
+      "actual_detail": "{\"looks\":[{\"id\":\"986f91b0-58d1-4cf5-b6e8-f4896ac7f28f\",\"venue\":\"lecture\",\"overallScore\":0.9509,\"createdAt\":\"2026-11-18T13:34:05.672738\",\"thumbnailUrl\":\"/uploads/wardrobe/87264f88-e71d-4dee-b1b7-4cfca4",
       "passed": true,
-      "recorded_at": "2026-11-15T05:26:21.551867+00:00"
+      "recorded_at": "2026-11-18T13:34:05.695437+00:00"
     },
     {
       "case_id": "tryon-no-body-photo",
@@ -84,7 +102,7 @@
       "actual_status": 400,
       "actual_detail": "{\"detail\":\"Upload a full-body photo in your profile before trying on an outfit.\"}",
       "passed": true,
-      "recorded_at": "2026-11-15T05:26:27.362161+00:00"
+      "recorded_at": "2026-11-18T13:34:33.241912+00:00"
     },
     {
       "case_id": "screening-unavailable",
@@ -93,7 +111,70 @@
       "actual_status": null,
       "actual_detail": "skipped: DeepSeek configured",
       "passed": null,
-      "recorded_at": "2026-11-15T05:26:27.363901+00:00"
+      "recorded_at": "2026-11-18T13:34:33.243307+00:00"
+    },
+    {
+      "case_id": "duplicate-upload",
+      "description": "Re-uploading the same valid garment is accepted again (201).",
+      "expected_status": 201,
+      "actual_status": 201,
+      "actual_detail": "{\"id\":\"54c05a4e-a8f1-484f-82b6-e29dae3dee97\",\"imageUrl\":\"/uploads/wardrobe/1e472c41-35ef-49dd-8354-5e33fd34a23b.jpg\",\"category\":\"top\",\"color\":\"light blue\",\"cut\":\"slim\",\"style\":\"smartCasual\",\"formality",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:34:37.550200+00:00"
+    },
+    {
+      "case_id": "recommend-lecture",
+      "description": "Recommend for lecture on a mixed closet returns 200.",
+      "expected_status": 200,
+      "actual_status": 200,
+      "actual_detail": "{\"outfits\":[{\"id\":\"5cf5ab96-5d6d-4020-8b0e-229906866b17\",\"items\":[{\"id\":\"a0302087-07cb-4fd0-bc70-11d6294dd17d\",\"category\":\"top\",\"color\":\"light blue\",\"description\":\"Long-sleeve button-down shirt in lig",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:34:58.915896+00:00"
+    },
+    {
+      "case_id": "recommend-careerFair",
+      "description": "Recommend for careerFair on a mixed closet returns 200.",
+      "expected_status": 200,
+      "actual_status": 200,
+      "actual_detail": "{\"outfits\":[{\"id\":\"83348de3-4340-4983-9a01-3dd109b3a58d\",\"items\":[{\"id\":\"3e678a89-754e-4535-a3e0-ba55dac15e91\",\"category\":\"top\",\"color\":\"light blue\",\"description\":\"Long-sleeve button-down shirt with s",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:35:18.586571+00:00"
+    },
+    {
+      "case_id": "recommend-casualDate",
+      "description": "Recommend for casualDate on a mixed closet returns 200.",
+      "expected_status": 200,
+      "actual_status": 200,
+      "actual_detail": "{\"outfits\":[{\"id\":\"982cc91b-4040-4880-9a0a-4d11051413c5\",\"items\":[{\"id\":\"f4a6f687-a80e-471d-a1a0-759cd55af9ab\",\"category\":\"top\",\"color\":\"light blue\",\"description\":\"Light blue long-sleeve button-up shi",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:35:35.263883+00:00"
+    },
+    {
+      "case_id": "recommend-hallGathering",
+      "description": "Recommend for hallGathering on a mixed closet returns 200.",
+      "expected_status": 200,
+      "actual_status": 200,
+      "actual_detail": "{\"outfits\":[{\"id\":\"626c1bf4-6902-4fb2-9e0b-e73dad5a50da\",\"items\":[{\"id\":\"92897223-3076-4360-b9cf-0b562a590c5e\",\"category\":\"top\",\"color\":\"grey\",\"description\":\"Long-sleeve button-down dress shirt in lig",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:35:59.765337+00:00"
+    },
+    {
+      "case_id": "recommend-formal",
+      "description": "Recommend for formal on a mixed closet returns 200.",
+      "expected_status": 200,
+      "actual_status": 200,
+      "actual_detail": "{\"outfits\":[{\"id\":\"a24c2953-28f6-44ff-ab6b-eaf6ad5b5d4d\",\"items\":[{\"id\":\"7bef18b5-de41-437d-b577-9a124295b235\",\"category\":\"top\",\"color\":\"light blue\",\"description\":\"Long-sleeve button-up shirt in fine ",
+      "passed": true,
+      "recorded_at": "2026-11-18T13:36:22.589733+00:00"
+    },
+    {
+      "case_id": "formal-insufficient-fallback",
+      "description": "Recommend for formal with an incomplete/casual closet returns 200 (best available).",
+      "expected_status": 200,
+      "actual_status": 400,
+      "actual_detail": "{\"detail\":\"Closet must include at least one top, one bottom and one pair of shoes before creating outfits. Missing: bottom, shoes.\"}",
+      "passed": false,
+      "recorded_at": "2026-11-18T13:36:26.532112+00:00"
     },
     {
       "case_id": "offline-api",
@@ -102,7 +183,7 @@
       "actual_status": null,
       "actual_detail": "connection error",
       "passed": true,
-      "recorded_at": "2026-11-15T05:26:27.371563+00:00"
+      "recorded_at": "2026-11-18T13:36:26.540639+00:00"
     }
   ]
 }

@@ -630,12 +630,26 @@ def _attach_optionals(
         ranked.sort(key=lambda pair: pair[0], reverse=True)
         return ranked[0][1]
 
-    # Shoes are mandatory, not optional: every returned outfit must contain exactly
-    # one top, one bottom and one pair of shoes from the user's uploaded closet.
+    # Shoes are mandatory. Outerwear (jacket/blazer/coat) and accessories (hat,
+    # etc.) are optional extras; ranking later picks among the variants.
     shoes = best_of(grouped.get("shoes") or [])
     if not shoes:
         return []
-    return [core + [shoes]]
+
+    outer = best_of(grouped.get("outerwear") or [])
+    accessory = best_of(grouped.get("accessory") or [])
+
+    base = core + [shoes]
+    variants: list[list[WardrobeItem]] = [base]
+
+    if outer:
+        variants.append(core + [outer, shoes])
+    if accessory:
+        variants.append(core + [shoes, accessory])
+    if outer and accessory:
+        variants.append(core + [outer, shoes, accessory])
+
+    return variants
 
 
 def _inspiration_text(ref: dict | None) -> str | None:
@@ -672,7 +686,7 @@ def _rationale_items(
     }
     venue_label = labels.get(venue, venue)
     out: list[RationaleItemOut] = []
-    for item in items[:3]:
+    for item in items:
         color = (item.color or "").strip()
         cat = item.category
         if cat == "outerwear":

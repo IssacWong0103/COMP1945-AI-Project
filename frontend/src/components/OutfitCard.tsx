@@ -22,7 +22,15 @@ export function OutfitCard({ outfit, index, alternative = false, onTryOn, onSwap
         <p className="text-sm font-semibold text-ink">{alternative ? 'Alternative' : 'Outfit'} {look}</p>
       </header>
 
-      <div className="mb-3 grid grid-cols-3 gap-2">
+      <div
+        className={`mb-3 grid gap-2 ${
+          outfit.items.length <= 3
+            ? 'grid-cols-3'
+            : outfit.items.length === 4
+              ? 'grid-cols-2 sm:grid-cols-4'
+              : 'grid-cols-3 sm:grid-cols-5'
+        }`}
+      >
         {outfit.items.map((item) => (
           <figure key={item.id} className="overflow-hidden rounded-lg bg-canvas">
             {item.imageUrl ? (

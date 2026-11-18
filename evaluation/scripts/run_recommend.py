@@ -47,7 +47,7 @@ def seed_wardrobe(client: httpx.Client, manifest_items: list[dict], uploads_dir:
         with image_path.open("rb") as fh:
             response = client.post(
                 f"{common.BASE_URL}/api/wardrobe/items",
-                files={"file": (image_path.name, fh, "image/jpeg")},
+                files={"file": (image_path.name, fh, common.image_mime(image_path))},
                 timeout=120.0,
             )
         if response.status_code == 201:
@@ -130,6 +130,72 @@ def build_random_outfit(items: list[dict], venue: str, seed: str) -> dict:
             "empty_return": False,
         },
     }
+
+
+def build_color_match_outfit(items: list[dict], venue: str, seed: str) -> dict:
+    """Complete-outfit baseline that maximises colour cohesion, then venue fit."""
+    from itertools import product
+
+    from app.services.matching import cohesion_score, venue_fit_score
+
+    by_cat: dict[str, list[dict]] = {}
+    for item in items:
+        by_cat.setdefault(item["category"], []).append(item)
+
+    cores: list[list[dict]] = []
+    if "dress" in by_cat:
+        cores.extend([[d] for d in by_cat["dress"]])
+    if "top" in by_cat and "bottom" in by_cat:
+        cores.extend([[t, b] for t in by_cat["top"] for b in by_cat["bottom"]])
+    extras = [by_cat[c] + [None] for c in ("outerwear", "shoes", "accessory") if c in by_cat]
+
+    best: dict | None = None
+    best_key = (-1.0, -1.0)
+    rng = random.Random(seed)
+    candidates = cores[:]
+    rng.shuffle(candidates)
+    candidates = candidates[:80]
+    extra_combos = list(product(*extras)) if extras else [()]
+    rng.shuffle(extra_combos)
+    extra_combos = extra_combos[:40]
+
+    for core in candidates:
+        for extra in extra_combos:
+            picked = core + [item for item in extra if item is not None]
+            if not picked:
+                continue
+            model_items = [to_wardrobe_item(item) for item in picked]
+            coh = cohesion_score(model_items, None)
+            v_fit = venue_fit_score(model_items, venue, None)
+            key = (coh, v_fit)
+            if key > best_key:
+                best_key = key
+                categories = [item["category"] for item in picked]
+                complete = ("top" in categories and "bottom" in categories) or ("dress" in categories)
+                best = {
+                    "outfit": {
+                        "id": f"color-match-{seed}",
+                        "venue_fit_score": round(v_fit, 4),
+                        "cohesion_score": round(coh, 4),
+                        "overall_score": round(0.55 * v_fit + 0.45 * coh, 4),
+                        "formality_score": round(
+                            sum(item["formalityScore"] for item in picked) / len(picked), 1
+                        ),
+                        "model_reference_url": None,
+                        "inspiration": None,
+                        "item_ids": [item["id"] for item in picked],
+                        "categories": categories,
+                    },
+                    "constraint_checks": {
+                        "complete": complete,
+                        "duplicate_items": len(set(categories)) != len(categories),
+                        "invalid_combination": False,
+                        "empty_return": False,
+                    },
+                }
+    if best is None:
+        return build_random_outfit(items, venue, seed)
+    return best
 
 
 def constraint_checks(outfit: dict) -> dict:
@@ -216,10 +282,14 @@ def main() -> None:
                 continue
 
             for venue in venues:
-                for condition in ("full", "no_reference", "random"):
+                for condition in ("full", "no_reference", "random", "color_match"):
                     seed = f"{case_id}:{venue}:{condition}"
-                    if condition == "random":
-                        rnd = build_random_outfit(items, venue, seed)
+                    if condition in {"random", "color_match"}:
+                        rnd = (
+                            build_color_match_outfit(items, venue, seed)
+                            if condition == "color_match"
+                            else build_random_outfit(items, venue, seed)
+                        )
                         record = {
                             "case_id": case_id,
                             "venue": venue,

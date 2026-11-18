@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -53,10 +54,10 @@ def write_status(state: str, step: str, **extra) -> None:
 
 def run_script(args: list[str], step: str) -> None:
     write_status("running", step)
-    env = {
-        "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
-        "USTYLE_BASE_URL": BASE_URL,
-    }
+    env = os.environ.copy()
+    env["USTYLE_BASE_URL"] = BASE_URL
+    env["USTYLE_DB_PATH"] = str(EVAL_ROOT / "runtime" / "eval.db")
+    env["USTYLE_UPLOADS_DIR"] = str(EVAL_ROOT / "runtime" / "uploads")
     cmd = [str(PYTHON), *args]
     with LOG_PATH.open("a", encoding="utf-8") as log:
         log.write(f"\n=== {step} === {now()}\n")
@@ -119,6 +120,7 @@ def main() -> None:
             "latency",
         )
         run_script([str(SCRIPTS / "run_functional.py"), *root], "functional_matrix")
+        run_script([str(SCRIPTS / "run_quality_rating.py")], "quality_rating")
         run_script([str(SCRIPTS / "analyze.py")], "aggregating")
         run_script([str(SCRIPTS / "report.py")], "generating_report")
 

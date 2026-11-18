@@ -1,36 +1,48 @@
 {
   "conditions": {
     "full": {
-      "cases": 3,
-      "overall_mean": 1.0,
-      "overall_median": 1.0,
-      "venue_fit_mean": 1.0,
-      "cohesion_mean": 0.99,
-      "complete_rate": 1.0,
+      "cases": 25,
+      "overall_mean": 0.9107,
+      "overall_median": 0.9705,
+      "venue_fit_mean": 0.8734,
+      "cohesion_mean": 0.9284,
+      "complete_rate": 0.8,
       "duplicate_rate": 0.0,
       "invalid_rate": 0.0,
-      "empty_rate": 0.0,
-      "fallback_rate": 0.0
+      "empty_rate": 0.2,
+      "fallback_rate": 0.64
     },
     "no_reference": {
-      "cases": 3,
-      "overall_mean": 0.9955,
-      "overall_median": 0.9955,
-      "venue_fit_mean": 1.0,
-      "cohesion_mean": 0.99,
-      "complete_rate": 1.0,
+      "cases": 25,
+      "overall_mean": 0.8917,
+      "overall_median": 0.9513,
+      "venue_fit_mean": 0.8734,
+      "cohesion_mean": 0.9284,
+      "complete_rate": 0.8,
+      "duplicate_rate": 0.0,
+      "invalid_rate": 0.0,
+      "empty_rate": 0.2,
+      "fallback_rate": 0.64
+    },
+    "random": {
+      "cases": 25,
+      "overall_mean": 0.746,
+      "overall_median": 0.8023,
+      "venue_fit_mean": 0.6322,
+      "cohesion_mean": 0.8851,
+      "complete_rate": 0.8,
       "duplicate_rate": 0.0,
       "invalid_rate": 0.0,
       "empty_rate": 0.0,
       "fallback_rate": 0.0
     },
-    "random": {
-      "cases": 3,
-      "overall_mean": 0.842,
-      "overall_median": 0.955,
-      "venue_fit_mean": 0.77,
-      "cohesion_mean": 0.93,
-      "complete_rate": 1.0,
+    "color_match": {
+      "cases": 25,
+      "overall_mean": 0.8009,
+      "overall_median": 0.8785,
+      "venue_fit_mean": 0.6528,
+      "cohesion_mean": 0.982,
+      "complete_rate": 0.8,
       "duplicate_rate": 0.0,
       "invalid_rate": 0.0,
       "empty_rate": 0.0,
@@ -40,57 +52,112 @@
   "per_venue": {
     "careerFair": {
       "full": {
-        "cases": 1,
-        "overall_mean": 1.0
+        "cases": 5,
+        "overall_mean": 0.9118
       },
       "no_reference": {
-        "cases": 1,
-        "overall_mean": 0.9955
+        "cases": 5,
+        "overall_mean": 0.8916
       },
       "random": {
-        "cases": 1,
-        "overall_mean": 0.616
+        "cases": 5,
+        "overall_mean": 0.6536
+      },
+      "color_match": {
+        "cases": 5,
+        "overall_mean": 0.8214
       }
     },
     "casualDate": {
       "full": {
-        "cases": 1,
-        "overall_mean": 1.0
+        "cases": 5,
+        "overall_mean": 0.9888
       },
       "no_reference": {
-        "cases": 1,
-        "overall_mean": 0.9955
+        "cases": 5,
+        "overall_mean": 0.9707
       },
       "random": {
-        "cases": 1,
-        "overall_mean": 0.955
+        "cases": 5,
+        "overall_mean": 0.8557
+      },
+      "color_match": {
+        "cases": 5,
+        "overall_mean": 0.927
+      }
+    },
+    "formal": {
+      "full": {
+        "cases": 5,
+        "overall_mean": 0.7749
+      },
+      "no_reference": {
+        "cases": 5,
+        "overall_mean": 0.7552
+      },
+      "random": {
+        "cases": 5,
+        "overall_mean": 0.589
+      },
+      "color_match": {
+        "cases": 5,
+        "overall_mean": 0.663
+      }
+    },
+    "hallGathering": {
+      "full": {
+        "cases": 5,
+        "overall_mean": 0.8991
+      },
+      "no_reference": {
+        "cases": 5,
+        "overall_mean": 0.8836
+      },
+      "random": {
+        "cases": 5,
+        "overall_mean": 0.7791
+      },
+      "color_match": {
+        "cases": 5,
+        "overall_mean": 0.7037
       }
     },
     "lecture": {
       "full": {
-        "cases": 1,
-        "overall_mean": 1.0
+        "cases": 5,
+        "overall_mean": 0.9787
       },
       "no_reference": {
-        "cases": 1,
-        "overall_mean": 0.9955
+        "cases": 5,
+        "overall_mean": 0.9575
       },
       "random": {
-        "cases": 1,
-        "overall_mean": 0.955
+        "cases": 5,
+        "overall_mean": 0.8525
+      },
+      "color_match": {
+        "cases": 5,
+        "overall_mean": 0.8896
       }
     }
   },
   "full_vs_no_reference": {
-    "wins": 3,
+    "wins": 20,
     "ties": 0,
     "losses": 0,
-    "mean_diff": 0.0045
+    "mean_diff": 0.0189
   },
   "full_vs_random": {
-    "wins": 3,
+    "wins": 20,
     "ties": 0,
     "losses": 0,
-    "mean_diff": 0.158
-  }
+    "mean_diff": 0.1532
+  },
+  "full_vs_color_match": {
+    "wins": 18,
+    "ties": 0,
+    "losses": 2,
+    "mean_diff": 0.0909
+  },
+  "cliffs_delta_full_vs_no_reference": 0.295
 }
